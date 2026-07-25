@@ -1,0 +1,49 @@
+{
+  "full_name": "TRIEU VAN DAI",
+  "location": "Na Lom, Dinh Hoa, Thai Nguyen",
+  "education": [
+    {
+      "degree": "Dai hoc",
+      "major": "Information Technology",
+      "school": "Thai Nguyen University of Information and Communication Technology",
+      "graduation_year": null
+    }
+  ],
+  "work_experience": [
+    {
+      "position": "Leader",
+      "company": null,
+      "duration": null,
+      "description": "Automatically detect and classify vascular calcification regions in Computed Tomography (CT) images. Optimize DBSCAN parameters (eps andminPts) to achieve the best clustering performance. Evaluate the effectiveness of the model by comparing it with manual analysis and other clustering algorithms. Assist medical professionals in early and accurate diagnosis of atherosclerosis-related diseases, thereby improving treatment outcomes."
+    },
+    {
+      "position": "Leader",
+      "company": null,
+      "duration": null,
+      "description": "Role-Based Access Control (RBAC) & Publishing Workflow. Content Management (Article CRUD, Category CRUD). Authentication & User Management. Responsive Design. Smart Data Seeding. AI Features (TTS, Article Review)."
+    }
+  ],
+  "skills": [
+    "C++",
+    "Python",
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "Flask",
+    "REST API Development",
+    "SQL Server",
+    "SQLite",
+    "Git",
+    "GitHub",
+    "ChatGPT",
+    "Claude",
+    "OpenClaw",
+    "Team work",
+    "Time management",
+    "Problem solving",
+    "Self learning"
+  ],
+  "certifications": [
+    "English B2 (CEFR)"
+  ]
+}
