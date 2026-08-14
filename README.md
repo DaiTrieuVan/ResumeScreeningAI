@@ -1,10 +1,10 @@
-# 🎯 Resume Screening AI Project
+#Resume Screening AI Project
 
 Hệ thống tự động rà soát, đánh giá và phân tích khoảng cách kỹ năng (Gap Analysis) của ứng viên dựa trên CV (PDF) và Mô tả công việc (Job Description) bằng AI.
 
 ---
 
-## 🌟 Tính năng chính
+##Tính năng chính
 
 1. **Bóc tách dữ liệu CV (PDF Parsing):** Trích xuất tự động thông tin từ file CV định dạng PDF.
 2. **So khớp ứng viên bằng Vector Embedding:** Sử dụng `Sentence Transformers` (mô hình `all-MiniLM-L6-v2`) để tính toán độ tương đồng ngữ nghĩa giữa CV và Mô tả công việc.
@@ -14,7 +14,7 @@ Hệ thống tự động rà soát, đánh giá và phân tích khoảng cách 
 
 ---
 
-## 🛠️ Công nghệ sử dụng
+##Công nghệ sử dụng
 
 - **Backend:** Python 3.10+, FastAPI, SQLAlchemy 2.0 (Async), Pydantic v2, Uvicorn
 - **AI & NLP:** Google Gemini API (`google-genai`), Sentence-Transformers, NumPy, pdfplumber
@@ -23,7 +23,7 @@ Hệ thống tự động rà soát, đánh giá và phân tích khoảng cách 
 
 ---
 
-## 🚀 Hướng dẫn cài đặt & Khởi chạy
+##Hướng dẫn cài đặt & Khởi chạy
 
 ### 1. Backend (FastAPI)
 ```bash
@@ -49,7 +49,7 @@ npm run dev
 
 ---
 
-## 📁 Cấu trúc dự án
+##Cấu trúc dự án
 
 ```
 Resume Screening AI Project/
