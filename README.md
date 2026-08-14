@@ -1,4 +1,4 @@
-#Resume Screening AI Project
+# Resume Screening AI Project
 
 Hệ thống tự động rà soát, đánh giá và phân tích khoảng cách kỹ năng (Gap Analysis) của ứng viên dựa trên CV (PDF) và Mô tả công việc (Job Description) bằng AI.
 
