@@ -1,0 +1,196 @@
+import React, { useState } from 'react';
+import { Search, Eye, Filter, SlidersHorizontal } from 'lucide-react';
+import { updateCandidateStatus } from '../services/api';
+
+export default function CandidateTable({ candidates, jobWeights, onSelectCandidate, onStatusChange }) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [minScore, setMinScore] = useState(0);
+  const [statusFilter, setStatusFilter] = useState('ALL');
+
+  // Compute live overall score based on current slider weights if jobWeights are adjusted
+  const getLiveScore = (cand) => {
+    if (!jobWeights) return cand.overall_score;
+    const { wSkills, wExp, wEdu } = jobWeights;
+    const live = (cand.skills_sub_score * wSkills) + (cand.experience_sub_score * wExp) + (cand.education_sub_score * wEdu);
+    return Math.round(live * 10) / 10;
+  };
+
+  const filteredCandidates = candidates.filter((c) => {
+    const score = getLiveScore(c);
+    const matchesSearch = 
+      (c.candidate_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (c.strengths_summary || []).some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const matchesMinScore = score >= minScore;
+    const matchesStatus = statusFilter === 'ALL' || c.recruiter_status === statusFilter;
+
+    return matchesSearch && matchesMinScore && matchesStatus;
+  });
+
+  const getScoreBadgeClass = (score) => {
+    if (score >= 80) return 'score-high';
+    if (score >= 60) return 'score-medium';
+    return 'score-low';
+  };
+
+  const getStatusBadgeClass = (st) => {
+    switch (st) {
+      case 'SHORTLISTED': return 'badge-shortlisted';
+      case 'UNDER_REVIEW': return 'badge-review';
+      case 'REJECTED': return 'badge-rejected';
+      default: return 'badge-new';
+    }
+  };
+
+  const handleStatusSelect = async (candidate, newStatus) => {
+    try {
+      const updated = await updateCandidateStatus(candidate.id, newStatus);
+      if (onStatusChange) onStatusChange(updated);
+    } catch (err) {
+      alert('Cập nhật trạng thái thất bại: ' + err.message);
+    }
+  };
+
+  return (
+    <div className="glass-panel" style={{ padding: '24px' }}>
+      
+      {/* Filter Bar */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1', minWidth: '260px' }}>
+          <div style={{ position: 'relative', width: '100%' }}>
+            <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+            <input
+              className="input-field"
+              placeholder="Tìm kiếm tên ứng viên hoặc kỹ năng..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ paddingLeft: '38px' }}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          
+          {/* Min Score Threshold Filter */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+            <SlidersHorizontal size={14} color="var(--accent-cyan)" />
+            <span>Điểm tối thiểu: <b>{minScore}%</b></span>
+            <input
+              type="range"
+              min="0"
+              max="95"
+              step="5"
+              value={minScore}
+              onChange={(e) => setMinScore(Number(e.target.value))}
+              style={{ width: '100px' }}
+            />
+          </div>
+
+          {/* Status Dropdown Filter */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+            <Filter size={14} color="var(--text-muted)" />
+            <select
+              className="select-field"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              style={{ padding: '6px 12px', width: 'auto' }}
+            >
+              <option value="ALL">Tất cả trạng thái</option>
+              <option value="NEW">Mới (New)</option>
+              <option value="SHORTLISTED">Đã chọn lọc (Shortlisted)</option>
+              <option value="UNDER_REVIEW">Đang xem xét (Under Review)</option>
+              <option value="REJECTED">Từ chối (Rejected)</option>
+            </select>
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* Candidate Table */}
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
+              <th style={{ padding: '12px 16px' }}>Ứng viên</th>
+              <th style={{ padding: '12px 16px' }}>Điểm Phù hợp Tổng thể</th>
+              <th style={{ padding: '12px 16px' }}>Khớp Kỹ năng</th>
+              <th style={{ padding: '12px 16px' }}>Kinh nghiệm</th>
+              <th style={{ padding: '12px 16px' }}>Trạng thái</th>
+              <th style={{ padding: '12px 16px', textAlign: 'right' }}>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredCandidates.length === 0 ? (
+              <tr>
+                <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  Không có ứng viên nào phù hợp với bộ lọc hiện tại.
+                </td>
+              </tr>
+            ) : (
+              filteredCandidates.map((cand) => {
+                const liveScore = getLiveScore(cand);
+                return (
+                  <tr
+                    key={cand.id}
+                    style={{
+                      borderBottom: '1px solid var(--border-color)',
+                      transition: 'var(--transition)'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <td style={{ padding: '14px 16px' }}>
+                      <div style={{ fontWeight: 700 }}>{cand.candidate_name}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{cand.candidate_email || cand.candidate_file_name}</div>
+                    </td>
+
+                    <td style={{ padding: '14px 16px' }}>
+                      <span className={`score-pill ${getScoreBadgeClass(liveScore)}`}>
+                        {liveScore}%
+                      </span>
+                    </td>
+
+                    <td style={{ padding: '14px 16px', fontFamily: 'var(--font-mono)' }}>
+                      {cand.skills_sub_score}%
+                    </td>
+
+                    <td style={{ padding: '14px 16px', fontFamily: 'var(--font-mono)' }}>
+                      {cand.experience_sub_score}%
+                    </td>
+
+                    <td style={{ padding: '14px 16px' }}>
+                      <select
+                        value={cand.recruiter_status}
+                        onChange={(e) => handleStatusSelect(cand, e.target.value)}
+                        className={`badge ${getStatusBadgeClass(cand.recruiter_status)}`}
+                        style={{ border: 'none', cursor: 'pointer', outline: 'none' }}
+                      >
+                        <option value="NEW">MỚI</option>
+                        <option value="SHORTLISTED">ĐÃ CHỌN LỌC</option>
+                        <option value="UNDER_REVIEW">ĐANG XEM XÉT</option>
+                        <option value="REJECTED">TỪ CHỐI</option>
+                      </select>
+                    </td>
+
+                    <td style={{ padding: '14px 16px', textAlign: 'right' }}>
+                      <button
+                        onClick={() => onSelectCandidate(cand)}
+                        className="btn btn-secondary"
+                        style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                      >
+                        <Eye size={14} /> Phân tích AI
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  );
+}

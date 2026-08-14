@@ -1,0 +1,205 @@
+openapi: 3.0.3
+info:
+  title: Resume Screening AI API
+  description: OpenAPI 3.0 contract for Job Posting, Resume Parsing, Screening Evaluation, and Career Gap Advisor.
+  version: 1.0.0
+paths:
+  /api/jobs:
+    post:
+      summary: Create a new Job Posting Requisition
+      operationId: createJobPosting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateJobRequest'
+      responses:
+        '201':
+          description: Job posting created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobPosting'
+
+  /api/resumes/upload:
+    post:
+      summary: Upload PDF Candidate Resumes (Bulk support)
+      operationId: uploadResumes
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: Resumes uploaded and parsed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CandidateResume'
+
+  /api/screenings/evaluate:
+    post:
+      summary: Trigger AI Two-Stage Screening for a Job Posting
+      operationId: evaluateScreening
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                job_id:
+                  type: string
+                resume_ids:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Screening complete
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScreeningResult'
+
+  /api/gap-advisor/analyze:
+    post:
+      summary: Candidate-facing Career Gap Analysis (CV vs JD)
+      operationId: analyzeCareerGap
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                job_title:
+                  type: string
+                job_description:
+                  type: string
+                resume_id:
+                  type: string
+      responses:
+        '200':
+          description: Gap analysis generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GapAnalysisResponse'
+
+components:
+  schemas:
+    CreateJobRequest:
+      type: object
+      required: [title, required_skills]
+      properties:
+        title:
+          type: string
+        department:
+          type: string
+        required_skills:
+          type: array
+          items:
+            type: string
+        min_years_experience:
+          type: integer
+        weight_skills:
+          type: number
+          default: 0.50
+        weight_experience:
+          type: number
+          default: 0.35
+        weight_education:
+          type: number
+          default: 0.15
+
+    JobPosting:
+      allOf:
+        - $ref: '#/components/schemas/CreateJobRequest'
+        - type: object
+          properties:
+            id:
+              type: string
+            created_at:
+              type: string
+
+    CandidateResume:
+      type: object
+      properties:
+        id:
+          type: string
+        file_name:
+          type: string
+        parsed_name:
+          type: string
+        parsed_email:
+          type: string
+        extracted_skills:
+          type: array
+          items:
+            type: string
+        parse_status:
+          type: string
+
+    ScreeningResult:
+      type: object
+      properties:
+        id:
+          type: string
+        job_id:
+          type: string
+        resume_id:
+          type: string
+        overall_score:
+          type: number
+        skills_sub_score:
+          type: number
+        experience_sub_score:
+          type: number
+        education_sub_score:
+          type: number
+        strengths_summary:
+          type: array
+          items:
+            type: string
+        gaps_summary:
+          type: array
+          items:
+            type: string
+        ai_reasoning:
+          type: string
+        recruiter_status:
+          type: string
+
+    GapAnalysisResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        matched_skills:
+          type: array
+          items:
+            type: string
+        missing_skills:
+          type: array
+          items:
+            type: string
+        suggested_action_items:
+          type: array
+          items:
+            type: string
+        summary_explanation:
+          type: string

@@ -1,0 +1,50 @@
+openapi: 3.0.3
+info:
+  title: Real Job Aggregator & Candidate AI Matcher API
+  version: 1.0.0
+paths:
+  /api/real-jobs:
+    get:
+      summary: Fetch real job listings with filtering
+      parameters:
+        - name: location
+          in: query
+          schema:
+            type: string
+        - name: min_salary
+          in: query
+          schema:
+            type: integer
+        - name: skill
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of real job postings
+
+  /api/real-jobs/match:
+    post:
+      summary: Scan and rank real jobs matching candidate CV
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                resume_id:
+                  type: string
+      responses:
+        '200':
+          description: Ranked list of matched real jobs with AI match score & reasoning
+
+  /api/real-jobs/sync:
+    post:
+      summary: Trigger Real Job Aggregator sync from feeds (TopCV, ITViec)
+      responses:
+        '200':
+          description: Ingestion sync status
