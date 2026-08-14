@@ -4,28 +4,31 @@ Hệ thống tự động rà soát, đánh giá và phân tích khoảng cách 
 
 ---
 
-##Tính năng chính
+## Tính năng chính
 
-1. **Bóc tách dữ liệu CV (PDF Parsing):** Trích xuất tự động thông tin từ file CV định dạng PDF.
-2. **So khớp ứng viên bằng Vector Embedding:** Sử dụng `Sentence Transformers` (mô hình `all-MiniLM-L6-v2`) để tính toán độ tương đồng ngữ nghĩa giữa CV và Mô tả công việc.
-3. **AI Gap Advisor (Gemini LLM):** Phân tích các điểm thiếu hụt kỹ năng (Skill Gaps) của ứng viên và đưa ra gợi ý lộ trình cải thiện chuyên sâu.
-4. **Aggregator & Reranker Công việc Thực tế:** Tìm kiếm, thu thập và xếp hạng công việc thực tế theo tiêu chí phù hợp với ứng viên.
-5. **Dashboard Nhà tuyển dụng:** Giao diện quản lý tin tuyển dụng, upload danh sách CV, xem báo cáo điểm số và xuất báo cáo kết quả.
-
----
-
-##Công nghệ sử dụng
-
-- **Backend:** Python 3.10+, FastAPI, SQLAlchemy 2.0 (Async), Pydantic v2, Uvicorn
-- **AI & NLP:** Google Gemini API (`google-genai`), Sentence-Transformers, NumPy, pdfplumber
-- **Frontend:** React 18, Vite, Lucide Icons, Vanilla CSS
-- **Database:** SQLite (`aiosqlite`)
+1. Bóc tách dữ liệu CV (PDF Parsing): Trích xuất tự động thông tin từ file CV định dạng PDF.
+2. So khớp ứng viên bằng Vector Embedding: Sử dụng Sentence Transformers (mô hình all-MiniLM-L6-v2) để tính toán độ tương đồng ngữ nghĩa giữa CV và Mô tả công việc.
+3. AI Gap Advisor (Gemini LLM): Phân tích các điểm thiếu hụt kỹ năng (Skill Gaps) của ứng viên và đưa ra gợi ý lộ trình cải thiện chuyên sâu.
+4. Aggregator & Reranker Công việc Thực tế: Tìm kiếm, thu thập và xếp hạng công việc thực tế theo tiêu chí phù hợp với ứng viên.
+5. Dashboard Nhà tuyển dụng: Giao diện quản lý tin tuyển dụng, upload danh sách CV, xem báo cáo điểm số và xuất báo cáo kết quả.
 
 ---
 
-##Hướng dẫn cài đặt & Khởi chạy
+## Công nghệ sử dụng
+
+- Backend: Python 3.10+, FastAPI, SQLAlchemy 2.0 (Async), Pydantic v2, Uvicorn
+- AI & NLP: Google Gemini API (google-genai), Sentence-Transformers, NumPy, pdfplumber
+- Frontend: React 18, Vite, Lucide Icons, Vanilla CSS
+- Database: SQLite (aiosqlite)
+
+Danh mục chi tiết các thư viện phụ thuộc và giấy phép tương ứng xem tại file DEPENDENCIES.md.
+
+---
+
+## Hướng dẫn cài đặt & Khởi chạy
 
 ### 1. Backend (FastAPI)
+
 ```bash
 cd backend
 python -m venv venv
@@ -37,19 +40,22 @@ pip install -r requirements.txt
 
 uvicorn app.main:app --reload --port 8000
 ```
-- API Documentation: [http://127.0.0.1:8000/api/docs](http://127.0.0.1:8000/api/docs)
+
+- API Documentation: http://127.0.0.1:8000/api/docs
 
 ### 2. Frontend (React + Vite)
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-- Giao diện người dùng: [http://localhost:5173](http://localhost:5173)
+
+- Giao diện người dùng: http://localhost:5173
 
 ---
 
-##Cấu trúc dự án
+## Cấu trúc dự án
 
 ```
 Resume Screening AI Project/
@@ -71,5 +77,23 @@ Resume Screening AI Project/
 │   │   └── styles/       # CSS Styles
 │   ├── package.json
 │   └── vite.config.js
-└── specs/                # Product Specification & Feature Planning Documents
+├── specs/                # Product Specification & Feature Planning Documents
+├── CHANGELOG.md          # Lịch sử thay đổi qua các phiên bản
+├── DEPENDENCIES.md       # Danh mục các gói mã nguồn mở & giấy phép
+└── LICENSE               # Giấy phép bản quyền nguồn mở (MIT License)
 ```
+
+---
+
+## Quản lý lỗi & Đóng góp (Bug Tracker & Issues)
+
+Dự án sử dụng công cụ quản lý lỗi tích hợp sẵn trên kho mã nguồn GitHub (GitHub Issues).
+
+- Báo lỗi (Bug Report): Bạn có thể gửi báo lỗi trực tiếp tại trang Issues của repository: https://github.com/DaiTrieuVan/ResumeScreeningAI/issues
+- Lịch sử cập nhật: Thông tin về các thay đổi mã nguồn qua các phiên bản được ghi nhận tại file CHANGELOG.md.
+
+---
+
+## Giấy phép (License)
+
+Dự án được phát hành theo giấy phép mã nguồn mở MIT License được phê chuẩn bởi OSI (Open Source Initiative). Chi tiết xem tại file LICENSE.

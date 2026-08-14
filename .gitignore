@@ -17,7 +17,11 @@ build/
 
 # Storage & Local Databases
 storage/resumes/*
+backend/storage/resumes/*
 !storage/resumes/.gitkeep
+!backend/storage/resumes/.gitkeep
+.vite/
+
 *.db
 *.sqlite
 *.sqlite3
