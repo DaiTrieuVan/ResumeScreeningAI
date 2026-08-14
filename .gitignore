@@ -25,6 +25,10 @@ backend/storage/resumes/*
 *.db
 *.sqlite
 *.sqlite3
+*.zip
+*.tar.gz
+*.rar
+
 
 # Environment variables
 .env
