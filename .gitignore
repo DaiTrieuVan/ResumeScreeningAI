@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+*.egg-info/
+.pytest_cache/
+
+# Node.js
+node_modules/
+dist/
+build/
+*.log
+
+# Storage & Local Databases
+storage/resumes/*
+!storage/resumes/.gitkeep
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment variables
+.env
+.env.local
+
+# Spec Kit local state
+.specify/feature.json
+
+# System & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.agents
