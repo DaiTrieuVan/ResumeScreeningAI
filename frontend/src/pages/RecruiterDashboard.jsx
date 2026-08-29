@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Briefcase, Plus, Play, RefreshCw, Sliders } from 'lucide-react';
-import { fetchJobs, triggerScreening, fetchJobScreenings } from '../services/api';
+import { fetchJobs, triggerScreeningStream, fetchJobScreenings } from '../services/api';
 import JobPostingForm from '../components/JobPostingForm';
 import ResumeUploader from '../components/ResumeUploader';
 import CandidateTable from '../components/CandidateTable';
 import CandidateDetailModal from '../components/CandidateDetailModal';
 import ExportFeedbackPanel from '../components/ExportFeedbackPanel';
+import ScreeningProgressModal from '../components/ScreeningProgressModal';
 
 export default function RecruiterDashboard() {
   const [jobs, setJobs] = useState([]);
@@ -16,6 +17,13 @@ export default function RecruiterDashboard() {
   const [showJobForm, setShowJobForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [screeningLoading, setScreeningLoading] = useState(false);
+
+  // Live Progress Modal State
+  const [progressModalOpen, setProgressModalOpen] = useState(false);
+  const [screeningProgressData, setScreeningProgressData] = useState(null);
+  const [screeningLogs, setScreeningLogs] = useState([]);
+  const [screeningCompleted, setScreeningCompleted] = useState(false);
+  const [screeningError, setScreeningError] = useState(null);
 
   // Live Slider Weights for selected job
   const [sliderWeights, setSliderWeights] = useState({ wSkills: 0.5, wExp: 0.35, wEdu: 0.15 });
@@ -61,11 +69,34 @@ export default function RecruiterDashboard() {
   const handleRunScreening = async () => {
     if (!selectedJob) return;
     setScreeningLoading(true);
+    setProgressModalOpen(true);
+    setScreeningCompleted(false);
+    setScreeningError(null);
+    setScreeningProgressData({ progress_percent: 0, total: 0, current: 0, message: 'Khởi động kết nối tới Động cơ AI...' });
+    
+    const startTime = new Date().toLocaleTimeString();
+    setScreeningLogs([{ time: startTime, text: `Bắt đầu phân tích & sàng lọc cho vị trí: ${selectedJob.title}` }]);
+
     try {
-      const results = await triggerScreening(selectedJob.id);
+      const results = await triggerScreeningStream(
+        selectedJob.id,
+        null,
+        (evt) => {
+          setScreeningProgressData(evt);
+          const eventTime = new Date().toLocaleTimeString();
+          if (evt.message) {
+            setScreeningLogs((prev) => [...prev, { time: eventTime, text: evt.message }]);
+          }
+        }
+      );
       setCandidates(results);
+      setScreeningCompleted(true);
+      const finishTime = new Date().toLocaleTimeString();
+      setScreeningLogs((prev) => [...prev, { time: finishTime, text: '🎉 Đã hoàn tất đánh giá toàn bộ CV thành công!' }]);
     } catch (err) {
-      alert('Lỗi sàng lọc AI: ' + err.message);
+      setScreeningError(err.message || 'Lỗi xảy ra trong quá trình sàng lọc AI.');
+      const errTime = new Date().toLocaleTimeString();
+      setScreeningLogs((prev) => [...prev, { time: errTime, text: `❌ LỖI: ${err.message}` }]);
     } finally {
       setScreeningLoading(false);
     }
@@ -200,6 +231,15 @@ export default function RecruiterDashboard() {
           onClose={() => setSelectedCandidate(null)}
         />
       )}
+
+      <ScreeningProgressModal
+        isOpen={progressModalOpen}
+        progressData={screeningProgressData}
+        logs={screeningLogs}
+        isCompleted={screeningCompleted}
+        error={screeningError}
+        onClose={() => setProgressModalOpen(false)}
+      />
 
     </div>
   );
