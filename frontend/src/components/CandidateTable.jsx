@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
-import { Search, Eye, Filter, SlidersHorizontal } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Eye, Filter, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import { updateCandidateStatus } from '../services/api';
 
 export default function CandidateTable({ candidates, jobWeights, onSelectCandidate, onStatusChange }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [minScore, setMinScore] = useState(0);
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
+  // Reset to page 1 whenever filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, minScore, statusFilter]);
 
   // Compute live overall score based on current slider weights if jobWeights are adjusted
   const getLiveScore = (cand) => {
@@ -26,6 +33,11 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
 
     return matchesSearch && matchesMinScore && matchesStatus;
   });
+
+  const totalPages = Math.ceil(filteredCandidates.length / ITEMS_PER_PAGE) || 1;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedCandidates = filteredCandidates.slice(startIndex, endIndex);
 
   const getScoreBadgeClass = (score) => {
     if (score >= 80) return 'score-high';
@@ -122,14 +134,14 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
             </tr>
           </thead>
           <tbody>
-            {filteredCandidates.length === 0 ? (
+            {paginatedCandidates.length === 0 ? (
               <tr>
                 <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
                   Không có ứng viên nào phù hợp với bộ lọc hiện tại.
                 </td>
               </tr>
             ) : (
-              filteredCandidates.map((cand) => {
+              paginatedCandidates.map((cand) => {
                 const liveScore = getLiveScore(cand);
                 return (
                   <tr
@@ -190,6 +202,76 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Footer */}
+      {filteredCandidates.length > 0 && (
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '12px',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginTop: '20px',
+          paddingTop: '16px',
+          borderTop: '1px solid var(--border-color)',
+          fontSize: '0.85rem',
+          color: 'var(--text-muted)'
+        }}>
+          <div>
+            Hiển thị <b>{startIndex + 1}</b> - <b>{Math.min(endIndex, filteredCandidates.length)}</b> trong tổng số <b>{filteredCandidates.length}</b> ứng viên
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+              className="btn btn-secondary"
+              style={{
+                padding: '4px 10px',
+                fontSize: '0.8rem',
+                opacity: currentPage === 1 ? 0.5 : 1,
+                cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <ChevronLeft size={14} /> Trang trước
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+              <button
+                key={pageNum}
+                onClick={() => setCurrentPage(pageNum)}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid var(--border-color)',
+                  background: currentPage === pageNum ? 'var(--accent-primary)' : 'rgba(255, 255, 255, 0.05)',
+                  color: '#fff',
+                  fontWeight: currentPage === pageNum ? 700 : 400,
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  transition: 'var(--transition)'
+                }}
+              >
+                {pageNum}
+              </button>
+            ))}
+
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="btn btn-secondary"
+              style={{
+                padding: '4px 10px',
+                fontSize: '0.8rem',
+                opacity: currentPage === totalPages ? 0.5 : 1,
+                cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
+              }}
+            >
+              Trang sau <ChevronRight size={14} />
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );
