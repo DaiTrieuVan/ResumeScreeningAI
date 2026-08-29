@@ -53,3 +53,22 @@ async def test_evaluate_stream():
         assert res.status_code == 200
         assert "text/event-stream" in res.headers.get("content-type", "")
         assert "data: " in res.text
+
+@pytest.mark.asyncio
+async def test_upload_and_evaluate_by_job_id():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        job_res = await ac.post("/api/jobs", json={
+            "title": "Specific Job AI",
+            "department": "Engineering",
+            "required_skills": ["Python"]
+        })
+        job_id = job_res.json()["id"]
+
+        # Upload dummy PDF for specific job
+        files = [("files", ("test_cv.pdf", b"%PDF-1.4 test pdf content", "application/pdf"))]
+        data = {"job_id": job_id}
+        upload_res = await ac.post("/api/resumes/upload", files=files, data=data)
+        assert upload_res.status_code == 200
+        uploaded = upload_res.json()
+        assert len(uploaded) == 1
+        assert uploaded[0]["job_id"] == job_id
