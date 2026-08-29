@@ -5,7 +5,7 @@ from sqlalchemy import select
 
 from app.core.database import get_db
 from app.models.job_posting import JobPosting
-from app.schemas.job_posting import JobPostingCreate, JobPostingResponse
+from app.schemas.job_posting import JobPostingCreate, JobPostingUpdate, JobPostingResponse
 from app.core.exceptions import ResourceNotFoundException
 
 router = APIRouter(prefix="/jobs", tags=["Job Postings"])
@@ -38,3 +38,36 @@ async def get_job_posting(
     if not job:
         raise ResourceNotFoundException("JobPosting", job_id)
     return job
+
+@router.put("/{job_id}", response_model=JobPostingResponse)
+async def update_job_posting(
+    job_id: str,
+    job_in: JobPostingUpdate,
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(select(JobPosting).where(JobPosting.id == job_id))
+    job = result.scalar_one_or_none()
+    if not job:
+        raise ResourceNotFoundException("JobPosting", job_id)
+
+    update_data = job_in.model_dump(exclude_unset=True)
+    for field, val in update_data.items():
+        setattr(job, field, val)
+
+    await db.commit()
+    await db.refresh(job)
+    return job
+
+@router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_job_posting(
+    job_id: str,
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(select(JobPosting).where(JobPosting.id == job_id))
+    job = result.scalar_one_or_none()
+    if not job:
+        raise ResourceNotFoundException("JobPosting", job_id)
+
+    await db.delete(job)
+    await db.commit()
+    return None

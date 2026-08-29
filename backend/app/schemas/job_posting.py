@@ -16,6 +16,17 @@ class JobPostingBase(BaseModel):
 class JobPostingCreate(JobPostingBase):
     pass
 
+class JobPostingUpdate(BaseModel):
+    title: Optional[str] = None
+    department: Optional[str] = None
+    required_skills: Optional[List[str]] = None
+    preferred_skills: Optional[List[str]] = None
+    min_years_experience: Optional[int] = None
+    required_education: Optional[str] = None
+    weight_skills: Optional[float] = None
+    weight_experience: Optional[float] = None
+    weight_education: Optional[float] = None
+
 class JobPostingResponse(JobPostingBase):
     id: str
     status: str
