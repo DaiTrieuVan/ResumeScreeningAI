@@ -7,6 +7,7 @@ from app.core.database import get_db
 from app.core.storage import save_uploaded_pdf, delete_stored_file
 from app.services.pdf_parser import extract_text_from_pdf
 from app.services.job_aggregator import seed_real_jobs_if_empty
+from app.services.job_crawler_service import crawl_and_sync_jobs
 from app.services.cv_job_matcher import match_cv_against_real_jobs
 from app.models.real_job import RealJobPosting
 from app.schemas.real_job import RealJobPostingResponse, CandidateJobMatchResponse
@@ -102,3 +103,19 @@ async def match_cv_with_real_jobs(
 async def sync_real_jobs(db: AsyncSession = Depends(get_db)):
     count = await seed_real_jobs_if_empty(db)
     return {"status": "success", "synced_jobs_count": count}
+
+@router.post("/crawl")
+async def crawl_real_jobs(
+    limit: int = 10, 
+    target_urls: Optional[List[str]] = None,
+    db: AsyncSession = Depends(get_db)
+):
+    new_added, updated, total_active = await crawl_and_sync_jobs(db, limit=limit, target_urls=target_urls)
+    return {
+        "status": "success",
+        "message": f"Đã cào dữ liệu thành công. Thêm mới: {new_added}, Cập nhật: {updated}.",
+        "new_jobs_added": new_added,
+        "existing_jobs_updated": updated,
+        "total_active_jobs": total_active
+    }
+
