@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict
 
 class CandidateResumeResponse(BaseModel):
     id: str
+    job_id: Optional[str] = None
     file_name: str
     file_size_bytes: int
     parsed_name: Optional[str] = None
