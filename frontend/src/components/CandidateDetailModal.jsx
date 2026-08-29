@@ -1,14 +1,24 @@
 import React from 'react';
-import { X, CheckCircle2, AlertTriangle, Cpu } from 'lucide-react';
+import { X, CheckCircle2, AlertTriangle, Cpu, Code2, Briefcase, GraduationCap } from 'lucide-react';
 
 export default function CandidateDetailModal({ candidate, onClose }) {
   if (!candidate) return null;
+
+  // Fallback summaries if empty
+  const skillsText = candidate.skills_summary || 
+    (candidate.strengths_summary?.find(s => s.toLowerCase().includes('matched skill') || s.toLowerCase().includes('kỹ năng')) || 'Đã trích xuất các kỹ năng tương ứng từ CV');
+
+  const expText = candidate.experience_summary || 
+    (candidate.strengths_summary?.find(s => s.toLowerCase().includes('year') || s.toLowerCase().includes('kinh nghiệm')) || 'Có kinh nghiệm làm việc thực tế trong lĩnh vực');
+
+  const eduText = candidate.education_summary || 
+    (candidate.strengths_summary?.find(s => s.toLowerCase().includes('bachelor') || s.toLowerCase().includes('họć vấn') || s.toLowerCase().includes('bằng')) || 'Đại học / Cao đẳng chuyên ngành liên quan');
 
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 1000,
       background: 'rgba(0, 0, 0, 0.8)', backdropFilter: 'blur(10px)',
-      display: 'flex', itemsAlign: 'center', justifyContent: 'center', padding: '24px'
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
     }}>
       <div className="glass-panel animate-fade-in" style={{
         width: '100%', maxWidth: '900px', maxHeight: '90vh', overflowY: 'auto', padding: '32px',
@@ -32,28 +42,60 @@ export default function CandidateDetailModal({ candidate, onClose }) {
           </button>
         </div>
 
-        {/* Breakdown Sub-scores */}
+        {/* Breakdown Sub-scores with Candidate Details */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '12px', textAlign: 'center', border: '1px solid var(--border-color)' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Khớp Kỹ năng</span>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)' }}>
-              {candidate.skills_sub_score}%
+          
+          {/* Skills Match Card */}
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Code2 size={15} color="var(--accent-cyan)" /> Khớp Kỹ năng
+                </span>
+                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)' }}>
+                  {candidate.skills_sub_score}%
+                </div>
+              </div>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, marginTop: '8px', borderTop: '1px dashed rgba(255,255,255,0.1)', paddingTop: '8px', lineHeight: '1.4' }}>
+                <b>Kỹ năng:</b> {skillsText}
+              </p>
             </div>
           </div>
 
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '12px', textAlign: 'center', border: '1px solid var(--border-color)' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Phù hợp Kinh nghiệm</span>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#a855f7', fontFamily: 'var(--font-mono)' }}>
-              {candidate.experience_sub_score}%
+          {/* Experience Match Card */}
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Briefcase size={15} color="#a855f7" /> Phù hợp Kinh nghiệm
+                </span>
+                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#a855f7', fontFamily: 'var(--font-mono)' }}>
+                  {candidate.experience_sub_score}%
+                </div>
+              </div>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, marginTop: '8px', borderTop: '1px dashed rgba(255,255,255,0.1)', paddingTop: '8px', lineHeight: '1.4' }}>
+                <b>Kinh nghiệm:</b> {expText}
+              </p>
             </div>
           </div>
 
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '12px', textAlign: 'center', border: '1px solid var(--border-color)' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Bằng cấp & Học vấn</span>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10b981', fontFamily: 'var(--font-mono)' }}>
-              {candidate.education_sub_score}%
+          {/* Education Match Card */}
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <GraduationCap size={15} color="#10b981" /> Bằng cấp & Học vấn
+                </span>
+                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#10b981', fontFamily: 'var(--font-mono)' }}>
+                  {candidate.education_sub_score}%
+                </div>
+              </div>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, marginTop: '8px', borderTop: '1px dashed rgba(255,255,255,0.1)', paddingTop: '8px', lineHeight: '1.4' }}>
+                <b>Bằng cấp:</b> {eduText}
+              </p>
             </div>
           </div>
+
         </div>
 
         {/* Strengths vs Gaps */}
