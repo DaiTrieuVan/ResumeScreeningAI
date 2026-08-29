@@ -39,6 +39,39 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedCandidates = filteredCandidates.slice(startIndex, endIndex);
 
+  // Helper for smart compact pagination with ellipsis (...)
+  const getPaginationRange = (current, total) => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const pages = [];
+    pages.push(1);
+
+    if (current > 3) {
+      pages.push('...');
+    }
+
+    const start = Math.max(2, current - 1);
+    const end = Math.min(total - 1, current + 1);
+
+    for (let i = start; i <= end; i++) {
+      if (!pages.includes(i)) {
+        pages.push(i);
+      }
+    }
+
+    if (current < total - 2) {
+      pages.push('...');
+    }
+
+    if (!pages.includes(total)) {
+      pages.push(total);
+    }
+
+    return pages;
+  };
+
   const getScoreBadgeClass = (score) => {
     if (score >= 80) return 'score-high';
     if (score >= 60) return 'score-medium';
@@ -221,7 +254,7 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
             Hiển thị <b>{startIndex + 1}</b> - <b>{Math.min(endIndex, filteredCandidates.length)}</b> trong tổng số <b>{filteredCandidates.length}</b> ứng viên
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
             <button
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
@@ -236,25 +269,35 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
               <ChevronLeft size={14} /> Trang trước
             </button>
 
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-              <button
-                key={pageNum}
-                onClick={() => setCurrentPage(pageNum)}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid var(--border-color)',
-                  background: currentPage === pageNum ? 'var(--accent-primary)' : 'rgba(255, 255, 255, 0.05)',
-                  color: '#fff',
-                  fontWeight: currentPage === pageNum ? 700 : 400,
-                  cursor: 'pointer',
-                  fontSize: '0.8rem',
-                  transition: 'var(--transition)'
-                }}
-              >
-                {pageNum}
-              </button>
-            ))}
+            {getPaginationRange(currentPage, totalPages).map((item, idx) => {
+              if (item === '...') {
+                return (
+                  <span key={`ellipsis-${idx}`} style={{ padding: '0 4px', color: 'var(--text-muted)', fontWeight: 600 }}>
+                    ...
+                  </span>
+                );
+              }
+              return (
+                <button
+                  key={item}
+                  onClick={() => setCurrentPage(item)}
+                  style={{
+                    padding: '4px 10px',
+                    minWidth: '32px',
+                    borderRadius: '6px',
+                    border: '1px solid var(--border-color)',
+                    background: currentPage === item ? 'var(--accent-primary)' : 'rgba(255, 255, 255, 0.05)',
+                    color: '#fff',
+                    fontWeight: currentPage === item ? 700 : 400,
+                    cursor: 'pointer',
+                    fontSize: '0.8rem',
+                    transition: 'var(--transition)'
+                  }}
+                >
+                  {item}
+                </button>
+              );
+            })}
 
             <button
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
