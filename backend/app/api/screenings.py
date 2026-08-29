@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, status, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, or_
 from pydantic import BaseModel
 
 from app.core.database import get_db, AsyncSessionLocal
@@ -53,8 +53,11 @@ async def evaluate_screening(
     if not job:
         raise ResourceNotFoundException("JobPosting", req.job_id)
 
-    # Fetch candidate resumes
-    query = select(CandidateResume).where(CandidateResume.parse_status == "SUCCESS")
+    # Fetch candidate resumes uploaded for this job_id (or unlinked legacy resumes)
+    query = select(CandidateResume).where(
+        CandidateResume.parse_status == "SUCCESS",
+        or_(CandidateResume.job_id == req.job_id, CandidateResume.job_id == None)
+    )
     if req.resume_ids:
         query = query.where(CandidateResume.id.in_(req.resume_ids))
     
@@ -144,7 +147,10 @@ async def evaluate_screening_stream(req: EvaluateRequest):
                 yield f"data: {json.dumps({'stage': 'error', 'message': f'Vị trí tuyển dụng {req.job_id} không tồn tại'})}\n\n"
                 return
 
-            query = select(CandidateResume).where(CandidateResume.parse_status == "SUCCESS")
+            query = select(CandidateResume).where(
+                CandidateResume.parse_status == "SUCCESS",
+                or_(CandidateResume.job_id == req.job_id, CandidateResume.job_id == None)
+            )
             if req.resume_ids:
                 query = query.where(CandidateResume.id.in_(req.resume_ids))
             

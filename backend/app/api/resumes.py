@@ -1,5 +1,5 @@
-from typing import List
-from fastapi import APIRouter, Depends, UploadFile, File, status
+from typing import List, Optional
+from fastapi import APIRouter, Depends, UploadFile, File, Form, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -14,6 +14,7 @@ router = APIRouter(prefix="/resumes", tags=["Candidate Resumes"])
 @router.post("/upload", response_model=List[CandidateResumeResponse], status_code=status.HTTP_200_OK)
 async def upload_resumes(
     files: List[UploadFile] = File(...),
+    job_id: Optional[str] = Form(None),
     db: AsyncSession = Depends(get_db)
 ):
     saved_resumes = []
@@ -37,6 +38,7 @@ async def upload_resumes(
             error_msg = str(e)
             
         resume = CandidateResume(
+            job_id=job_id,
             file_name=file.filename or unique_name,
             file_path=dest_path,
             file_size_bytes=file_size,
