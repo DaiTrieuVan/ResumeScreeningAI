@@ -20,6 +20,31 @@ class EvaluateRequest(BaseModel):
     job_id: str
     resume_ids: Optional[List[str]] = None
 
+async def get_resumes_for_job(job_id: str, resume_ids: Optional[List[str]], db: AsyncSession) -> List[CandidateResume]:
+    if resume_ids:
+        res_stmt = select(CandidateResume).where(
+            CandidateResume.parse_status == "SUCCESS",
+            CandidateResume.id.in_(resume_ids)
+        )
+        res = await db.execute(res_stmt)
+        return res.scalars().all()
+
+    # 1. First attempt: fetch resumes explicitly uploaded for this job_id
+    job_stmt = select(CandidateResume).where(
+        CandidateResume.parse_status == "SUCCESS",
+        CandidateResume.job_id == job_id
+    )
+    job_resumes = (await db.execute(job_stmt)).scalars().all()
+    if job_resumes:
+        return job_resumes
+
+    # 2. Fallback: if no resumes linked to job_id exist, fetch unlinked legacy resumes
+    legacy_stmt = select(CandidateResume).where(
+        CandidateResume.parse_status == "SUCCESS",
+        CandidateResume.job_id == None
+    )
+    return (await db.execute(legacy_stmt)).scalars().all()
+
 class ScreeningResultResponse(BaseModel):
     id: str
     job_id: str
@@ -53,16 +78,8 @@ async def evaluate_screening(
     if not job:
         raise ResourceNotFoundException("JobPosting", req.job_id)
 
-    # Fetch candidate resumes uploaded for this job_id (or unlinked legacy resumes)
-    query = select(CandidateResume).where(
-        CandidateResume.parse_status == "SUCCESS",
-        or_(CandidateResume.job_id == req.job_id, CandidateResume.job_id == None)
-    )
-    if req.resume_ids:
-        query = query.where(CandidateResume.id.in_(req.resume_ids))
-    
-    resumes_res = await db.execute(query)
-    resumes = resumes_res.scalars().all()
+    # Fetch candidate resumes prioritizing job_id linked resumes
+    resumes = await get_resumes_for_job(req.job_id, req.resume_ids, db)
 
     if not resumes:
         return []
@@ -147,15 +164,7 @@ async def evaluate_screening_stream(req: EvaluateRequest):
                 yield f"data: {json.dumps({'stage': 'error', 'message': f'Vị trí tuyển dụng {req.job_id} không tồn tại'})}\n\n"
                 return
 
-            query = select(CandidateResume).where(
-                CandidateResume.parse_status == "SUCCESS",
-                or_(CandidateResume.job_id == req.job_id, CandidateResume.job_id == None)
-            )
-            if req.resume_ids:
-                query = query.where(CandidateResume.id.in_(req.resume_ids))
-            
-            resumes_res = await db.execute(query)
-            resumes = resumes_res.scalars().all()
+            resumes = await get_resumes_for_job(req.job_id, req.resume_ids, db)
 
             if not resumes:
                 yield f"data: {json.dumps({'stage': 'completed', 'progress_percent': 100, 'total': 0, 'current': 0, 'results': []})}\n\n"
