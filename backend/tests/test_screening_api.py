@@ -37,3 +37,19 @@ async def test_create_and_list_jobs():
         res_list = await ac.get("/api/jobs")
         assert res_list.status_code == 200
         assert len(res_list.json()) >= 1
+
+@pytest.mark.asyncio
+async def test_evaluate_stream():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        job_res = await ac.post("/api/jobs", json={
+            "title": "Backend Streaming Tester",
+            "department": "Engineering",
+            "required_skills": ["Python", "FastAPI"],
+            "min_years_experience": 2
+        })
+        job_id = job_res.json()["id"]
+
+        res = await ac.post("/api/screenings/evaluate/stream", json={"job_id": job_id})
+        assert res.status_code == 200
+        assert "text/event-stream" in res.headers.get("content-type", "")
+        assert "data: " in res.text
