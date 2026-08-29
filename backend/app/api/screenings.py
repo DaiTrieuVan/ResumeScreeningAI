@@ -29,6 +29,9 @@ class ScreeningResultResponse(BaseModel):
     experience_sub_score: float
     education_sub_score: float
     overall_score: float
+    skills_summary: Optional[str] = None
+    experience_summary: Optional[str] = None
+    education_summary: Optional[str] = None
     strengths_summary: List[str]
     gaps_summary: List[str]
     ai_reasoning: str
@@ -119,6 +122,9 @@ async def evaluate_screening(
         s_result.experience_sub_score = e_score
         s_result.education_sub_score = ed_score
         s_result.overall_score = overall
+        s_result.skills_summary = eval_data.get("skills_summary") or ""
+        s_result.experience_summary = eval_data.get("experience_summary") or ""
+        s_result.education_summary = eval_data.get("education_summary") or ""
         s_result.strengths_summary = eval_data["strengths_summary"]
         s_result.gaps_summary = eval_data["gaps_summary"]
         s_result.ai_reasoning = eval_data["ai_reasoning"]
@@ -207,6 +213,9 @@ async def evaluate_screening_stream(req: EvaluateRequest):
                 s_result.experience_sub_score = e_score
                 s_result.education_sub_score = ed_score
                 s_result.overall_score = overall
+                s_result.skills_summary = eval_data.get("skills_summary") or ""
+                s_result.experience_summary = eval_data.get("experience_summary") or ""
+                s_result.education_summary = eval_data.get("education_summary") or ""
                 s_result.strengths_summary = eval_data["strengths_summary"]
                 s_result.gaps_summary = eval_data["gaps_summary"]
                 s_result.ai_reasoning = eval_data["ai_reasoning"]
@@ -241,6 +250,9 @@ async def fetch_screenings_for_job(job_id: str, db: AsyncSession) -> List[Screen
             experience_sub_score=s_res.experience_sub_score or 0.0,
             education_sub_score=s_res.education_sub_score or 0.0,
             overall_score=s_res.overall_score or 0.0,
+            skills_summary=getattr(s_res, 'skills_summary', None),
+            experience_summary=getattr(s_res, 'experience_summary', None),
+            education_summary=getattr(s_res, 'education_summary', None),
             strengths_summary=s_res.strengths_summary or [],
             gaps_summary=s_res.gaps_summary or [],
             ai_reasoning=s_res.ai_reasoning or "",
@@ -296,6 +308,9 @@ async def update_screening_status(
         experience_sub_score=s_result.experience_sub_score or 0.0,
         education_sub_score=s_result.education_sub_score or 0.0,
         overall_score=s_result.overall_score or 0.0,
+        skills_summary=getattr(s_result, 'skills_summary', None),
+        experience_summary=getattr(s_result, 'experience_summary', None),
+        education_summary=getattr(s_result, 'education_summary', None),
         strengths_summary=s_result.strengths_summary or [],
         gaps_summary=s_result.gaps_summary or [],
         ai_reasoning=s_result.ai_reasoning or "",
