@@ -1,10 +1,12 @@
+import json
 from typing import List, Optional
 from fastapi import APIRouter, Depends, status, Query
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from pydantic import BaseModel
 
-from app.core.database import get_db
+from app.core.database import get_db, AsyncSessionLocal
 from app.models.job_posting import JobPosting
 from app.models.candidate_resume import CandidateResume
 from app.models.screening_result import ScreeningResult
@@ -125,6 +127,98 @@ async def evaluate_screening(
 
     # Query returned results with candidate details
     return await fetch_screenings_for_job(job.id, db)
+
+@router.post("/evaluate/stream")
+async def evaluate_screening_stream(req: EvaluateRequest):
+    async def event_generator():
+        async with AsyncSessionLocal() as db:
+            job_res = await db.execute(select(JobPosting).where(JobPosting.id == req.job_id))
+            job = job_res.scalar_one_or_none()
+            if not job:
+                yield f"data: {json.dumps({'stage': 'error', 'message': f'Vị trí tuyển dụng {req.job_id} không tồn tại'})}\n\n"
+                return
+
+            query = select(CandidateResume).where(CandidateResume.parse_status == "SUCCESS")
+            if req.resume_ids:
+                query = query.where(CandidateResume.id.in_(req.resume_ids))
+            
+            resumes_res = await db.execute(query)
+            resumes = resumes_res.scalars().all()
+
+            if not resumes:
+                yield f"data: {json.dumps({'stage': 'completed', 'progress_percent': 100, 'total': 0, 'current': 0, 'results': []})}\n\n"
+                return
+
+            total_resumes = len(resumes)
+            yield f"data: {json.dumps({'stage': 'stage1_vector', 'progress_percent': 5, 'total': total_resumes, 'current': 0, 'message': f'Đang khởi động khớp nối Vector Similarity cho {total_resumes} ứng viên...'})}\n\n"
+
+            jd_text = f"Job Title: {job.title}. Required Skills: {', '.join(job.required_skills or [])}. Department: {job.department or ''}"
+            resume_tuples = [(r.id, r.raw_text or "") for r in resumes]
+
+            stage1_rankings = dict(rank_candidates_by_vector_similarity(jd_text, resume_tuples))
+
+            yield f"data: {json.dumps({'stage': 'stage1_vector_done', 'progress_percent': 15, 'total': total_resumes, 'current': 0, 'message': 'Đã hoàn thành khớp nối Vector. Bắt đầu đánh giá chuyên sâu AI (LLM Reranking)...'})}\n\n"
+
+            for idx, r in enumerate(resumes, start=1):
+                cand_name = r.parsed_name or r.file_name or f"Ứng viên #{idx}"
+                pct = round(15 + (idx / total_resumes) * 80)
+                
+                yield f"data: {json.dumps({'stage': 'stage2_llm', 'progress_percent': pct, 'total': total_resumes, 'current': idx, 'current_candidate': cand_name, 'message': f'Đang phân tích AI cho ứng viên ({idx}/{total_resumes}): {cand_name}'})}\n\n"
+
+                sim_score = stage1_rankings.get(r.id, 50.0)
+
+                eval_data = await rerank_candidate_resume(
+                    job_title=job.title,
+                    required_skills=job.required_skills or [],
+                    preferred_skills=job.preferred_skills or [],
+                    min_experience=job.min_years_experience or 0,
+                    required_education=job.required_education or "",
+                    resume_text=r.raw_text or ""
+                )
+
+                if eval_data.get("candidate_name") and eval_data["candidate_name"] != "Unknown Candidate":
+                    r.parsed_name = eval_data["candidate_name"]
+                if eval_data.get("email"):
+                    r.parsed_email = eval_data["email"]
+
+                s_score = eval_data["skills_sub_score"]
+                e_score = eval_data["experience_sub_score"]
+                ed_score = eval_data["education_sub_score"]
+                overall = round(
+                    (s_score * job.weight_skills) +
+                    (e_score * job.weight_experience) +
+                    (ed_score * job.weight_education),
+                    1
+                )
+
+                existing_res = await db.execute(
+                    select(ScreeningResult).where(
+                        and_(ScreeningResult.job_id == job.id, ScreeningResult.resume_id == r.id)
+                    )
+                )
+                s_result = existing_res.scalar_one_or_none()
+
+                if not s_result:
+                    s_result = ScreeningResult(job_id=job.id, resume_id=r.id)
+                    db.add(s_result)
+
+                s_result.stage1_similarity_score = sim_score
+                s_result.skills_sub_score = s_score
+                s_result.experience_sub_score = e_score
+                s_result.education_sub_score = ed_score
+                s_result.overall_score = overall
+                s_result.strengths_summary = eval_data["strengths_summary"]
+                s_result.gaps_summary = eval_data["gaps_summary"]
+                s_result.ai_reasoning = eval_data["ai_reasoning"]
+
+                await db.commit()
+
+            final_results = await fetch_screenings_for_job(job.id, db)
+            results_data = [item.model_dump() for item in final_results]
+            
+            yield f"data: {json.dumps({'stage': 'completed', 'progress_percent': 100, 'total': total_resumes, 'current': total_resumes, 'message': 'Đã hoàn tất phân tích toàn bộ CV!', 'results': results_data})}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 async def fetch_screenings_for_job(job_id: str, db: AsyncSession) -> List[ScreeningResultResponse]:
     stmt = (
