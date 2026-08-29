@@ -18,6 +18,10 @@ class ScreeningResult(Base):
     education_sub_score: Mapped[float] = mapped_column(Float, nullable=True, default=0.0)
     overall_score: Mapped[float] = mapped_column(Float, nullable=True, default=0.0)
     
+    skills_summary: Mapped[str] = mapped_column(Text, nullable=True)
+    experience_summary: Mapped[str] = mapped_column(Text, nullable=True)
+    education_summary: Mapped[str] = mapped_column(Text, nullable=True)
+
     strengths_summary: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
     gaps_summary: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
     ai_reasoning: Mapped[str] = mapped_column(Text, nullable=True)
