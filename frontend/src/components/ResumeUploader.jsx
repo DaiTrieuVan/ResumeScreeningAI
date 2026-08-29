@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, XCircle } from 'lucide-react';
 import { uploadSingleResume } from '../services/api';
 
-export default function ResumeUploader({ onResumesUploaded }) {
+export default function ResumeUploader({ jobId, onResumesUploaded }) {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]); // array of File objects
   const [fileProgressMap, setFileProgressMap] = useState({}); // { [fileName]: { status: 'pending'|'uploading'|'success'|'error', errorMsg?: string } }
@@ -85,7 +85,7 @@ export default function ResumeUploader({ onResumesUploaded }) {
       }));
 
       try {
-        const result = await uploadSingleResume(file);
+        const result = await uploadSingleResume(file, jobId);
         uploadedResults.push(result);
         successCount++;
 

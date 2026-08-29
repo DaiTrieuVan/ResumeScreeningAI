@@ -16,9 +16,10 @@ export async function createJob(jobData) {
   return res.json();
 }
 
-export async function uploadResumes(files) {
+export async function uploadResumes(files, jobId = null) {
   const formData = new FormData();
   files.forEach((file) => formData.append('files', file));
+  if (jobId) formData.append('job_id', jobId);
   const res = await fetch(`${API_BASE}/resumes/upload`, {
     method: 'POST',
     body: formData,
@@ -27,9 +28,10 @@ export async function uploadResumes(files) {
   return res.json();
 }
 
-export async function uploadSingleResume(file) {
+export async function uploadSingleResume(file, jobId = null) {
   const formData = new FormData();
   formData.append('files', file);
+  if (jobId) formData.append('job_id', jobId);
   const res = await fetch(`${API_BASE}/resumes/upload`, {
     method: 'POST',
     body: formData,

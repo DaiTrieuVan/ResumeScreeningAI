@@ -202,7 +202,7 @@ export default function RecruiterDashboard() {
       )}
 
       {/* PDF Bulk Uploader */}
-      <ResumeUploader onResumesUploaded={() => selectedJob && loadScreenings(selectedJob.id)} />
+      <ResumeUploader jobId={selectedJob?.id} onResumesUploaded={() => selectedJob && loadScreenings(selectedJob.id)} />
 
       {/* Export Panel */}
       {selectedJob && <ExportFeedbackPanel selectedJobId={selectedJob.id} candidateCount={candidates.length} />}
