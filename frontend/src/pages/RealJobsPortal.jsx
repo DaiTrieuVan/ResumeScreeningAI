@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Sparkles, UploadCloud, FileText, Loader2, Globe } from 'lucide-react';
+import { Search, Sparkles, UploadCloud, FileText, Loader2, Globe, RefreshCw, Bot } from 'lucide-react';
 import RealJobCard from '../components/RealJobCard';
 import RealJobFilters from '../components/RealJobFilters';
 
 export default function RealJobsPortal() {
   const [cvFile, setCvFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [crawling, setCrawling] = useState(false);
+  const [crawlStatusMsg, setCrawlStatusMsg] = useState('');
   const [matchResults, setMatchResults] = useState([]);
   const [hasScanned, setHasScanned] = useState(false);
 
@@ -34,6 +36,24 @@ export default function RealJobsPortal() {
       })));
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleCrawlJobs = async () => {
+    setCrawling(true);
+    setCrawlStatusMsg('');
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/real-jobs/crawl?limit=10', {
+        method: 'POST'
+      });
+      if (!res.ok) throw new Error('Cào dữ liệu thất bại');
+      const data = await res.json();
+      setCrawlStatusMsg(data.message || 'Đã cào việc làm thực tế thành công!');
+      await fetchInitialJobs();
+    } catch (err) {
+      setCrawlStatusMsg('Lỗi cào dữ liệu: ' + err.message);
+    } finally {
+      setCrawling(false);
     }
   };
 
@@ -92,7 +112,7 @@ export default function RealJobsPortal() {
           Tải CV của bạn lên để Động cơ AI quét toàn bộ công việc IT/Công nghệ đang tuyển dụng thực tế, chấm điểm độ phù hợp (%) và gợi ý vị trí tốt nhất.
         </p>
 
-        {/* Upload Form */}
+        {/* Upload & Crawl Control Bar */}
         <form onSubmit={handleScanJobs} style={{ marginTop: '20px', display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center', alignItems: 'center' }}>
           <div style={{ position: 'relative' }}>
             <input
@@ -123,7 +143,31 @@ export default function RealJobsPortal() {
               </>
             )}
           </button>
+
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleCrawlJobs}
+            disabled={crawling}
+            style={{ padding: '10px 18px', fontSize: '0.9rem', borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)' }}
+          >
+            {crawling ? (
+              <>
+                <Loader2 size={18} className="spin" /> Đang Cào Dữ Liệu...
+              </>
+            ) : (
+              <>
+                <Bot size={18} /> Crawl Dữ Liệu Việc Làm Mới (MVP Bot)
+              </>
+            )}
+          </button>
         </form>
+
+        {crawlStatusMsg && (
+          <div style={{ marginTop: '12px', padding: '8px 16px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', fontSize: '0.85rem', display: 'inline-block' }}>
+            {crawlStatusMsg}
+          </div>
+        )}
       </div>
 
       {/* Filter Bar */}
@@ -158,3 +202,4 @@ export default function RealJobsPortal() {
     </div>
   );
 }
+
