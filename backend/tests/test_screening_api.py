@@ -2,11 +2,25 @@ import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from app.main import app
-from app.core.database import init_db
+from app.models.job_posting import JobPosting
+from app.core.database import init_db, AsyncSessionLocal
+from sqlalchemy import select
+
+created_job_ids = []
 
 @pytest_asyncio.fixture(autouse=True)
 async def setup_test_db():
     await init_db()
+    yield
+    if created_job_ids:
+        async with AsyncSessionLocal() as db:
+            for jid in created_job_ids:
+                job_res = await db.execute(select(JobPosting).where(JobPosting.id == jid))
+                job = job_res.scalar_one_or_none()
+                if job:
+                    await db.delete(job)
+            await db.commit()
+            created_job_ids.clear()
 
 @pytest.mark.asyncio
 async def test_health_check():
@@ -33,6 +47,7 @@ async def test_create_and_list_jobs():
         data = res.json()
         assert data["title"] == "Senior AI Engineer"
         job_id = data["id"]
+        created_job_ids.append(job_id)
 
         res_list = await ac.get("/api/jobs")
         assert res_list.status_code == 200
@@ -48,6 +63,7 @@ async def test_evaluate_stream():
             "min_years_experience": 2
         })
         job_id = job_res.json()["id"]
+        created_job_ids.append(job_id)
 
         res = await ac.post("/api/screenings/evaluate/stream", json={"job_id": job_id})
         assert res.status_code == 200
@@ -63,6 +79,7 @@ async def test_upload_and_evaluate_by_job_id():
             "required_skills": ["Python"]
         })
         job_id = job_res.json()["id"]
+        created_job_ids.append(job_id)
 
         # Upload dummy PDF for specific job
         files = [("files", ("test_cv.pdf", b"%PDF-1.4 test pdf content", "application/pdf"))]
