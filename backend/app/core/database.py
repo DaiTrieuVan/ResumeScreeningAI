@@ -33,5 +33,11 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             await session.close()
 
 async def init_db() -> None:
+    # Import all models to ensure they are registered with Base.metadata before create_all
+    import app.models.candidate_resume
+    import app.models.job_posting
+    import app.models.screening_result
+    import app.models.gap_analysis
+    import app.models.real_job
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
