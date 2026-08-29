@@ -27,6 +27,18 @@ export async function uploadResumes(files) {
   return res.json();
 }
 
+export async function uploadSingleResume(file) {
+  const formData = new FormData();
+  formData.append('files', file);
+  const res = await fetch(`${API_BASE}/resumes/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+  if (!res.ok) throw new Error(`Failed to upload file ${file.name}`);
+  const data = await res.json();
+  return data[0];
+}
+
 export async function triggerScreening(jobId, resumeIds = null) {
   const res = await fetch(`${API_BASE}/screenings/evaluate`, {
     method: 'POST',
@@ -35,6 +47,49 @@ export async function triggerScreening(jobId, resumeIds = null) {
   });
   if (!res.ok) throw new Error('Failed to run screening evaluation');
   return res.json();
+}
+
+export async function triggerScreeningStream(jobId, resumeIds = null, onProgress = null) {
+  const res = await fetch(`${API_BASE}/screenings/evaluate/stream`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ job_id: jobId, resume_ids: resumeIds }),
+  });
+
+  if (!res.ok) throw new Error('Failed to start AI evaluation stream');
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder('utf-8');
+  let buffer = '';
+  let finalResults = [];
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop();
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        try {
+          const payload = JSON.parse(line.slice(6));
+          if (onProgress) onProgress(payload);
+          if (payload.stage === 'completed') {
+            finalResults = payload.results || [];
+          } else if (payload.stage === 'error') {
+            throw new Error(payload.message || 'Error occurred during AI processing');
+          }
+        } catch (e) {
+          if (e.message && e.message.includes('Error occurred')) throw e;
+          console.warn('Failed to parse SSE event:', e, line);
+        }
+      }
+    }
+  }
+
+  return finalResults;
 }
 
 export async function fetchJobScreenings(jobId) {
