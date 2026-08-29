@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Briefcase, Plus, Play, RefreshCw, Sliders } from 'lucide-react';
-import { fetchJobs, triggerScreeningStream, fetchJobScreenings } from '../services/api';
+import { Briefcase, Plus, Play, RefreshCw, Sliders, Edit3, Trash2 } from 'lucide-react';
+import { fetchJobs, triggerScreeningStream, fetchJobScreenings, deleteJob } from '../services/api';
 import JobPostingForm from '../components/JobPostingForm';
 import ResumeUploader from '../components/ResumeUploader';
 import CandidateTable from '../components/CandidateTable';
@@ -15,6 +15,7 @@ export default function RecruiterDashboard() {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   
   const [showJobForm, setShowJobForm] = useState(false);
+  const [editingJob, setEditingJob] = useState(null);
   const [loading, setLoading] = useState(false);
   const [screeningLoading, setScreeningLoading] = useState(false);
 
@@ -49,12 +50,14 @@ export default function RecruiterDashboard() {
 
   const selectJob = async (job) => {
     setSelectedJob(job);
-    setSliderWeights({
-      wSkills: job.weight_skills,
-      wExp: job.weight_experience,
-      wEdu: job.weight_education
-    });
-    loadScreenings(job.id);
+    if (job) {
+      setSliderWeights({
+        wSkills: job.weight_skills ?? 0.5,
+        wExp: job.weight_experience ?? 0.35,
+        wEdu: job.weight_education ?? 0.15,
+      });
+      loadScreenings(job.id);
+    }
   };
 
   const loadScreenings = async (jobId) => {
@@ -68,12 +71,12 @@ export default function RecruiterDashboard() {
 
   const handleRunScreening = async () => {
     if (!selectedJob) return;
+
     setScreeningLoading(true);
     setProgressModalOpen(true);
     setScreeningCompleted(false);
     setScreeningError(null);
-    setScreeningProgressData({ progress_percent: 0, total: 0, current: 0, message: 'Khởi động kết nối tới Động cơ AI...' });
-    
+
     const startTime = new Date().toLocaleTimeString();
     setScreeningLogs([{ time: startTime, text: `Bắt đầu phân tích & sàng lọc cho vị trí: ${selectedJob.title}` }]);
 
@@ -81,11 +84,21 @@ export default function RecruiterDashboard() {
       const results = await triggerScreeningStream(
         selectedJob.id,
         null,
-        (evt) => {
-          setScreeningProgressData(evt);
-          const eventTime = new Date().toLocaleTimeString();
-          if (evt.message) {
-            setScreeningLogs((prev) => [...prev, { time: eventTime, text: evt.message }]);
+        (payload) => {
+          setScreeningProgressData(payload);
+
+          const time = new Date().toLocaleTimeString();
+          if (payload.stage === 'stage1_vector') {
+            setScreeningLogs((prev) => [
+              ...prev,
+              { time, text: payload.message || `Đang chạy khớp nối Vector Similarity cho ${payload.total} ứng viên...` }
+            ]);
+          } else if (payload.stage === 'stage2_llm') {
+            const currentName = payload.current_candidate_name || `Ứng viên #${payload.current}`;
+            setScreeningLogs((prev) => [
+              ...prev,
+              { time, text: `[${payload.current}/${payload.total}] Đang đánh giá AI cho: ${currentName}` }
+            ]);
           }
         }
       );
@@ -102,10 +115,36 @@ export default function RecruiterDashboard() {
     }
   };
 
-  const handleJobCreated = (newJob) => {
-    setJobs((prev) => [newJob, ...prev]);
+  const handleJobSaved = (savedJob) => {
+    if (editingJob) {
+      setJobs((prev) => prev.map((j) => (j.id === savedJob.id ? savedJob : j)));
+      setSelectedJob(savedJob);
+    } else {
+      setJobs((prev) => [savedJob, ...prev]);
+      selectJob(savedJob);
+    }
+    setEditingJob(null);
     setShowJobForm(false);
-    selectJob(newJob);
+  };
+
+  const handleDeleteJob = async () => {
+    if (!selectedJob) return;
+    const confirmDelete = window.confirm(`Bạn có chắc chắn muốn xóa vị trí tuyển dụng "${selectedJob.title}"? Tất cả kết quả đánh giá liên quan sẽ bị xóa.`);
+    if (!confirmDelete) return;
+
+    try {
+      await deleteJob(selectedJob.id);
+      const updated = jobs.filter((j) => j.id !== selectedJob.id);
+      setJobs(updated);
+      if (updated.length > 0) {
+        selectJob(updated[0]);
+      } else {
+        setSelectedJob(null);
+        setCandidates([]);
+      }
+    } catch (err) {
+      alert('Lỗi xóa vị trí tuyển dụng: ' + err.message);
+    }
   };
 
   return (
@@ -138,10 +177,42 @@ export default function RecruiterDashboard() {
         </div>
 
         {/* Action Buttons */}
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={() => setShowJobForm(true)} className="btn btn-secondary">
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => {
+              setEditingJob(null);
+              setShowJobForm(true);
+            }}
+            className="btn btn-secondary"
+            title="Tạo vị trí tuyển dụng mới"
+          >
             <Plus size={16} /> Tạo Yêu cầu Mới
           </button>
+
+          {selectedJob && (
+            <>
+              <button
+                onClick={() => {
+                  setEditingJob(selectedJob);
+                  setShowJobForm(true);
+                }}
+                className="btn btn-secondary"
+                style={{ padding: '8px 12px' }}
+                title="Chỉnh sửa vị trí tuyển dụng đang chọn"
+              >
+                <Edit3 size={16} /> Sửa Yêu cầu
+              </button>
+
+              <button
+                onClick={handleDeleteJob}
+                className="btn btn-secondary"
+                style={{ padding: '8px 12px', color: 'var(--accent-red)', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+                title="Xóa vị trí tuyển dụng đang chọn"
+              >
+                <Trash2 size={16} /> Xóa Yêu cầu
+              </button>
+            </>
+          )}
 
           <button
             onClick={handleRunScreening}
@@ -220,8 +291,12 @@ export default function RecruiterDashboard() {
       {/* Modals */}
       {showJobForm && (
         <JobPostingForm
-          onJobCreated={handleJobCreated}
-          onClose={() => setShowJobForm(false)}
+          initialData={editingJob}
+          onJobSaved={handleJobSaved}
+          onClose={() => {
+            setShowJobForm(false);
+            setEditingJob(null);
+          }}
         />
       )}
 
