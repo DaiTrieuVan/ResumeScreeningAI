@@ -1,18 +1,28 @@
-import React, { useState } from 'react';
-import { PlusCircle, Sliders, X } from 'lucide-react';
-import { createJob } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import { PlusCircle, Edit3, Sliders, X } from 'lucide-react';
+import { createJob, updateJob } from '../services/api';
 
-export default function JobPostingForm({ onJobCreated, onClose }) {
-  const [title, setTitle] = useState('');
-  const [department, setDepartment] = useState('');
-  const [skillsInput, setSkillsInput] = useState('');
-  const [minExp, setMinExp] = useState(3);
-  const [education, setEducation] = useState("Cử nhân CNTT hoặc ngành liên quan");
+export default function JobPostingForm({ initialData = null, onJobSaved, onClose }) {
+  const isEdit = Boolean(initialData && initialData.id);
+
+  const [title, setTitle] = useState(initialData?.title || '');
+  const [department, setDepartment] = useState(initialData?.department || '');
+  const [skillsInput, setSkillsInput] = useState(
+    Array.isArray(initialData?.required_skills) ? initialData.required_skills.join(', ') : ''
+  );
+  const [minExp, setMinExp] = useState(initialData?.min_years_experience ?? 3);
+  const [education, setEducation] = useState(initialData?.required_education || "Cử nhân CNTT hoặc ngành liên quan");
   
   // Weights (Skills, Exp, Edu)
-  const [wSkills, setWSkills] = useState(50);
-  const [wExp, setWExp] = useState(35);
-  const [wEdu, setWEdu] = useState(15);
+  const [wSkills, setWSkills] = useState(
+    initialData?.weight_skills ? Math.round(initialData.weight_skills * 100) : 50
+  );
+  const [wExp, setWExp] = useState(
+    initialData?.weight_experience ? Math.round(initialData.weight_experience * 100) : 35
+  );
+  const [wEdu, setWEdu] = useState(
+    initialData?.weight_education ? Math.round(initialData.weight_education * 100) : 15
+  );
   
   const [loading, setLoading] = useState(false);
 
@@ -35,10 +45,15 @@ export default function JobPostingForm({ onJobCreated, onClose }) {
         weight_education: wEdu / 100
       };
 
-      const newJob = await createJob(payload);
-      onJobCreated(newJob);
+      let saved;
+      if (isEdit) {
+        saved = await updateJob(initialData.id, payload);
+      } else {
+        saved = await createJob(payload);
+      }
+      onJobSaved(saved);
     } catch (err) {
-      alert('Lỗi tạo vị trí tuyển dụng: ' + err.message);
+      alert(`Lỗi ${isEdit ? 'cập nhật' : 'tạo'} vị trí tuyển dụng: ` + err.message);
     } finally {
       setLoading(false);
     }
@@ -54,8 +69,8 @@ export default function JobPostingForm({ onJobCreated, onClose }) {
         
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2 style={{ fontSize: '1.2rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <PlusCircle color="var(--accent-primary)" size={20} />
-            Tạo Yêu cầu Tuyển dụng Mới
+            {isEdit ? <Edit3 color="var(--accent-cyan)" size={20} /> : <PlusCircle color="var(--accent-primary)" size={20} />}
+            {isEdit ? 'Chỉnh sửa Yêu cầu Tuyển dụng' : 'Tạo Yêu cầu Tuyển dụng Mới'}
           </h2>
           <button onClick={onClose} className="btn btn-secondary" style={{ padding: '6px' }}>
             <X size={18} />
@@ -154,7 +169,7 @@ export default function JobPostingForm({ onJobCreated, onClose }) {
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
             <button type="button" onClick={onClose} className="btn btn-secondary">Hủy bỏ</button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Đang tạo...' : 'Tạo Yêu cầu Tuyển dụng'}
+              {loading ? (isEdit ? 'Đang lưu...' : 'Đang tạo...') : (isEdit ? 'Lưu thay đổi' : 'Tạo Yêu cầu Tuyển dụng')}
             </button>
           </div>
         </form>
