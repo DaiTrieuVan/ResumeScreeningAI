@@ -16,6 +16,24 @@ export async function createJob(jobData) {
   return res.json();
 }
 
+export async function updateJob(jobId, jobData) {
+  const res = await fetch(`${API_BASE}/jobs/${jobId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(jobData),
+  });
+  if (!res.ok) throw new Error('Failed to update job posting');
+  return res.json();
+}
+
+export async function deleteJob(jobId) {
+  const res = await fetch(`${API_BASE}/jobs/${jobId}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Failed to delete job posting');
+  return true;
+}
+
 export async function uploadResumes(files, jobId = null) {
   const formData = new FormData();
   files.forEach((file) => formData.append('files', file));
