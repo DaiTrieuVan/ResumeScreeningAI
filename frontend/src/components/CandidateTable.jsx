@@ -189,6 +189,11 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
                     <td style={{ padding: '14px 16px' }}>
                       <div style={{ fontWeight: 700 }}>{cand.candidate_name}</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{cand.candidate_email || cand.candidate_file_name}</div>
+                      {(cand.skills_summary || cand.experience_summary) && (
+                        <div style={{ fontSize: '0.72rem', color: 'var(--accent-cyan)', marginTop: '4px', maxWidth: '280px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          ⚡ {cand.skills_summary || cand.experience_summary}
+                        </div>
+                      )}
                     </td>
 
                     <td style={{ padding: '14px 16px' }}>
@@ -198,11 +203,21 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
                     </td>
 
                     <td style={{ padding: '14px 16px', fontFamily: 'var(--font-mono)' }}>
-                      {cand.skills_sub_score}%
+                      <div>{cand.skills_sub_score}%</div>
+                      {cand.skills_summary && (
+                        <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 400, fontFamily: 'sans-serif', maxWidth: '120px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={cand.skills_summary}>
+                          {cand.skills_summary}
+                        </div>
+                      )}
                     </td>
 
                     <td style={{ padding: '14px 16px', fontFamily: 'var(--font-mono)' }}>
-                      {cand.experience_sub_score}%
+                      <div>{cand.experience_sub_score}%</div>
+                      {cand.experience_summary && (
+                        <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 400, fontFamily: 'sans-serif', maxWidth: '120px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={cand.experience_summary}>
+                          {cand.experience_summary}
+                        </div>
+                      )}
                     </td>
 
                     <td style={{ padding: '14px 16px' }}>
