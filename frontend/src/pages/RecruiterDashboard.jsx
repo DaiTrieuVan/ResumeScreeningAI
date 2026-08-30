@@ -93,11 +93,20 @@ export default function RecruiterDashboard() {
               ...prev,
               { time, text: payload.message || `Đang chạy khớp nối Vector Similarity cho ${payload.total} ứng viên...` }
             ]);
-          } else if (payload.stage === 'stage2_llm') {
-            const currentName = payload.current_candidate_name || `Ứng viên #${payload.current}`;
+          } else if (payload.stage === 'stage1_vector_done') {
+            const llmCount = payload.llm_candidates || payload.total;
+            const skippedCount = payload.skipped_candidates || 0;
             setScreeningLogs((prev) => [
               ...prev,
-              { time, text: `[${payload.current}/${payload.total}] Đang đánh giá AI cho: ${currentName}` }
+              { time, text: `✅ Vector Similarity hoàn tất.` },
+              { time, text: `🔍 Top-K Filter: ${llmCount} ứng viên đủ điều kiện → LLM | ${skippedCount} ứng viên bỏ qua` },
+              { time, text: `⚡ Bắt đầu LLM song song (${payload.message?.match(/\d+ luồng/)?.[0] || '5 luồng'})...` }
+            ]);
+          } else if (payload.stage === 'stage2_llm') {
+            const currentName = payload.current_candidate || payload.current_candidate_name || `Ứng viên #${payload.current}`;
+            setScreeningLogs((prev) => [
+              ...prev,
+              { time, text: `[${payload.current}/${payload.total}] ✓ Đã đánh giá AI: ${currentName}` }
             ]);
           }
         }
