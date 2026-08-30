@@ -84,6 +84,10 @@ async def evaluate_screening(
     req: EvaluateRequest,
     db: AsyncSession = Depends(get_db)
 ):
+    """
+    Non-streaming evaluation endpoint with same optimized pipeline:
+    1. Batch Vector Similarity → 2. Top-K Filter → 3. Concurrent LLM
+    """
     # Fetch job posting
     job_res = await db.execute(select(JobPosting).where(JobPosting.id == req.job_id))
     job = job_res.scalar_one_or_none()
@@ -96,34 +100,87 @@ async def evaluate_screening(
     if not resumes:
         return []
 
-    # Build job requirement string for vector similarity
+    resume_map = {r.id: r for r in resumes}
+
+    # ── Stage 1: Batch Vector Similarity ────────────────────────
     jd_text = f"Job Title: {job.title}. Required Skills: {', '.join(job.required_skills or [])}. Department: {job.department or ''}"
     resume_tuples = [(r.id, r.raw_text or "") for r in resumes]
-
-    # Stage 1: Fast Embedding Pre-ranking
     stage1_rankings = dict(rank_candidates_by_vector_similarity(jd_text, resume_tuples))
 
-    results = []
-    for r in resumes:
-        sim_score = stage1_rankings.get(r.id, 50.0)
+    # ── Stage 1.5: Top-K Pre-filtering ──────────────────────────
+    sorted_by_score = sorted(stage1_rankings.items(), key=lambda x: x[1], reverse=True)
+    qualified_ids = [
+        rid for rid, score in sorted_by_score
+        if score >= TOP_K_SIMILARITY_THRESHOLD
+    ][:TOP_K_MAX_CANDIDATES]
+    below_threshold_ids = [rid for rid in resume_map if rid not in qualified_ids]
 
-        # Stage 2: Detailed LLM Reranking
-        eval_data = await rerank_candidate_resume(
-            job_title=job.title,
-            required_skills=job.required_skills or [],
-            preferred_skills=job.preferred_skills or [],
-            min_experience=job.min_years_experience or 0,
-            required_education=job.required_education or "",
-            resume_text=r.raw_text or ""
+    # Save below-threshold candidates with vector-only scores
+    for rid in below_threshold_ids:
+        sim_score = stage1_rankings.get(rid, 0.0)
+        existing_res = await db.execute(
+            select(ScreeningResult).where(
+                and_(ScreeningResult.job_id == job.id, ScreeningResult.resume_id == rid)
+            )
         )
+        s_result = existing_res.scalar_one_or_none()
+        if not s_result:
+            s_result = ScreeningResult(job_id=job.id, resume_id=rid)
+            db.add(s_result)
 
-        # Update candidate parsed metadata if found by LLM
+        proportional_score = round(sim_score * 0.6, 1)
+        s_result.stage1_similarity_score = sim_score
+        s_result.skills_sub_score = proportional_score
+        s_result.experience_sub_score = proportional_score
+        s_result.education_sub_score = proportional_score
+        s_result.overall_score = proportional_score
+        s_result.skills_summary = "Đánh giá nhanh (vector similarity)"
+        s_result.experience_summary = "Chưa đánh giá chuyên sâu"
+        s_result.education_summary = "Chưa đánh giá chuyên sâu"
+        s_result.strengths_summary = ["Điểm vector similarity thấp"]
+        s_result.gaps_summary = ["Không đạt ngưỡng khớp nối tối thiểu"]
+        s_result.ai_reasoning = f"Vector similarity {sim_score:.1f}% < ngưỡng {TOP_K_SIMILARITY_THRESHOLD}%."
+
+    await db.commit()
+
+    # ── Stage 2: Concurrent LLM Reranking ───────────────────────
+    semaphore = asyncio.Semaphore(LLM_CONCURRENCY_LIMIT)
+    eval_results = {}
+
+    async def evaluate_one(resume_id: str):
+        async with semaphore:
+            r = resume_map[resume_id]
+            try:
+                eval_data = await rerank_candidate_resume(
+                    job_title=job.title,
+                    required_skills=job.required_skills or [],
+                    preferred_skills=job.preferred_skills or [],
+                    min_experience=job.min_years_experience or 0,
+                    required_education=job.required_education or "",
+                    resume_text=r.raw_text or ""
+                )
+                eval_results[resume_id] = eval_data
+            except Exception as e:
+                logger.error(f"LLM evaluation failed for {resume_id}: {e}")
+                eval_results[resume_id] = None
+
+    # Run all qualified candidates concurrently
+    await asyncio.gather(*[evaluate_one(rid) for rid in qualified_ids])
+
+    # Persist LLM results
+    for rid in qualified_ids:
+        eval_data = eval_results.get(rid)
+        if eval_data is None:
+            continue
+
+        r = resume_map[rid]
+        sim_score = stage1_rankings.get(rid, 50.0)
+
         if eval_data.get("candidate_name") and eval_data["candidate_name"] != "Unknown Candidate":
             r.parsed_name = eval_data["candidate_name"]
         if eval_data.get("email"):
             r.parsed_email = eval_data["email"]
 
-        # Calculate overall weighted score client/API side
         s_score = eval_data["skills_sub_score"]
         e_score = eval_data["experience_sub_score"]
         ed_score = eval_data["education_sub_score"]
@@ -134,19 +191,14 @@ async def evaluate_screening(
             1
         )
 
-        # Check existing result or create new
         existing_res = await db.execute(
             select(ScreeningResult).where(
-                and_(ScreeningResult.job_id == job.id, ScreeningResult.resume_id == r.id)
+                and_(ScreeningResult.job_id == job.id, ScreeningResult.resume_id == rid)
             )
         )
         s_result = existing_res.scalar_one_or_none()
-
         if not s_result:
-            s_result = ScreeningResult(
-                job_id=job.id,
-                resume_id=r.id
-            )
+            s_result = ScreeningResult(job_id=job.id, resume_id=rid)
             db.add(s_result)
 
         s_result.stage1_similarity_score = sim_score
@@ -165,6 +217,7 @@ async def evaluate_screening(
 
     # Query returned results with candidate details
     return await fetch_screenings_for_job(job.id, db)
+
 
 @router.post("/evaluate/stream")
 async def evaluate_screening_stream(req: EvaluateRequest):
