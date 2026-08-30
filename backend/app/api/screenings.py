@@ -1,4 +1,6 @@
 import json
+import asyncio
+import logging
 from typing import List, Optional
 from fastapi import APIRouter, Depends, status, Query
 from fastapi.responses import StreamingResponse
@@ -13,6 +15,16 @@ from app.models.screening_result import ScreeningResult
 from app.services.embedding_service import rank_candidates_by_vector_similarity
 from app.services.reranker_service import rerank_candidate_resume
 from app.core.exceptions import ResourceNotFoundException
+
+logger = logging.getLogger(__name__)
+
+# --- Pipeline Optimization Constants ---
+# Top-K: Only send candidates with Stage1 score >= threshold to expensive LLM.
+# Candidates below threshold get heuristic-only scores.
+TOP_K_SIMILARITY_THRESHOLD = 25.0  # Minimum vector similarity % to qualify for LLM
+TOP_K_MAX_CANDIDATES = 80          # Maximum number of candidates sent to LLM
+# Concurrent LLM: Number of parallel Gemini API calls via asyncio.Semaphore
+LLM_CONCURRENCY_LIMIT = 5
 
 router = APIRouter(prefix="/screenings", tags=["Screening & Evaluation"])
 
