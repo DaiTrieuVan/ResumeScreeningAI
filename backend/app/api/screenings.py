@@ -346,8 +346,10 @@ async def evaluate_screening_stream(req: EvaluateRequest):
                 result = await progress_queue.get()
                 completed_count += 1
                 pct = round(15 + (completed_count / llm_count) * 80)
+                cand_display_name = result['cand_name']
+                progress_msg = f'Đã phân tích AI ({completed_count}/{llm_count}): {cand_display_name}'
 
-                yield f"data: {json.dumps({'stage': 'stage2_llm', 'progress_percent': pct, 'total': llm_count, 'current': completed_count, 'current_candidate': result['cand_name'], 'message': f'Đã phân tích AI ({completed_count}/{llm_count}): {result[\"cand_name\"]}'})}\n\n"
+                yield f"data: {json.dumps({'stage': 'stage2_llm', 'progress_percent': pct, 'total': llm_count, 'current': completed_count, 'current_candidate': cand_display_name, 'message': progress_msg})}\n\n"
 
                 rid = result["resume_id"]
                 r = resume_map[rid]
