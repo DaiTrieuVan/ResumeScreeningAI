@@ -49,7 +49,8 @@ async def rerank_candidate_resume(
     resume_text: str
 ) -> Dict[str, Any]:
     """
-    Calls Gemini 1.5 Flash to generate structured evaluations.
+    Calls Gemini Flash to generate structured evaluations.
+    Uses asyncio.to_thread to prevent blocking the event loop during concurrent calls.
     """
     prompt = RERANK_PROMPT_TEMPLATE.format(
         job_title=job_title,
@@ -57,21 +58,27 @@ async def rerank_candidate_resume(
         preferred_skills=", ".join(preferred_skills or []),
         min_experience=min_experience,
         required_education=required_education or "Not specified",
-        resume_text=resume_text[:4000] # Cap text length to prevent overflow
+        resume_text=resume_text[:4000]  # Cap text length to prevent overflow
     )
 
     if settings.GEMINI_API_KEY:
         try:
-            client = genai.Client(api_key=settings.GEMINI_API_KEY)
-            response = client.models.generate_content(
-                model=settings.DEFAULT_LLM_MODEL,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    temperature=0.2
+            def _sync_gemini_call():
+                """Synchronous Gemini API call, executed in thread pool."""
+                client = genai.Client(api_key=settings.GEMINI_API_KEY)
+                response = client.models.generate_content(
+                    model=settings.DEFAULT_LLM_MODEL,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        temperature=0.2
+                    )
                 )
-            )
-            raw_text = response.text or "{}"
+                return response.text or "{}"
+
+            # Offload blocking I/O to thread pool for true async concurrency
+            import asyncio
+            raw_text = await asyncio.to_thread(_sync_gemini_call)
             parsed = json.loads(raw_text)
             return sanitize_rerank_output(parsed, required_skills, resume_text)
         except Exception as e:
