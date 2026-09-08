@@ -187,7 +187,28 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
                     onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                   >
                     <td style={{ padding: '14px 16px' }}>
-                      <div style={{ fontWeight: 700 }}>{cand.candidate_name}</div>
+                      <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                        <span>{cand.candidate_name}</span>
+                        {cand.honors_badges && cand.honors_badges.map((badge, idx) => (
+                          <span
+                            key={idx}
+                            style={{
+                              fontSize: '0.68rem',
+                              padding: '2px 8px',
+                              borderRadius: '12px',
+                              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                              color: '#fff',
+                              fontWeight: 700,
+                              boxShadow: '0 2px 6px rgba(245, 158, 11, 0.3)',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            🏆 {badge}
+                          </span>
+                        ))}
+                      </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{cand.candidate_email || cand.candidate_file_name}</div>
                       {(cand.skills_summary || cand.experience_summary) && (
                         <div style={{ fontSize: '0.72rem', color: 'var(--accent-cyan)', marginTop: '4px', maxWidth: '280px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -197,9 +218,16 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
                     </td>
 
                     <td style={{ padding: '14px 16px' }}>
-                      <span className={`score-pill ${getScoreBadgeClass(liveScore)}`}>
-                        {liveScore}%
-                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                        <span className={`score-pill ${getScoreBadgeClass(liveScore)}`}>
+                          {liveScore}%
+                        </span>
+                        {cand.stage1_similarity_score > 0 && (
+                          <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '4px', fontFamily: 'var(--font-mono)' }} title="Vector Similarity Tie-Breaker">
+                            Vector: {Math.round(cand.stage1_similarity_score * 10) / 10}%
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     <td style={{ padding: '14px 16px', fontFamily: 'var(--font-mono)' }}>

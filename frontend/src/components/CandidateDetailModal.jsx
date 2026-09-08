@@ -28,9 +28,28 @@ export default function CandidateDetailModal({ candidate, onClose }) {
         {/* Modal Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
               <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>{candidate.candidate_name}</h2>
               <span className="score-pill score-high">Điểm Phù hợp: {candidate.overall_score}%</span>
+              {candidate.honors_badges && candidate.honors_badges.map((badge, idx) => (
+                <span
+                  key={idx}
+                  style={{
+                    fontSize: '0.75rem',
+                    padding: '3px 10px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                    color: '#fff',
+                    fontWeight: 700,
+                    boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  🏆 {badge}
+                </span>
+              ))}
             </div>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
               File CV: {candidate.candidate_file_name} {candidate.candidate_email && `| Email: ${candidate.candidate_email}`}

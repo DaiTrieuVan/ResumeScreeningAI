@@ -78,6 +78,7 @@ class ScreeningResultResponse(BaseModel):
     candidate_name: Optional[str] = None
     candidate_email: Optional[str] = None
     candidate_file_name: Optional[str] = None
+    honors_badges: Optional[List[str]] = []
 
 @router.post("/evaluate", response_model=List[ScreeningResultResponse])
 async def evaluate_screening(
@@ -413,18 +414,25 @@ async def evaluate_screening_stream(req: EvaluateRequest):
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
+from app.services.reranker_service import detect_competition_honors
+
 async def fetch_screenings_for_job(job_id: str, db: AsyncSession) -> List[ScreeningResultResponse]:
     stmt = (
         select(ScreeningResult, CandidateResume)
         .join(CandidateResume, ScreeningResult.resume_id == CandidateResume.id)
         .where(ScreeningResult.job_id == job_id)
-        .order_by(ScreeningResult.overall_score.desc())
+        .order_by(
+            ScreeningResult.overall_score.desc(),
+            ScreeningResult.stage1_similarity_score.desc(),
+            CandidateResume.uploaded_at.desc()
+        )
     )
     res = await db.execute(stmt)
     rows = res.all()
 
     out = []
     for s_res, c_res in rows:
+        badges = detect_competition_honors(c_res.raw_text or "")
         out.append(ScreeningResultResponse(
             id=s_res.id,
             job_id=s_res.job_id,
@@ -445,7 +453,8 @@ async def fetch_screenings_for_job(job_id: str, db: AsyncSession) -> List[Screen
             score_override=s_res.score_override,
             candidate_name=c_res.parsed_name or c_res.file_name,
             candidate_email=c_res.parsed_email,
-            candidate_file_name=c_res.file_name
+            candidate_file_name=c_res.file_name,
+            honors_badges=badges
         ))
     return out
 
