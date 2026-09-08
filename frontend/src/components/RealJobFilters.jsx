@@ -1,7 +1,7 @@
 import React from 'react';
 import { Filter, SlidersHorizontal, MapPin, DollarSign } from 'lucide-react';
 
-export default function RealJobFilters({ minScore, setMinScore, locationFilter, setLocationFilter, searchQuery, setSearchQuery }) {
+export default function RealJobFilters({ minScore, setMinScore, locationFilter, setLocationFilter, searchQuery, setSearchQuery, categoryFilter, setCategoryFilter }) {
   return (
     <div className="glass-panel" style={{ padding: '16px 24px', marginBottom: '20px', display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', justifyContent: 'space-between' }}>
       
@@ -31,6 +31,26 @@ export default function RealJobFilters({ minScore, setMinScore, locationFilter, 
           <option value="REMOTE">Remote / Làm từ xa</option>
         </select>
       </div>
+
+      {/* Category Filter */}
+      {categoryFilter !== undefined && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+          <Filter size={16} color="var(--accent-cyan)" />
+          <select
+            className="select-field"
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            style={{ width: 'auto', padding: '6px 12px' }}
+          >
+            <option value="ALL">Tất cả ngành nghề</option>
+            <option value="CHEF">Ẩm thực / Chef / F&B</option>
+            <option value="IT">IT / Công nghệ / AI</option>
+            <option value="MARKETING">Marketing & Truyền thông</option>
+            <option value="SALES">Kinh doanh / Sales</option>
+            <option value="FINANCE">Tài chính / Kế toán</option>
+          </select>
+        </div>
+      )}
 
       {/* Score Threshold Slider */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem' }}>

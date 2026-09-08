@@ -14,6 +14,7 @@ export default function RealJobsPortal() {
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [locationFilter, setLocationFilter] = useState('ALL');
+  const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [minScore, setMinScore] = useState(0);
 
   // Initial load: fetch un-matched real jobs
@@ -48,7 +49,7 @@ export default function RealJobsPortal() {
       });
       if (!res.ok) throw new Error('Cào dữ liệu thất bại');
       const data = await res.json();
-      setCrawlStatusMsg(data.message || 'Đã cào việc làm thực tế thành công!');
+      setCrawlStatusMsg(data.message || 'Đã cào dữ liệu việc làm đa ngành thành công!');
       await fetchInitialJobs();
     } catch (err) {
       setCrawlStatusMsg('Lỗi cào dữ liệu: ' + err.message);
@@ -83,17 +84,36 @@ export default function RealJobsPortal() {
     }
   };
 
+  const detectedCvDomain = matchResults.length > 0 ? matchResults[0].cv_domain : null;
+
   const filteredMatches = matchResults.filter((m) => {
     const job = m.real_job;
+    const titleLower = (job.title || '').toLowerCase();
+    const skillsText = (job.required_skills || []).join(' ').toLowerCase();
+    const descLower = (job.description_text || '').toLowerCase();
+
     const matchesSearch = 
-      (job.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      titleLower.includes(searchQuery.toLowerCase()) ||
       (job.company_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (job.required_skills || []).some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
+      skillsText.includes(searchQuery.toLowerCase());
 
     const matchesLoc = locationFilter === 'ALL' || job.location_tag === locationFilter;
     const matchesScore = m.match_score >= minScore;
 
-    return matchesSearch && matchesLoc && matchesScore;
+    let matchesCategory = true;
+    if (categoryFilter === 'CHEF') {
+      matchesCategory = titleLower.includes('bếp') || titleLower.includes('chef') || skillsText.includes('culinary') || descLower.includes('bếp');
+    } else if (categoryFilter === 'IT') {
+      matchesCategory = titleLower.includes('developer') || titleLower.includes('engineer') || titleLower.includes('ai') || titleLower.includes('python') || titleLower.includes('react');
+    } else if (categoryFilter === 'MARKETING') {
+      matchesCategory = titleLower.includes('marketing') || titleLower.includes('seo') || titleLower.includes('content');
+    } else if (categoryFilter === 'SALES') {
+      matchesCategory = titleLower.includes('sales') || titleLower.includes('kinh doanh') || titleLower.includes('account');
+    } else if (categoryFilter === 'FINANCE') {
+      matchesCategory = titleLower.includes('kế toán') || titleLower.includes('tài chính') || titleLower.includes('accountant');
+    }
+
+    return matchesSearch && matchesLoc && matchesScore && matchesCategory;
   });
 
   return (
@@ -107,9 +127,9 @@ export default function RealJobsPortal() {
         }}>
           <Globe size={28} color="#fff" />
         </div>
-        <h2 style={{ fontSize: '1.6rem', fontWeight: 800 }}>Tìm Việc Thật Trực Tiếp từ TopCV & ITViec</h2>
+        <h2 style={{ fontSize: '1.6rem', fontWeight: 800 }}>Tìm Việc Thật Đa Ngành Trực Tiếp từ TopCV & ITViec</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '650px', margin: '8px auto 0' }}>
-          Tải CV của bạn lên để Động cơ AI quét toàn bộ công việc IT/Công nghệ đang tuyển dụng thực tế, chấm điểm độ phù hợp (%) và gợi ý vị trí tốt nhất.
+          Tải CV của bạn (Đầu bếp, IT, Marketing, Sales, Kế toán...) để Động cơ AI quét toàn bộ công việc thực tế, phân loại đúng ngành nghề và chấm điểm độ phù hợp (%).
         </p>
 
         {/* Upload & Crawl Control Bar */}
@@ -153,11 +173,11 @@ export default function RealJobsPortal() {
           >
             {crawling ? (
               <>
-                <Loader2 size={18} className="spin" /> Đang Cào Dữ Liệu...
+                <Loader2 size={18} className="spin" /> Đang Cào Dữ Liệu Đa Ngành...
               </>
             ) : (
               <>
-                <Bot size={18} /> Crawl Dữ Liệu Việc Làm Mới (MVP Bot)
+                <Bot size={18} /> Crawl Dữ Liệu Việc Làm Đa Ngành (MVP Bot)
               </>
             )}
           </button>
@@ -168,6 +188,24 @@ export default function RealJobsPortal() {
             {crawlStatusMsg}
           </div>
         )}
+
+        {hasScanned && detectedCvDomain && (
+          <div style={{
+            marginTop: '16px',
+            padding: '12px 20px',
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)',
+            border: '1px solid var(--accent-cyan)',
+            color: '#fff',
+            fontSize: '0.9rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <Sparkles size={18} color="var(--accent-cyan)" />
+            <span>🧠 AI Nhận diện CV thuộc ngành: <b>{detectedCvDomain}</b>. Đã tự động lọc và gợi ý công việc phù hợp nhất!</span>
+          </div>
+        )}
       </div>
 
       {/* Filter Bar */}
@@ -176,6 +214,8 @@ export default function RealJobsPortal() {
         setMinScore={setMinScore}
         locationFilter={locationFilter}
         setLocationFilter={setLocationFilter}
+        categoryFilter={categoryFilter}
+        setCategoryFilter={setCategoryFilter}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
       />

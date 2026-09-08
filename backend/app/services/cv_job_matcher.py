@@ -1,3 +1,4 @@
+import re
 import json
 import logging
 from typing import List, Dict, Any
@@ -8,9 +9,30 @@ from app.services.embedding_service import rank_candidates_by_vector_similarity
 
 logger = logging.getLogger(__name__)
 
+DOMAIN_KEYWORDS = {
+    "Ẩm thực / F&B / Đầu bếp": ["bếp", "chef", "nhà hàng", "khách sạn", "nấu ăn", "culinary", "menu", "sushi", "bánh", "pastry", "f&b", "bếp trưởng", "bếp chính"],
+    "IT / Phần mềm / AI": ["developer", "python", "java", "react", "fastapi", "devops", "cloud", "aws", "docker", "ai", "data", "software", "backend", "fullstack"],
+    "Marketing & Truyền thông": ["marketing", "seo", "content", "facebook ads", "google ads", "brand", "media", "copywriter"],
+    "Kinh doanh / Sales": ["sales", "b2b", "kinh doanh", "account executive", "bán hàng", "tư vấn", "cửa hàng trưởng"],
+    "Tài chính / Kế toán": ["kế toán", "tài chính", "accountant", "audit", "thuế", "thu ngân", "finance"],
+    "Nhân sự / Hành chính": ["nhân sự", "hr", "tuyển dụng", "c&b", "hành chính", "admin"]
+}
+
+def detect_cv_domain(cv_text: str) -> str:
+    text_lower = (cv_text or "").lower()
+    scores = {}
+    for domain, kw_list in DOMAIN_KEYWORDS.items():
+        count = sum(1 for kw in kw_list if kw in text_lower)
+        if count > 0:
+            scores[domain] = count
+    if not scores:
+        return "Khác / Tổng hợp"
+    return max(scores.items(), key=lambda x: x[1])[0]
+
 CV_JOB_MATCH_PROMPT = """
 You are an expert AI Career Matcher.
 Evaluate the candidate's CV against the real job opening below.
+Candidate Profession Domain: {detected_domain}
 
 ### Candidate CV:
 {cv_text}
@@ -39,22 +61,28 @@ async def match_cv_against_real_jobs(
     real_jobs: List[Dict[str, Any]]
 ) -> List[Dict[str, Any]]:
     """
-    Two-stage CV-to-Jobs evaluation.
+    Two-stage CV-to-Jobs evaluation with AI Domain Relevance Guardrail.
     Stage 1: Vector cosine similarity pre-ranking over real jobs.
     Stage 2: Gemini 1.5 Flash structured evaluation.
     """
     if not real_jobs or not cv_text:
         return []
 
+    cv_domain = detect_cv_domain(cv_text)
+
     # Stage 1: Vector Pre-Ranking
-    job_tuples = [(j["id"], f"{j['title']} {j['company_name']} {', '.join(j['required_skills'])} {j['description_text']}") for j in real_jobs]
+    job_tuples = [(j["id"], f"{j['title']} {j['company_name']} {', '.join(j['required_skills'] or [])} {j['description_text']}") for j in real_jobs]
     vector_rankings = dict(rank_candidates_by_vector_similarity(cv_text, job_tuples))
 
-    # Sort real jobs by vector similarity score and take top 10
-    sorted_jobs = sorted(real_jobs, key=lambda j: vector_rankings.get(j["id"], 0.0), reverse=True)[:10]
+    # Sort real jobs by vector similarity score
+    sorted_jobs = sorted(real_jobs, key=lambda j: vector_rankings.get(j["id"], 0.0), reverse=True)
+
+    # Filter out jobs with extremely low vector match (< 25%) if higher matching jobs exist
+    high_match_jobs = [j for j in sorted_jobs if vector_rankings.get(j["id"], 0.0) >= 30.0]
+    candidate_jobs = high_match_jobs[:10] if high_match_jobs else sorted_jobs[:10]
 
     matched_results = []
-    for job in sorted_jobs:
+    for job in candidate_jobs:
         sim_score = vector_rankings.get(job["id"], 50.0)
 
         # Stage 2: Gemini LLM Rerank
@@ -62,12 +90,13 @@ async def match_cv_against_real_jobs(
             try:
                 client = genai.Client(api_key=settings.GEMINI_API_KEY)
                 prompt = CV_JOB_MATCH_PROMPT.format(
+                    detected_domain=cv_domain,
                     cv_text=cv_text[:3000],
                     job_title=job["title"],
                     company_name=job["company_name"],
-                    required_skills=", ".join(job["required_skills"]),
-                    experience_required=job["experience_required"] or "N/A",
-                    description_text=job["description_text"][:2000]
+                    required_skills=", ".join(job.get("required_skills") or []),
+                    experience_required=job.get("experience_required") or "N/A",
+                    description_text=(job.get("description_text") or "")[:2000]
                 )
                 response = client.models.generate_content(
                     model=settings.DEFAULT_LLM_MODEL,
@@ -86,6 +115,7 @@ async def match_cv_against_real_jobs(
             eval_data = fallback_job_match(cv_text, job, sim_score)
 
         eval_data["real_job"] = job
+        eval_data["cv_domain"] = cv_domain
         matched_results.append(eval_data)
 
     matched_results.sort(key=lambda x: x["match_score"], reverse=True)

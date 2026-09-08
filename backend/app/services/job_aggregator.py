@@ -6,8 +6,58 @@ from app.models.real_job import RealJobPosting
 
 logger = logging.getLogger(__name__)
 
-# Sample Real-World Job Feed for TopCV & ITViec Vietnam Tech Roles
+# Sample Multi-Industry Real-World Job Feed for TopCV & ITViec Vietnam
 CURATED_REAL_JOBS: List[Dict[str, Any]] = [
+    # --- F&B / CHEF / CULINARY JOBS ---
+    {
+        "source": "TopCV",
+        "external_id": "topcv-chef-101",
+        "title": "Bếp Trưởng Điều Hành / Head Chef (Khách Sạn - Nhà Hàng 5 Sao)",
+        "company_name": "Golden Palace Resort & Hotel",
+        "company_logo_url": "https://static.topcv.vn/company_logos/golden-palace.jpg",
+        "location": "Hà Nội (Hoàn Kiếm)",
+        "location_tag": "HA_NOI",
+        "salary_text": "25 - 40 Triệu VNĐ",
+        "salary_min_vnd": 25000000,
+        "salary_max_vnd": 40000000,
+        "required_skills": ["Culinary Arts", "Menu Planning", "Food Safety & Hygiene", "Kitchen Management", "Asian/European Cuisine", "Cost Control"],
+        "experience_required": "3+ năm",
+        "description_text": "Quản lý toàn bộ hoạt động khu vực Bếp nhà hàng 5 sao. Xây dựng thực đơn Á-Âu cao cấp, kiểm soát chi phí nguyên vật liệu và đào tạo đội ngũ nhân viên bếp.",
+        "source_url": "https://www.topcv.vn/viec-lam/bep-truong-dieu-hanh-head-chef-khach-san"
+    },
+    {
+        "source": "TopCV",
+        "external_id": "topcv-chef-102",
+        "title": "Bếp Chính / Sous Chef (Chuỗi Nhà Hàng Nhật Bản & Á Châu)",
+        "company_name": "Ramen & Sushi House Vietnam",
+        "company_logo_url": "https://static.topcv.vn/company_logos/sushi-house.jpg",
+        "location": "TP. Hồ Chí Minh (Quận 1)",
+        "location_tag": "HO_CHI_MINH",
+        "salary_text": "15 - 25 Triệu VNĐ",
+        "salary_min_vnd": 15000000,
+        "salary_max_vnd": 25000000,
+        "required_skills": ["Japanese Cuisine", "Sushi & Sashimi", "Food Preparation", "HACCP", "Inventory Control"],
+        "experience_required": "2+ năm",
+        "description_text": "Chế biến các món ăn Nhật Bản và Á Châu theo đúng định lượng chuẩn. Phối hợp với Bếp Trưởng duy trì tiêu chuẩn vệ sinh an toàn thực phẩm.",
+        "source_url": "https://www.topcv.vn/viec-lam/bep-chinh-sous-chef-nhat-ban"
+    },
+    {
+        "source": "TopCV",
+        "external_id": "topcv-chef-103",
+        "title": "Bếp Trưởng Bánh / Pastry Chef (Chuỗi Bakery & Café High-End)",
+        "company_name": "Artisan Bakery & Café",
+        "company_logo_url": "https://static.topcv.vn/company_logos/artisan.jpg",
+        "location": "Đà Nẵng (Sơn Trà)",
+        "location_tag": "DA_NANG",
+        "salary_text": "18 - 30 Triệu VNĐ",
+        "salary_min_vnd": 18000000,
+        "salary_max_vnd": 30000000,
+        "required_skills": ["Baking & Pastry", "French Desserts", "Cake Decoration", "Recipe Development", "Quality Assurance"],
+        "experience_required": "2+ năm",
+        "description_text": "Sáng tạo và sản xuất các loại bánh ngọt, bánh mì phong cách Pháp cao cấp. Giám sát quy trình bảo quản nguyên liệu bánh.",
+        "source_url": "https://www.topcv.vn/viec-lam/bep-truong-banh-pastry-chef"
+    },
+    # --- IT / SOFTWARE JOBS ---
     {
         "source": "TopCV",
         "external_id": "topcv-101",
@@ -87,24 +137,76 @@ CURATED_REAL_JOBS: List[Dict[str, Any]] = [
         "experience_required": "3+ năm",
         "description_text": "Quản lý hệ thống containerization Docker/K8s, tự động hóa quy trình CI/CD deployment và giám sát hệ thống server.",
         "source_url": "https://www.topcv.vn/viec-lam/devops-engineer-misa"
+    },
+    # --- MARKETING & SALES JOBS ---
+    {
+        "source": "TopCV",
+        "external_id": "topcv-mkt-501",
+        "title": "Digital Marketing Leader / Specialist",
+        "company_name": "Shopee Vietnam",
+        "company_logo_url": "https://static.topcv.vn/company_logos/shopee.jpg",
+        "location": "TP. Hồ Chí Minh (Quận 10)",
+        "location_tag": "HO_CHI_MINH",
+        "salary_text": "20 - 35 Triệu VNĐ",
+        "salary_min_vnd": 20000000,
+        "salary_max_vnd": 35000000,
+        "required_skills": ["Facebook Ads", "Google Ads", "SEO", "Content Strategy", "Google Analytics", "Performance Marketing"],
+        "experience_required": "2+ năm",
+        "description_text": "Lập kế hoạch và thực thi chiến dịch Performance Marketing trên Facebook, Google Ads, TikTok Ads. Tối ưu chi phí CPL/CAC và tăng chuyển đổi mua hàng.",
+        "source_url": "https://www.topcv.vn/viec-lam/digital-marketing-leader-shopee"
+    },
+    {
+        "source": "TopCV",
+        "external_id": "topcv-sales-502",
+        "title": "Trưởng Phòng Kinh Doanh B2B / Sales Manager",
+        "company_name": "MISA Joint Stock Company",
+        "company_logo_url": "https://static.topcv.vn/company_logos/misa.jpg",
+        "location": "Hà Nội (Cầu Giấy)",
+        "location_tag": "HA_NOI",
+        "salary_text": "25 - 45 Triệu VNĐ",
+        "salary_min_vnd": 25000000,
+        "salary_max_vnd": 45000000,
+        "required_skills": ["B2B Sales", "Negotiation", "CRM", "Sales Strategy", "Team Leadership", "Key Account Management"],
+        "experience_required": "3+ năm",
+        "description_text": "Quản lý và phát triển đội ngũ kinh doanh phần mềm B2B. Tìm kiếm khách hàng doanh nghiệp, đàm phán hợp đồng và hoàn thành chỉ tiêu doanh số.",
+        "source_url": "https://www.topcv.vn/viec-lam/truong-phong-kinh-doanh-b2b-misa"
+    },
+    # --- FINANCE & ACCOUNTING JOBS ---
+    {
+        "source": "TopCV",
+        "external_id": "topcv-acc-601",
+        "title": "Kế Toán Trưởng / Chief Accountant",
+        "company_name": "Sun Group Vietnam",
+        "company_logo_url": "https://static.topcv.vn/company_logos/sungroup.jpg",
+        "location": "Đà Nẵng (Hải Châu)",
+        "location_tag": "DA_NANG",
+        "salary_text": "30 - 50 Triệu VNĐ",
+        "salary_min_vnd": 30000000,
+        "salary_max_vnd": 50000000,
+        "required_skills": ["Financial Statements", "Tax Reporting", "General Ledger", "Internal Audit", "ERP MISA/SAP", "VAS Standards"],
+        "experience_required": "5+ năm",
+        "description_text": "Chịu trách nhiệm toàn bộ công tác tài chính kế toán của tập đoàn. Lập báo cáo tài chính, quyết toán thuế và làm việc với các cơ quan thanh tra thuế.",
+        "source_url": "https://www.topcv.vn/viec-lam/ke-toan-truong-chief-accountant"
     }
 ]
 
 async def seed_real_jobs_if_empty(db: AsyncSession) -> int:
     """
-    Seeds initial curated real tech jobs if DB has no RealJobPosting records.
+    Seeds and syncs curated real jobs across all major industries into RealJobPosting database.
     """
     res = await db.execute(select(RealJobPosting))
-    existing = res.scalars().all()
-    if existing:
-        return len(existing)
+    existing_jobs = res.scalars().all()
+    existing_ext_ids = {j.external_id for j in existing_jobs}
 
     count = 0
     for job_data in CURATED_REAL_JOBS:
-        job = RealJobPosting(**job_data)
-        db.add(job)
-        count += 1
+        if job_data["external_id"] not in existing_ext_ids:
+            job = RealJobPosting(**job_data)
+            db.add(job)
+            count += 1
 
-    await db.commit()
-    logger.info(f"Seeded {count} real job postings from TopCV / ITViec feeds.")
-    return count
+    if count > 0:
+        await db.commit()
+        logger.info(f"Seeded/Updated {count} new multi-industry real job postings from TopCV / ITViec feeds.")
+
+    return len(existing_jobs) + count
