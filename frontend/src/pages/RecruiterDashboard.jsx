@@ -98,15 +98,15 @@ export default function RecruiterDashboard() {
             const skippedCount = payload.skipped_candidates || 0;
             setScreeningLogs((prev) => [
               ...prev,
-              { time, text: `✅ Vector Similarity hoàn tất.` },
-              { time, text: `🔍 Top-K Filter: ${llmCount} ứng viên đủ điều kiện → LLM | ${skippedCount} ứng viên bỏ qua` },
-              { time, text: `⚡ Bắt đầu LLM song song (${payload.message?.match(/\d+ luồng/)?.[0] || '5 luồng'})...` }
+              { time, text: `Vector Similarity hoàn tất.` },
+              { time, text: `Top-K Filter: ${llmCount} ứng viên đủ điều kiện → LLM | ${skippedCount} ứng viên bỏ qua` },
+              { time, text: `Bắt đầu LLM song song (${payload.message?.match(/\d+ luồng/)?.[0] || '5 luồng'})...` }
             ]);
           } else if (payload.stage === 'stage2_llm') {
             const currentName = payload.current_candidate || payload.current_candidate_name || `Ứng viên #${payload.current}`;
             setScreeningLogs((prev) => [
               ...prev,
-              { time, text: `[${payload.current}/${payload.total}] ✓ Đã đánh giá AI: ${currentName}` }
+              { time, text: `[${payload.current}/${payload.total}] Đã đánh giá AI: ${currentName}` }
             ]);
           }
         }
@@ -114,11 +114,11 @@ export default function RecruiterDashboard() {
       setCandidates(results);
       setScreeningCompleted(true);
       const finishTime = new Date().toLocaleTimeString();
-      setScreeningLogs((prev) => [...prev, { time: finishTime, text: '🎉 Đã hoàn tất đánh giá toàn bộ CV thành công!' }]);
+      setScreeningLogs((prev) => [...prev, { time: finishTime, text: 'Đã hoàn tất đánh giá toàn bộ CV thành công!' }]);
     } catch (err) {
       setScreeningError(err.message || 'Lỗi xảy ra trong quá trình sàng lọc AI.');
       const errTime = new Date().toLocaleTimeString();
-      setScreeningLogs((prev) => [...prev, { time: errTime, text: `❌ LỖI: ${err.message}` }]);
+      setScreeningLogs((prev) => [...prev, { time: errTime, text: `LỖI: ${err.message}` }]);
     } finally {
       setScreeningLoading(false);
     }

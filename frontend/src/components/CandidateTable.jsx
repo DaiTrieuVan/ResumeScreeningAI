@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Eye, Filter, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Eye, Filter, SlidersHorizontal, ChevronLeft, ChevronRight, Award, Zap } from 'lucide-react';
 import { updateCandidateStatus } from '../services/api';
 
 export default function CandidateTable({ candidates, jobWeights, onSelectCandidate, onStatusChange }) {
@@ -205,14 +205,14 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
                               gap: '4px'
                             }}
                           >
-                            🏆 {badge}
+                            <Award size={12} /> {badge}
                           </span>
                         ))}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{cand.candidate_email || cand.candidate_file_name}</div>
                       {(cand.skills_summary || cand.experience_summary) && (
-                        <div style={{ fontSize: '0.72rem', color: 'var(--accent-cyan)', marginTop: '4px', maxWidth: '280px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          ⚡ {cand.skills_summary || cand.experience_summary}
+                        <div style={{ fontSize: '0.72rem', color: 'var(--accent-cyan)', marginTop: '4px', maxWidth: '280px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <Zap size={12} style={{ shrink: 0 }} /> {cand.skills_summary || cand.experience_summary}
                         </div>
                       )}
                     </td>

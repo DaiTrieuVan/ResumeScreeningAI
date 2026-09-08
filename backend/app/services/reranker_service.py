@@ -196,7 +196,7 @@ def local_vector_ai_eval(
     
     strengths = []
     if honors_badges:
-        strengths.append(f"🏆 Thành tích xuất sắc: {', '.join(honors_badges)}")
+        strengths.append(f"Thành tích xuất sắc: {', '.join(honors_badges)}")
     if matched_skills:
         strengths.append(f"Khớp kỹ năng chuyên môn: {', '.join(matched_skills)}")
     else:

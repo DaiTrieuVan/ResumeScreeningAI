@@ -55,12 +55,12 @@ export default function RealJobsPortal() {
       const res = await fetch('http://127.0.0.1:8000/api/real-jobs/crawl?limit=50', {
         method: 'POST'
       });
-      if (!res.ok) throw new Error('Cào dữ liệu thất bại');
+      if (!res.ok) throw new Error('Lấy dữ liệu thất bại');
       const data = await res.json();
-      setCrawlStatusMsg(data.message || 'Đã cào dữ liệu việc làm đa ngành thành công!');
+      setCrawlStatusMsg(data.message || 'Đã lấy dữ liệu việc làm đa ngành thành công!');
       await fetchInitialJobs();
     } catch (err) {
-      setCrawlStatusMsg('Lỗi cào dữ liệu: ' + err.message);
+      setCrawlStatusMsg('Lỗi Lấy dữ liệu: ' + err.message);
     } finally {
       setCrawling(false);
     }
@@ -100,7 +100,7 @@ export default function RealJobsPortal() {
     const skillsText = (job.required_skills || []).join(' ').toLowerCase();
     const descLower = (job.description_text || '').toLowerCase();
 
-    const matchesSearch = 
+    const matchesSearch =
       titleLower.includes(searchQuery.toLowerCase()) ||
       (job.company_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       skillsText.includes(searchQuery.toLowerCase());
@@ -133,7 +133,7 @@ export default function RealJobsPortal() {
 
   return (
     <div className="animate-fade-in" style={{ maxWidth: '1050px', margin: '0 auto' }}>
-      
+
       {/* Hero Header */}
       <div className="glass-panel" style={{ padding: '28px', marginBottom: '24px', textAlign: 'center' }}>
         <div style={{
@@ -188,11 +188,11 @@ export default function RealJobsPortal() {
           >
             {crawling ? (
               <>
-                <Loader2 size={18} className="spin" /> Đang Cào Dữ Liệu Đa Ngành...
+                <Loader2 size={18} className="spin" /> Đang Lấy Dữ Liệu Đa Ngành...
               </>
             ) : (
               <>
-                <Bot size={18} /> Crawl Dữ Liệu Việc Làm Đa Ngành (MVP Bot)
+                <Bot size={18} /> Lấy Dữ Liệu Việc Làm Đa Ngành
               </>
             )}
           </button>
@@ -218,7 +218,7 @@ export default function RealJobsPortal() {
             gap: '8px'
           }}>
             <Sparkles size={18} color="var(--accent-cyan)" />
-            <span>🧠 AI Nhận diện CV thuộc ngành: <b>{detectedCvDomain}</b>. Đã tự động lọc và gợi ý công việc phù hợp nhất!</span>
+            <span>AI Nhận diện CV thuộc ngành: <b>{detectedCvDomain}</b>. Đã tự động lọc và gợi ý công việc phù hợp nhất!</span>
           </div>
         )}
       </div>
@@ -248,7 +248,7 @@ export default function RealJobsPortal() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {hasScanned && <span className="badge badge-shortlisted">Đã quét & Rerank bởi AI</span>}
-          
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
             <span>Hiển thị:</span>
             <select

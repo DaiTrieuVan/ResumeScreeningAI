@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, CheckCircle2, AlertTriangle, Cpu, Code2, Briefcase, GraduationCap } from 'lucide-react';
+import { X, CheckCircle2, AlertTriangle, Cpu, Code2, Briefcase, GraduationCap, Award } from 'lucide-react';
 
 export default function CandidateDetailModal({ candidate, onClose }) {
   if (!candidate) return null;
@@ -47,7 +47,7 @@ export default function CandidateDetailModal({ candidate, onClose }) {
                     gap: '4px'
                   }}
                 >
-                  🏆 {badge}
+                  <Award size={13} /> {badge}
                 </span>
               ))}
             </div>
