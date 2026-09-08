@@ -28,12 +28,12 @@ export default function RealJobsPortal() {
       const data = await res.json();
       setMatchResults(data.map((j) => ({
         real_job: j,
-        match_score: 80.0,
-        skills_sub_score: 80.0,
-        experience_sub_score: 80.0,
-        strengths_summary: ["Vị trí đang tuyển dụng trực tiếp"],
-        gaps_summary: ["Tải lên CV để xem phân tích AI riêng"],
-        match_reasoning: "Tuyển dụng trực tiếp từ cổng TopCV / ITViec."
+        match_score: null,
+        skills_sub_score: null,
+        experience_sub_score: null,
+        strengths_summary: [],
+        gaps_summary: [],
+        match_reasoning: "Tải lên CV PDF để kích hoạt chấm điểm AI riêng cho bạn."
       })));
     } catch (err) {
       console.error(err);
@@ -98,13 +98,13 @@ export default function RealJobsPortal() {
       skillsText.includes(searchQuery.toLowerCase());
 
     const matchesLoc = locationFilter === 'ALL' || job.location_tag === locationFilter;
-    const matchesScore = m.match_score >= minScore;
+    const matchesScore = m.match_score === null || m.match_score === undefined || m.match_score >= minScore;
 
     let matchesCategory = true;
     if (categoryFilter === 'CHEF') {
       matchesCategory = titleLower.includes('bếp') || titleLower.includes('chef') || skillsText.includes('culinary') || descLower.includes('bếp');
     } else if (categoryFilter === 'IT') {
-      matchesCategory = titleLower.includes('developer') || titleLower.includes('engineer') || titleLower.includes('ai') || titleLower.includes('python') || titleLower.includes('react');
+      matchesCategory = titleLower.includes('developer') || titleLower.includes('engineer') || titleLower.includes('ai') || titleLower.includes('python') || titleLower.includes('react') || titleLower.includes('qa') || titleLower.includes('tester') || titleLower.includes('product owner') || titleLower.includes('pm') || titleLower.includes('devops') || titleLower.includes('design') || titleLower.includes('data');
     } else if (categoryFilter === 'MARKETING') {
       matchesCategory = titleLower.includes('marketing') || titleLower.includes('seo') || titleLower.includes('content');
     } else if (categoryFilter === 'SALES') {
