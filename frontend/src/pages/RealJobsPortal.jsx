@@ -343,5 +343,4 @@ export default function RealJobsPortal() {
     </div>
   );
 }
-}
 
