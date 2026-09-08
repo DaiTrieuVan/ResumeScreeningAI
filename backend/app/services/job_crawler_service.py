@@ -299,7 +299,7 @@ async def crawl_with_crawl4ai(urls: List[str]) -> List[Dict[str, Any]]:
 
 async def crawl_and_sync_jobs(
     db: AsyncSession, 
-    limit: int = 10, 
+    limit: int = 50, 
     target_urls: Optional[List[str]] = None
 ) -> Tuple[int, int, int]:
     """

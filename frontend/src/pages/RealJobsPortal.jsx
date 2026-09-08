@@ -40,11 +40,19 @@ export default function RealJobsPortal() {
     }
   };
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, locationFilter, categoryFilter, minScore, matchResults]);
+
   const handleCrawlJobs = async () => {
     setCrawling(true);
     setCrawlStatusMsg('');
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/real-jobs/crawl?limit=10', {
+      const res = await fetch('http://127.0.0.1:8000/api/real-jobs/crawl?limit=50', {
         method: 'POST'
       });
       if (!res.ok) throw new Error('Cào dữ liệu thất bại');
@@ -115,6 +123,13 @@ export default function RealJobsPortal() {
 
     return matchesSearch && matchesLoc && matchesScore && matchesCategory;
   });
+
+  // Calculate Pagination values
+  const totalItems = filteredMatches.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const validCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (validCurrentPage - 1) * pageSize;
+  const paginatedMatches = filteredMatches.slice(startIndex, startIndex + pageSize);
 
   return (
     <div className="animate-fade-in" style={{ maxWidth: '1050px', margin: '0 auto' }}>
@@ -220,26 +235,113 @@ export default function RealJobsPortal() {
         setSearchQuery={setSearchQuery}
       />
 
-      {/* Job Results Count */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', padding: '0 4px' }}>
-        <h4 style={{ fontSize: '1rem', fontWeight: 700 }}>
-          {hasScanned ? 'Công việc Thật Phù hợp nhất với CV của bạn' : 'Danh sách Công việc Thật Mới nhất'} ({filteredMatches.length})
-        </h4>
-        {hasScanned && <span className="badge badge-shortlisted">Đã quét & Rerank bởi AI</span>}
+      {/* Job Results Header Info & Page Size Select */}
+      <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', padding: '12px 20px' }}>
+        <div>
+          <h4 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>
+            {hasScanned ? 'Công việc Thật Phù hợp nhất với CV của bạn' : 'Danh sách Công việc Thật Mới nhất'}
+          </h4>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '2px 0 0' }}>
+            Hiển thị <b>{totalItems > 0 ? startIndex + 1 : 0} - {Math.min(startIndex + pageSize, totalItems)}</b> trong tổng số <b>{totalItems}</b> vị trí tuyển dụng
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {hasScanned && <span className="badge badge-shortlisted">Đã quét & Rerank bởi AI</span>}
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+            <span>Hiển thị:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              style={{
+                background: 'rgba(0,0,0,0.4)',
+                color: '#fff',
+                border: '1px solid var(--border-color)',
+                borderRadius: '6px',
+                padding: '4px 8px',
+                fontSize: '0.8rem',
+                cursor: 'pointer'
+              }}
+            >
+              <option value={5}>5 vị trí/trang</option>
+              <option value={10}>10 vị trí/trang</option>
+              <option value={20}>20 vị trí/trang</option>
+              <option value={999}>Tất cả ({totalItems})</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       {/* Job Cards List */}
-      {filteredMatches.length === 0 ? (
+      {paginatedMatches.length === 0 ? (
         <div className="glass-panel" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)' }}>
           Không tìm thấy vị trí tuyển dụng phù hợp với bộ lọc hiện tại.
         </div>
       ) : (
-        filteredMatches.map((m, idx) => (
+        paginatedMatches.map((m, idx) => (
           <RealJobCard key={m.real_job.id || idx} matchData={m} />
         ))
       )}
 
+      {/* Pagination Footer Controls */}
+      {totalPages > 1 && (
+        <div className="glass-panel" style={{
+          display: 'flex',
+          justify: 'space-between',
+          alignItems: 'center',
+          padding: '12px 20px',
+          marginTop: '20px',
+          borderRadius: '12px'
+        }}>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={validCurrentPage === 1}
+            style={{ fontSize: '0.85rem', padding: '6px 14px' }}
+          >
+            ← Trang trước
+          </button>
+
+          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
+              <button
+                key={pg}
+                onClick={() => setCurrentPage(pg)}
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  border: pg === validCurrentPage ? '1px solid var(--accent-cyan)' : '1px solid var(--border-color)',
+                  background: pg === validCurrentPage ? 'var(--accent-gradient)' : 'rgba(255,255,255,0.05)',
+                  color: '#fff',
+                  fontWeight: pg === validCurrentPage ? 700 : 400,
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                {pg}
+              </button>
+            ))}
+          </div>
+
+          <button
+            className="btn btn-secondary"
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={validCurrentPage === totalPages}
+            style={{ fontSize: '0.85rem', padding: '6px 14px' }}
+          >
+            Trang sau →
+          </button>
+        </div>
+      )}
+
     </div>
   );
+}
 }
 

@@ -106,7 +106,7 @@ async def sync_real_jobs(db: AsyncSession = Depends(get_db)):
 
 @router.post("/crawl")
 async def crawl_real_jobs(
-    limit: int = 10, 
+    limit: int = 50, 
     target_urls: Optional[List[str]] = None,
     db: AsyncSession = Depends(get_db)
 ):
