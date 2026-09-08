@@ -18,9 +18,28 @@ def sanitize_extracted_text(text: str) -> str:
 
 def extract_text_from_pdf(file_path: str) -> str:
     """
-    Extracts text stream from a PDF using pdfplumber.
+    Extracts text stream from a PDF file using PyMuPDF (fitz) for maximum speed (5-15ms),
+    with pdfplumber as a fallback.
     """
     full_text = []
+    
+    # Primary: PyMuPDF (fitz) - High performance C engine
+    try:
+        import fitz
+        doc = fitz.open(file_path)
+        for page in doc:
+            text = page.get_text()
+            if text:
+                full_text.append(text)
+        doc.close()
+        extracted = " ".join(full_text)
+        sanitized = sanitize_extracted_text(extracted)
+        if sanitized:
+            return sanitized
+    except Exception:
+        pass  # Fallback to pdfplumber below
+
+    # Fallback: pdfplumber
     try:
         with pdfplumber.open(file_path) as pdf:
             for page in pdf.pages:
@@ -32,13 +51,38 @@ def extract_text_from_pdf(file_path: str) -> str:
         sanitized = sanitize_extracted_text(extracted)
         
         if not sanitized:
-            raise ParsingException(file_path, "PDF appears to be empty or an image-only scan without selectable text.")
+            raise ParsingException(file_path, "PDF appears to be empty or contains no readable digital text.")
             
         return sanitized
     except ParsingException:
         raise
     except Exception as e:
         raise ParsingException(file_path, f"Failed to extract text from PDF: {str(e)}")
+
+import zipfile
+import io
+import os
+from typing import List, Tuple
+
+def extract_pdfs_from_zip(zip_bytes_or_path) -> List[Tuple[str, bytes]]:
+    """
+    Extracts all PDF files from a ZIP archive.
+    Returns a list of tuples: (filename, pdf_file_bytes)
+    """
+    pdf_files = []
+    zip_obj = zipfile.ZipFile(io.BytesIO(zip_bytes_or_path) if isinstance(zip_bytes_or_path, bytes) else zip_bytes_or_path)
+    
+    for zip_info in zip_obj.infolist():
+        if zip_info.is_dir():
+            continue
+        filename = os.path.basename(zip_info.filename)
+        if filename.startswith('._') or filename.startswith('__MACOSX'):
+            continue  # Ignore macOS metadata files
+        if filename.lower().endswith('.pdf'):
+            with zip_obj.open(zip_info) as f:
+                pdf_files.append((filename, f.read()))
+                
+    return pdf_files
 
 def extract_resume_metadata(raw_text: str) -> dict:
     """

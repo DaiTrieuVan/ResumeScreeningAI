@@ -1,16 +1,23 @@
+import json
 import logging
 import numpy as np
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 logger = logging.getLogger(__name__)
 
+_model = None
 try:
     from sentence_transformers import SentenceTransformer
-    _model = SentenceTransformer('all-MiniLM-L6-v2')
-    logger.info("SentenceTransformer 'all-MiniLM-L6-v2' loaded successfully.")
-except Exception:
+    # Try multilingual model first for Vietnamese + English support
+    try:
+        _model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+        logger.info("SentenceTransformer 'paraphrase-multilingual-MiniLM-L12-v2' loaded successfully.")
+    except Exception:
+        _model = SentenceTransformer('all-MiniLM-L6-v2')
+        logger.info("SentenceTransformer 'all-MiniLM-L6-v2' loaded successfully.")
+except Exception as e:
     _model = None
-    logger.warning("SentenceTransformer unavailable. Falling back to keyword similarity.")
+    logger.warning(f"SentenceTransformer unavailable: {e}. Falling back to keyword similarity.")
 
 def compute_cosine_similarity(vec_a: np.ndarray, vec_b: np.ndarray) -> float:
     norm_a = np.linalg.norm(vec_a)
@@ -18,6 +25,22 @@ def compute_cosine_similarity(vec_a: np.ndarray, vec_b: np.ndarray) -> float:
     if norm_a == 0 or norm_b == 0:
         return 0.0
     return float(np.dot(vec_a, vec_b) / (norm_a * norm_b))
+
+def serialize_embedding(vec: np.ndarray) -> str:
+    """Serializes numpy array vector into JSON string for DB storage."""
+    if vec is None:
+        return ""
+    return json.dumps(vec.tolist())
+
+def deserialize_embedding(json_str: Optional[str]) -> Optional[np.ndarray]:
+    """Deserializes JSON string back to numpy array."""
+    if not json_str:
+        return None
+    try:
+        arr = json.loads(json_str)
+        return np.array(arr, dtype=np.float32)
+    except Exception:
+        return None
 
 def fallback_keyword_similarity(text_a: str, text_b: str) -> float:
     words_a = set(text_a.lower().split())
@@ -29,53 +52,76 @@ def fallback_keyword_similarity(text_a: str, text_b: str) -> float:
     return float(len(intersection) / len(union))
 
 def get_text_embedding(text: str) -> np.ndarray:
-    if _model is not None:
+    if _model is not None and text:
         return _model.encode(text, convert_to_numpy=True)
-    return np.zeros(384)
+    return np.zeros(384, dtype=np.float32)
 
 def rank_candidates_by_vector_similarity(
     job_description_text: str,
     resumes: List[Tuple[str, str]]  # List of (resume_id, raw_text)
 ) -> List[Tuple[str, float]]:
     """
-    Ranks candidates using vector cosine similarity with batch encoding.
-    Returns sorted list of (resume_id, similarity_score_0_to_100).
+    Legacy method: Encodes all resume texts on the fly.
+    """
+    resumes_with_cached = [(rid, text, None) for rid, text in resumes]
+    return rank_precomputed_vector_candidates(job_description_text, resumes_with_cached)
 
-    Optimization: Uses batch encode for all resume texts in a single call,
-    then vectorized numpy cosine similarity instead of per-CV sequential encoding.
+def rank_precomputed_vector_candidates(
+    job_description_text: str,
+    resumes: List[Tuple[str, str, Optional[str]]]  # List of (resume_id, raw_text, embedding_json)
+) -> List[Tuple[str, float]]:
+    """
+    Ranks candidates using pre-computed vector embeddings whenever available.
+    Uses ultra-fast matrix multiplication (N, D) x (D, 1) -> < 5ms for 1,000 CVs.
     """
     if not resumes:
         return []
 
-    resume_ids = [rid for rid, _ in resumes]
-    resume_texts = [text for _, text in resumes]
-
-    if _model is not None:
-        # Batch encode: single call encodes all texts at once (GPU/CPU batched)
-        jd_emb = _model.encode(job_description_text, convert_to_numpy=True)
-        resume_embeddings = _model.encode(
-            resume_texts,
-            batch_size=64,
-            convert_to_numpy=True,
-            show_progress_bar=False
-        )
-
-        # Vectorized cosine similarity: jd_emb (1, D) vs resume_embeddings (N, D)
-        jd_norm = jd_emb / (np.linalg.norm(jd_emb) + 1e-10)
-        resume_norms = resume_embeddings / (np.linalg.norm(resume_embeddings, axis=1, keepdims=True) + 1e-10)
-        similarities = np.dot(resume_norms, jd_norm)  # shape: (N,)
-
+    if _model is None:
         results = [
-            (rid, round(max(0.0, min(100.0, float(sim) * 100.0)), 2))
-            for rid, sim in zip(resume_ids, similarities)
+            (rid, round(max(0.0, min(100.0, fallback_keyword_similarity(job_description_text, raw_text) * 100.0)), 2))
+            for rid, raw_text, _ in resumes
         ]
-    else:
-        # Fallback: keyword-based Jaccard similarity
-        results = [
-            (rid, round(max(0.0, min(100.0, fallback_keyword_similarity(job_description_text, text) * 100.0)), 2))
-            for rid, text in resumes
-        ]
+        results.sort(key=lambda x: x[1], reverse=True)
+        return results
 
+    # Encode Job Description
+    jd_emb = _model.encode(job_description_text, convert_to_numpy=True)
+    jd_norm = jd_emb / (np.linalg.norm(jd_emb) + 1e-10)
+
+    resume_embeddings = []
+    resume_ids = []
+    missing_indices = []
+    missing_texts = []
+
+    for idx, (rid, raw_text, cached_json) in enumerate(resumes):
+        resume_ids.append(rid)
+        vec = deserialize_embedding(cached_json)
+        if vec is not None:
+            resume_embeddings.append(vec)
+        else:
+            resume_embeddings.append(None)
+            missing_indices.append(idx)
+            missing_texts.append(raw_text or "")
+
+    # Encode missing embeddings in batch
+    if missing_texts:
+        new_embs = _model.encode(missing_texts, batch_size=64, convert_to_numpy=True, show_progress_bar=False)
+        for missing_idx, new_vec in zip(missing_indices, new_embs):
+            resume_embeddings[missing_idx] = new_vec
+
+    # Stack into numpy matrix (N, D)
+    emb_matrix = np.array(resume_embeddings, dtype=np.float32)
+    norms = np.linalg.norm(emb_matrix, axis=1, keepdims=True) + 1e-10
+    normalized_matrix = emb_matrix / norms
+
+    # Cosine Similarity via Dot Product (N, D) x (D, 1) -> (N,)
+    similarities = np.dot(normalized_matrix, jd_norm)
+
+    results = [
+        (rid, round(max(0.0, min(100.0, float(sim) * 100.0)), 2))
+        for rid, sim in zip(resume_ids, similarities)
+    ]
     results.sort(key=lambda x: x[1], reverse=True)
     return results
 

@@ -12,7 +12,7 @@ from app.core.database import get_db, AsyncSessionLocal
 from app.models.job_posting import JobPosting
 from app.models.candidate_resume import CandidateResume
 from app.models.screening_result import ScreeningResult
-from app.services.embedding_service import rank_candidates_by_vector_similarity
+from app.services.embedding_service import rank_candidates_by_vector_similarity, rank_precomputed_vector_candidates
 from app.services.reranker_service import rerank_candidate_resume
 from app.core.exceptions import ResourceNotFoundException
 
@@ -104,8 +104,8 @@ async def evaluate_screening(
 
     # ── Stage 1: Batch Vector Similarity ────────────────────────
     jd_text = f"Job Title: {job.title}. Required Skills: {', '.join(job.required_skills or [])}. Department: {job.department or ''}"
-    resume_tuples = [(r.id, r.raw_text or "") for r in resumes]
-    stage1_rankings = dict(rank_candidates_by_vector_similarity(jd_text, resume_tuples))
+    resume_tuples = [(r.id, r.raw_text or "", getattr(r, "embedding_json", None)) for r in resumes]
+    stage1_rankings = dict(rank_precomputed_vector_candidates(jd_text, resume_tuples))
 
     # ── Stage 1.5: Top-K Pre-filtering ──────────────────────────
     sorted_by_score = sorted(stage1_rankings.items(), key=lambda x: x[1], reverse=True)
@@ -248,9 +248,9 @@ async def evaluate_screening_stream(req: EvaluateRequest):
             yield f"data: {json.dumps({'stage': 'stage1_vector', 'progress_percent': 5, 'total': total_resumes, 'current': 0, 'message': f'Đang khớp nối Vector Similarity (batch) cho {total_resumes} ứng viên...'})}\n\n"
 
             jd_text = f"Job Title: {job.title}. Required Skills: {', '.join(job.required_skills or [])}. Department: {job.department or ''}"
-            resume_tuples = [(r.id, r.raw_text or "") for r in resumes]
+            resume_tuples = [(r.id, r.raw_text or "", getattr(r, "embedding_json", None)) for r in resumes]
 
-            stage1_rankings = dict(rank_candidates_by_vector_similarity(jd_text, resume_tuples))
+            stage1_rankings = dict(rank_precomputed_vector_candidates(jd_text, resume_tuples))
 
             # ── Stage 1.5: Top-K Pre-filtering ──────────────────────────
             # Sort by Stage1 score descending, keep top candidates above threshold

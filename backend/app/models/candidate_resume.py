@@ -21,6 +21,7 @@ class CandidateResume(Base):
     education: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
     parse_status: Mapped[str] = mapped_column(String(50), default="SUCCESS")
     parse_error_message: Mapped[str] = mapped_column(Text, nullable=True)
+    embedding_json: Mapped[str] = mapped_column(Text, nullable=True)
     uploaded_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     screenings = relationship("ScreeningResult", back_populates="resume", cascade="all, delete-orphan")

@@ -40,6 +40,8 @@ def _migrate_sqlite_columns(sync_conn):
         columns = [c["name"] for c in inspector.get_columns("candidate_resumes")]
         if "job_id" not in columns:
             sync_conn.execute(text("ALTER TABLE candidate_resumes ADD COLUMN job_id VARCHAR(36)"))
+        if "embedding_json" not in columns:
+            sync_conn.execute(text("ALTER TABLE candidate_resumes ADD COLUMN embedding_json TEXT"))
 
     if "screening_results" in inspector.get_table_names():
         columns = [c["name"] for c in inspector.get_columns("screening_results")]
