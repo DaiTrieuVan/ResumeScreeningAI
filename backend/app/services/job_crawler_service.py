@@ -1,4 +1,5 @@
 import logging
+import asyncio
 import uuid
 import hashlib
 from typing import List, Dict, Any, Tuple, Optional
@@ -233,7 +234,7 @@ MVP_DEMO_LIVE_JOBS: List[Dict[str, Any]] = [
     },
     # --- FINANCE & ACCOUNTING JOBS ---
     {
-        "source": "TopCV",
+"source": "TopCV",
         "external_id": "topcv-acc-601",
         "title": "Kế Toán Trưởng / Chief Accountant",
         "company_name": "Sun Group Vietnam",
@@ -252,16 +253,16 @@ MVP_DEMO_LIVE_JOBS: List[Dict[str, Any]] = [
 
 PLAYWRIGHT_AVAILABLE = False
 try:
-    from playwright.async_api import async_playwright
+    from playwright.sync_api import sync_playwright
     PLAYWRIGHT_AVAILABLE = True
-    logger.info("Playwright library successfully loaded for live DOM extraction.")
+    logger.info("Playwright sync library successfully loaded for thread live DOM extraction.")
 except Exception as err:
     logger.warning(f"Playwright not available ({err}). Fallback mode enabled.")
 
-async def crawl_topcv_with_playwright(urls: List[str], limit: int = 20) -> List[Dict[str, Any]]:
+def _sync_crawl_topcv(urls: List[str], limit: int = 20) -> List[Dict[str, Any]]:
     """
-    Scrapes live job postings directly from TopCV DOM using Playwright headless Chromium.
-    Bypasses Cloudflare anti-bot checks and extracts real job titles + exact .html apply links.
+    Synchronously scrapes live job postings directly from TopCV DOM using Playwright headless Chromium inside a dedicated OS thread.
+    Bypasses Windows event loop transport restrictions under Uvicorn.
     """
     if not PLAYWRIGHT_AVAILABLE:
         logger.warning("Playwright is not available for live DOM extraction.")
@@ -269,9 +270,9 @@ async def crawl_topcv_with_playwright(urls: List[str], limit: int = 20) -> List[
     
     extracted_jobs = []
     try:
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            context = await browser.new_context(
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
                 locale="vi-VN",
                 viewport={"width": 1280, "height": 800}
@@ -281,15 +282,15 @@ async def crawl_topcv_with_playwright(urls: List[str], limit: int = 20) -> List[
                     break
                 try:
                     logger.info(f"Playwright Live Scraping Target: {target_url}")
-                    page = await context.new_page()
-                    await page.goto(target_url, wait_until="domcontentloaded", timeout=15000)
-                    await page.wait_for_timeout(2500)
+                    page = context.new_page()
+                    page.goto(target_url, wait_until="domcontentloaded", timeout=15000)
+                    page.wait_for_timeout(2500)
                     
-                    job_elements = await page.eval_on_selector_all(
+                    job_elements = page.eval_on_selector_all(
                         "a[href]",
                         "elements => elements.map(e => ({ text: e.innerText.trim(), href: e.getAttribute('href') }))"
                     )
-                    await page.close()
+                    page.close()
 
                     seen = set()
                     for item in job_elements:
@@ -323,11 +324,14 @@ async def crawl_topcv_with_playwright(urls: List[str], limit: int = 20) -> List[
                                 })
                 except Exception as ex:
                     logger.error(f"Error scraping TopCV page {target_url}: {ex}")
-            await browser.close()
+            browser.close()
     except Exception as e:
         logger.error(f"Playwright browser execution failed: {e}")
 
     return extracted_jobs
+
+async def crawl_topcv_with_playwright(urls: List[str], limit: int = 20) -> List[Dict[str, Any]]:
+    return await asyncio.to_thread(_sync_crawl_topcv, urls, limit)
 
 async def crawl_and_sync_jobs(
     db: AsyncSession, 

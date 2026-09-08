@@ -70,12 +70,21 @@ export default function RealJobCard({ matchData }) {
 
         {/* AI Score & Apply Button */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ textAlign: 'right' }}>
-            <span style={{ fontSize: '0.75rem', display: 'block', color: 'var(--text-muted)' }}>Độ phù hợp AI</span>
-            <span className={`score-pill ${getScoreClass(score)}`}>
-              {score}% Match
-            </span>
-          </div>
+          {score !== null && score !== undefined ? (
+            <div style={{ textAlign: 'right' }}>
+              <span style={{ fontSize: '0.75rem', display: 'block', color: 'var(--text-muted)' }}>Độ phù hợp AI</span>
+              <span className={`score-pill ${getScoreClass(score)}`}>
+                {score}% Match
+              </span>
+            </div>
+          ) : (
+            <div style={{ textAlign: 'right' }}>
+              <span style={{ fontSize: '0.75rem', display: 'block', color: 'var(--text-muted)', fontStyle: 'italic' }}>Chưa quét CV</span>
+              <span className="badge" style={{ background: 'rgba(255,255,255,0.06)', color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '2px', display: 'block' }}>
+                Tải CV để khớp AI
+              </span>
+            </div>
+          )}
 
           <a
             href={getValidApplyUrl(job)}
