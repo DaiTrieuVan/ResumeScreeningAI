@@ -23,7 +23,7 @@ CURATED_REAL_JOBS: List[Dict[str, Any]] = [
         "required_skills": ["Culinary Arts", "Menu Planning", "Food Safety & Hygiene", "Kitchen Management", "Asian/European Cuisine", "Cost Control"],
         "experience_required": "3+ năm",
         "description_text": "Quản lý toàn bộ hoạt động khu vực Bếp nhà hàng 5 sao. Xây dựng thực đơn Á-Âu cao cấp, kiểm soát chi phí nguyên vật liệu và đào tạo đội ngũ nhân viên bếp.",
-        "source_url": "https://www.topcv.vn/viec-lam/bep-truong-dieu-hanh-head-chef-khach-san"
+        "source_url": "https://www.topcv.vn/tim-viec-lam?keyword=Head+Chef"
     },
     {
         "source": "TopCV",
@@ -39,7 +39,7 @@ CURATED_REAL_JOBS: List[Dict[str, Any]] = [
         "required_skills": ["Japanese Cuisine", "Sushi & Sashimi", "Food Preparation", "HACCP", "Inventory Control"],
         "experience_required": "2+ năm",
         "description_text": "Chế biến các món ăn Nhật Bản và Á Châu theo đúng định lượng chuẩn. Phối hợp với Bếp Trưởng duy trì tiêu chuẩn vệ sinh an toàn thực phẩm.",
-        "source_url": "https://www.topcv.vn/viec-lam/bep-chinh-sous-chef-nhat-ban"
+        "source_url": "https://www.topcv.vn/tim-viec-lam?keyword=Sous+Chef"
     },
     {
         "source": "TopCV",
@@ -55,7 +55,7 @@ CURATED_REAL_JOBS: List[Dict[str, Any]] = [
         "required_skills": ["Baking & Pastry", "French Desserts", "Cake Decoration", "Recipe Development", "Quality Assurance"],
         "experience_required": "2+ năm",
         "description_text": "Sáng tạo và sản xuất các loại bánh ngọt, bánh mì phong cách Pháp cao cấp. Giám sát quy trình bảo quản nguyên liệu bánh.",
-        "source_url": "https://www.topcv.vn/viec-lam/bep-truong-banh-pastry-chef"
+        "source_url": "https://www.topcv.vn/tim-viec-lam?keyword=Pastry+Chef"
     },
     # --- IT / SOFTWARE JOBS ---
     {
@@ -72,7 +72,7 @@ CURATED_REAL_JOBS: List[Dict[str, Any]] = [
         "required_skills": ["Python", "FastAPI", "PostgreSQL", "Docker", "REST API"],
         "experience_required": "3-5 năm",
         "description_text": "Phát triển hệ thống Backend microservices bằng FastAPI và Python 3.13. Tích hợp các mô hình AI/LLM, tối ưu truy vấn PostgreSQL và triển khai Docker container trên hạ tầng Cloud.",
-        "source_url": "https://www.topcv.vn/viec-lam/senior-python-backend-engineer"
+        "source_url": "https://www.topcv.vn/tim-viec-lam-cong-nghe-thong-tin-cr257?category_family=r257"
     },
     {
         "source": "ITViec",
@@ -104,7 +104,7 @@ CURATED_REAL_JOBS: List[Dict[str, Any]] = [
         "required_skills": ["Python", "PyTorch", "Gemini API", "ChromaDB", "NLP"],
         "experience_required": "2+ năm AI/ML",
         "description_text": "Nghiên cứu và triển khai các giải pháp Generative AI, RAG và Vector Embedding. Sử dụng Gemini API, PyTorch và xử lý dữ liệu lớn bằng Python.",
-        "source_url": "https://www.topcv.vn/viec-lam/ai-machine-learning-engineer"
+        "source_url": "https://www.topcv.vn/tim-viec-lam-cong-nghe-thong-tin-cr257?category_family=r257"
     },
     {
         "source": "ITViec",
@@ -136,7 +136,7 @@ CURATED_REAL_JOBS: List[Dict[str, Any]] = [
         "required_skills": ["Docker", "Kubernetes", "CI/CD", "Linux", "Python"],
         "experience_required": "3+ năm",
         "description_text": "Quản lý hệ thống containerization Docker/K8s, tự động hóa quy trình CI/CD deployment và giám sát hệ thống server.",
-        "source_url": "https://www.topcv.vn/viec-lam/devops-engineer-misa"
+        "source_url": "https://www.topcv.vn/tim-viec-lam-cong-nghe-thong-tin-cr257?category_family=r257"
     },
     # --- MARKETING & SALES JOBS ---
     {
@@ -153,7 +153,7 @@ CURATED_REAL_JOBS: List[Dict[str, Any]] = [
         "required_skills": ["Facebook Ads", "Google Ads", "SEO", "Content Strategy", "Google Analytics", "Performance Marketing"],
         "experience_required": "2+ năm",
         "description_text": "Lập kế hoạch và thực thi chiến dịch Performance Marketing trên Facebook, Google Ads, TikTok Ads. Tối ưu chi phí CPL/CAC và tăng chuyển đổi mua hàng.",
-        "source_url": "https://www.topcv.vn/viec-lam/digital-marketing-leader-shopee"
+        "source_url": "https://www.topcv.vn/tim-viec-lam?keyword=Digital+Marketing"
     },
     {
         "source": "TopCV",
@@ -169,7 +169,7 @@ CURATED_REAL_JOBS: List[Dict[str, Any]] = [
         "required_skills": ["B2B Sales", "Negotiation", "CRM", "Sales Strategy", "Team Leadership", "Key Account Management"],
         "experience_required": "3+ năm",
         "description_text": "Quản lý và phát triển đội ngũ kinh doanh phần mềm B2B. Tìm kiếm khách hàng doanh nghiệp, đàm phán hợp đồng và hoàn thành chỉ tiêu doanh số.",
-        "source_url": "https://www.topcv.vn/viec-lam/truong-phong-kinh-doanh-b2b-misa"
+        "source_url": "https://www.topcv.vn/tim-viec-lam?keyword=Sales+Manager"
     },
     # --- FINANCE & ACCOUNTING JOBS ---
     {
@@ -186,27 +186,35 @@ CURATED_REAL_JOBS: List[Dict[str, Any]] = [
         "required_skills": ["Financial Statements", "Tax Reporting", "General Ledger", "Internal Audit", "ERP MISA/SAP", "VAS Standards"],
         "experience_required": "5+ năm",
         "description_text": "Chịu trách nhiệm toàn bộ công tác tài chính kế toán của tập đoàn. Lập báo cáo tài chính, quyết toán thuế và làm việc với các cơ quan thanh tra thuế.",
-        "source_url": "https://www.topcv.vn/viec-lam/ke-toan-truong-chief-accountant"
+        "source_url": "https://www.topcv.vn/tim-viec-lam?keyword=Ke+Toan+Truong"
     }
 ]
 
 async def seed_real_jobs_if_empty(db: AsyncSession) -> int:
     """
     Seeds and syncs curated real jobs across all major industries into RealJobPosting database.
+    Updates existing records' source_url if changed.
     """
     res = await db.execute(select(RealJobPosting))
     existing_jobs = res.scalars().all()
-    existing_ext_ids = {j.external_id for j in existing_jobs}
+    existing_map = {j.external_id: j for j in existing_jobs}
 
     count = 0
+    updated = 0
     for job_data in CURATED_REAL_JOBS:
-        if job_data["external_id"] not in existing_ext_ids:
+        ext_id = job_data["external_id"]
+        if ext_id not in existing_map:
             job = RealJobPosting(**job_data)
             db.add(job)
             count += 1
+        else:
+            existing_job = existing_map[ext_id]
+            if existing_job.source_url != job_data["source_url"]:
+                existing_job.source_url = job_data["source_url"]
+                updated += 1
 
-    if count > 0:
+    if count > 0 or updated > 0:
         await db.commit()
-        logger.info(f"Seeded/Updated {count} new multi-industry real job postings from TopCV / ITViec feeds.")
+        logger.info(f"Seeded/Updated real jobs: {count} new, {updated} updated source URLs.")
 
-    return len(existing_jobs) + count
+    return len(existing_map) + count

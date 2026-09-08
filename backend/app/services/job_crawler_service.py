@@ -35,7 +35,7 @@ MVP_DEMO_LIVE_JOBS: List[Dict[str, Any]] = [
         "required_skills": ["Culinary Arts", "Menu Planning", "Food Safety & Hygiene", "Kitchen Management", "Asian/European Cuisine", "Cost Control"],
         "experience_required": "3+ năm",
         "description_text": "Quản lý toàn bộ hoạt động khu vực Bếp nhà hàng 5 sao. Xây dựng thực đơn Á-Âu cao cấp, kiểm soát chi phí nguyên vật liệu và đào tạo đội ngũ nhân viên bếp.",
-        "source_url": "https://www.topcv.vn/viec-lam/bep-truong-dieu-hanh-head-chef-khach-san"
+        "source_url": "https://www.topcv.vn/tim-viec-lam?keyword=Head+Chef"
     },
     {
         "source": "TopCV",
@@ -51,7 +51,7 @@ MVP_DEMO_LIVE_JOBS: List[Dict[str, Any]] = [
         "required_skills": ["Japanese Cuisine", "Sushi & Sashimi", "Food Preparation", "HACCP", "Inventory Control"],
         "experience_required": "2+ năm",
         "description_text": "Chế biến các món ăn Nhật Bản và Á Châu theo đúng định lượng chuẩn. Phối hợp với Bếp Trưởng duy trì tiêu chuẩn vệ sinh an toàn thực phẩm.",
-        "source_url": "https://www.topcv.vn/viec-lam/bep-chinh-sous-chef-nhat-ban"
+        "source_url": "https://www.topcv.vn/tim-viec-lam?keyword=Sous+Chef"
     },
     {
         "source": "TopCV",
@@ -67,7 +67,7 @@ MVP_DEMO_LIVE_JOBS: List[Dict[str, Any]] = [
         "required_skills": ["Baking & Pastry", "French Desserts", "Cake Decoration", "Recipe Development", "Quality Assurance"],
         "experience_required": "2+ năm",
         "description_text": "Sáng tạo và sản xuất các loại bánh ngọt, bánh mì phong cách Pháp cao cấp. Giám sát quy trình bảo quản nguyên liệu bánh.",
-        "source_url": "https://www.topcv.vn/viec-lam/bep-truong-banh-pastry-chef"
+        "source_url": "https://www.topcv.vn/tim-viec-lam?keyword=Pastry+Chef"
     },
     # --- IT / SOFTWARE JOBS ---
     {
@@ -84,7 +84,7 @@ MVP_DEMO_LIVE_JOBS: List[Dict[str, Any]] = [
         "required_skills": ["Python", "FastAPI", "PostgreSQL", "Docker", "Redis", "REST API"],
         "experience_required": "3+ năm",
         "description_text": "Thiết kế và phát triển hệ thống backend high-concurrency sử dụng FastAPI và PostgreSQL. Triển khai dịch vụ trên Docker/Kubernetes và tích hợp các mô hình AI/LLM.",
-        "source_url": "https://www.topcv.vn/viec-lam/senior-backend-developer-python-fastapi"
+        "source_url": "https://www.topcv.vn/tim-viec-lam-cong-nghe-thong-tin-cr257?category_family=r257"
     },
     {
         "source": "ITViec",
@@ -116,7 +116,7 @@ MVP_DEMO_LIVE_JOBS: List[Dict[str, Any]] = [
         "required_skills": ["React", "TypeScript", "Python", "Node.js", "TailwindCSS"],
         "experience_required": "2-4 năm",
         "description_text": "Phát triển tính năng Fullstack với React, TypeScript cho Frontend và FastAPI/Node.js cho Backend. Tối ưu hiệu năng trải nghiệm người dùng.",
-        "source_url": "https://www.topcv.vn/viec-lam/fullstack-react-python-developer"
+        "source_url": "https://www.topcv.vn/tim-viec-lam-cong-nghe-thong-tin-cr257?category_family=r257"
     },
     {
         "source": "ITViec",
@@ -149,7 +149,7 @@ MVP_DEMO_LIVE_JOBS: List[Dict[str, Any]] = [
         "required_skills": ["Facebook Ads", "Google Ads", "SEO", "Content Strategy", "Google Analytics", "Performance Marketing"],
         "experience_required": "2+ năm",
         "description_text": "Lập kế hoạch và thực thi chiến dịch Performance Marketing trên Facebook, Google Ads, TikTok Ads. Tối ưu chi phí CPL/CAC và tăng chuyển đổi mua hàng.",
-        "source_url": "https://www.topcv.vn/viec-lam/digital-marketing-leader-shopee"
+        "source_url": "https://www.topcv.vn/tim-viec-lam?keyword=Digital+Marketing"
     },
     {
         "source": "TopCV",
@@ -165,7 +165,7 @@ MVP_DEMO_LIVE_JOBS: List[Dict[str, Any]] = [
         "required_skills": ["B2B Sales", "Negotiation", "CRM", "Sales Strategy", "Team Leadership", "Key Account Management"],
         "experience_required": "3+ năm",
         "description_text": "Quản lý và phát triển đội ngũ kinh doanh phần mềm B2B. Tìm kiếm khách hàng doanh nghiệp, đàm phán hợp đồng và hoàn thành chỉ tiêu doanh số.",
-        "source_url": "https://www.topcv.vn/viec-lam/truong-phong-kinh-doanh-b2b-misa"
+        "source_url": "https://www.topcv.vn/tim-viec-lam?keyword=Sales+Manager"
     },
     # --- FINANCE & ACCOUNTING JOBS ---
     {
@@ -182,7 +182,7 @@ MVP_DEMO_LIVE_JOBS: List[Dict[str, Any]] = [
         "required_skills": ["Financial Statements", "Tax Reporting", "General Ledger", "Internal Audit", "ERP MISA/SAP", "VAS Standards"],
         "experience_required": "5+ năm",
         "description_text": "Chịu trách nhiệm toàn bộ công tác tài chính kế toán của tập đoàn. Lập báo cáo tài chính, quyết toán thuế và làm việc với các cơ quan thanh tra thuế.",
-        "source_url": "https://www.topcv.vn/viec-lam/ke-toan-truong-chief-accountant"
+        "source_url": "https://www.topcv.vn/tim-viec-lam?keyword=Ke+Toan+Truong"
     }
 ]
 
@@ -280,6 +280,7 @@ async def crawl_and_sync_jobs(
             existing.salary_max_vnd = job_data.get("salary_max_vnd", 0)
             existing.required_skills = job_data.get("required_skills", [])
             existing.description_text = job_data["description_text"]
+            existing.source_url = job_data["source_url"]
             updated += 1
         else:
             # Add new job posting

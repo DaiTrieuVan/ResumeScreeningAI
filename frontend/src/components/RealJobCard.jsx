@@ -19,6 +19,19 @@ export default function RealJobCard({ matchData }) {
     return { background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.4)' };
   };
 
+  const getValidApplyUrl = (j) => {
+    if (!j || !j.source_url) return 'https://www.topcv.vn';
+    const url = j.source_url;
+    if (j.source === 'TopCV' && url.includes('/viec-lam/') && !url.includes('.html') && !url.includes('?') && !url.match(/-\d+$/)) {
+      const titleLower = (j.title || '').toLowerCase();
+      if (titleLower.includes('developer') || titleLower.includes('engineer') || titleLower.includes('python') || titleLower.includes('react') || titleLower.includes('backend') || titleLower.includes('ai') || titleLower.includes('fullstack') || titleLower.includes('devops')) {
+        return 'https://www.topcv.vn/tim-viec-lam-cong-nghe-thong-tin-cr257?category_family=r257';
+      }
+      return `https://www.topcv.vn/tim-viec-lam?keyword=${encodeURIComponent(j.title || '')}`;
+    }
+    return url;
+  };
+
   return (
     <div className="glass-panel" style={{ padding: '20px 24px', marginBottom: '16px', transition: 'var(--transition)' }}>
       
@@ -65,7 +78,7 @@ export default function RealJobCard({ matchData }) {
           </div>
 
           <a
-            href={job.source_url}
+            href={getValidApplyUrl(job)}
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-emerald"
