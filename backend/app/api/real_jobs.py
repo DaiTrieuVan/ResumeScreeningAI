@@ -21,8 +21,6 @@ async def list_real_jobs(
     skill: Optional[str] = None,
     db: AsyncSession = Depends(get_db)
 ):
-    await seed_real_jobs_if_empty(db)
-    
     query = select(RealJobPosting).where(RealJobPosting.status == "ACTIVE")
     if location_tag and location_tag.upper() != "ALL":
         query = query.where(RealJobPosting.location_tag == location_tag.upper())
@@ -44,7 +42,6 @@ async def match_cv_with_real_jobs(
     cv_text: Optional[str] = Form(None),
     db: AsyncSession = Depends(get_db)
 ):
-    await seed_real_jobs_if_empty(db)
 
     extracted_text = cv_text or ""
     if file:
