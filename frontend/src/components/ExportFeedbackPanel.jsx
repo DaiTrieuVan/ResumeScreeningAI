@@ -17,14 +17,30 @@ export default function ExportFeedbackPanel({ selectedJobId, candidateCount }) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '10px' }}>
+      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
         <a
           href={getExportCsvUrl(selectedJobId, 'SHORTLISTED')}
           download
           className="btn btn-emerald"
           style={{ textDecoration: 'none' }}
+          title="Tải về danh sách ứng viên đạt yêu cầu / điểm cao nhất"
         >
           <Download size={16} /> Xuất DS Chọn lọc (CSV)
+        </a>
+
+        <a
+          href={getExportCsvUrl(selectedJobId, 'REJECTED')}
+          download
+          className="btn"
+          style={{
+            textDecoration: 'none',
+            background: 'rgba(244, 63, 94, 0.15)',
+            border: '1px solid rgba(244, 63, 94, 0.3)',
+            color: '#f87171'
+          }}
+          title="Tải về danh sách ứng viên không đạt tiêu chuẩn để xem xét sau"
+        >
+          <Download size={16} /> Xuất DS Bị loại (CSV)
         </a>
 
         <a

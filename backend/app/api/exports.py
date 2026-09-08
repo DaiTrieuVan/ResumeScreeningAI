@@ -9,6 +9,7 @@ from app.core.database import get_db
 from app.models.screening_result import ScreeningResult
 from app.models.candidate_resume import CandidateResume
 from app.models.job_posting import JobPosting
+from app.services.reranker_service import detect_competition_honors
 from app.core.exceptions import ResourceNotFoundException
 
 router = APIRouter(prefix="/exports", tags=["Export Data"])
@@ -28,40 +29,69 @@ async def export_shortlist_csv(
         select(ScreeningResult, CandidateResume)
         .join(CandidateResume, ScreeningResult.resume_id == CandidateResume.id)
         .where(ScreeningResult.job_id == job_id)
+        .order_by(
+            ScreeningResult.overall_score.desc(),
+            ScreeningResult.stage1_similarity_score.desc()
+        )
     )
-    if status_filter and status_filter.upper() != "ALL":
-        stmt = stmt.where(ScreeningResult.recruiter_status == status_filter.upper())
-
-    stmt = stmt.order_by(ScreeningResult.overall_score.desc())
     res = await db.execute(stmt)
-    rows = res.all()
+    all_rows = res.all()
+
+    sf = (status_filter or "SHORTLISTED").upper()
+
+    # Smart filtering logic
+    if sf == "SHORTLISTED":
+        # First check if explicit SHORTLISTED recruiter_status exists
+        explicit = [r for r in all_rows if r[0].recruiter_status == "SHORTLISTED"]
+        if explicit:
+            rows = explicit
+        else:
+            # Fallback to Top candidates (overall_score >= 60.0 or top 50%)
+            rows = [r for r in all_rows if (r[0].overall_score or 0) >= 60.0]
+            if not rows and all_rows:
+                rows = all_rows[: max(1, len(all_rows) // 2)]
+    elif sf == "REJECTED":
+        # Check if explicit REJECTED recruiter_status exists
+        explicit = [r for r in all_rows if r[0].recruiter_status == "REJECTED"]
+        if explicit:
+            rows = explicit
+        else:
+            # Fallback to low-scoring candidates (overall_score < 60.0)
+            rows = [r for r in all_rows if (r[0].overall_score or 0) < 60.0]
+            if not rows and all_rows:
+                rows = all_rows[max(1, len(all_rows) // 2):]
+    else:
+        rows = all_rows
 
     output = io.StringIO()
     writer = csv.writer(output)
     
-    # Header
+    # Header with clear Vietnamese column labels
     writer.writerow([
-        "Candidate Name",
+        "Tên Ứng viên",
         "Email",
-        "Overall Score (%)",
-        "Skills Sub-score",
-        "Experience Sub-score",
-        "Education Sub-score",
-        "Recruiter Status",
-        "Key Strengths",
-        "Identified Gaps",
-        "AI Reasoning",
-        "Recruiter Notes"
+        "Điểm Phù hợp Tổng thể (%)",
+        "Điểm Kỹ năng (%)",
+        "Điểm Kinh nghiệm (%)",
+        "Điểm Học vấn (%)",
+        "Huy hiệu Thành tích / Giải thưởng",
+        "Trạng thái Tuyển dụng",
+        "Điểm mạnh Nổi bật",
+        "Điểm thiếu sót / Cần bổ sung",
+        "Giải trình Phân tích AI",
+        "Ghi chú Tuyển dụng"
     ])
 
     for s_res, c_res in rows:
+        badges = detect_competition_honors(c_res.raw_text or "")
         writer.writerow([
             c_res.parsed_name or c_res.file_name,
             c_res.parsed_email or "N/A",
-            f"{s_res.overall_score:.1f}",
-            f"{s_res.skills_sub_score:.1f}",
-            f"{s_res.experience_sub_score:.1f}",
-            f"{s_res.education_sub_score:.1f}",
+            f"{s_res.overall_score:.1f}%",
+            f"{s_res.skills_sub_score:.1f}%",
+            f"{s_res.experience_sub_score:.1f}%",
+            f"{s_res.education_sub_score:.1f}%",
+            "; ".join(badges) if badges else "Không",
             s_res.recruiter_status,
             "; ".join(s_res.strengths_summary or []),
             "; ".join(s_res.gaps_summary or []),
@@ -69,11 +99,13 @@ async def export_shortlist_csv(
             s_res.recruiter_feedback_notes or ""
         ])
 
-    csv_content = output.getvalue()
-    filename = f"shortlist_{job.title.replace(' ', '_')}.csv"
+    # Prepend UTF-8 BOM (\ufeff) so Microsoft Excel opens Vietnamese text perfectly without font errors
+    csv_content = "\ufeff" + output.getvalue()
+    clean_job_title = job.title.replace(' ', '_').replace('/', '_')
+    filename = f"{sf.lower()}_{clean_job_title}.csv"
 
     return Response(
-        content=csv_content,
-        media_type="text/csv",
+        content=csv_content.encode("utf-8-sig"),
+        media_type="text/csv; charset=utf-8-sig",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
