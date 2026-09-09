@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Eye, Filter, SlidersHorizontal, ChevronLeft, ChevronRight, Award, Zap } from 'lucide-react';
+import { Search, Eye, Filter, SlidersHorizontal, ChevronLeft, ChevronRight, Award, Zap, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { updateCandidateStatus } from '../services/api';
 
 export default function CandidateTable({ candidates, jobWeights, onSelectCandidate, onStatusChange }) {
@@ -159,9 +159,8 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
           <thead>
             <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
               <th style={{ padding: '12px 16px' }}>Ứng viên</th>
-              <th style={{ padding: '12px 16px' }}>Điểm Phù hợp Tổng thể</th>
-              <th style={{ padding: '12px 16px' }}>Khớp Kỹ năng</th>
-              <th style={{ padding: '12px 16px' }}>Kinh nghiệm</th>
+              <th style={{ padding: '12px 16px' }}>🎯 % Match AI</th>
+              <th style={{ padding: '12px 16px' }}>⚠️ Khoảng trống (Gaps)</th>
               <th style={{ padding: '12px 16px' }}>Trạng thái</th>
               <th style={{ padding: '12px 16px', textAlign: 'right' }}>Thao tác</th>
             </tr>
@@ -169,13 +168,21 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
           <tbody>
             {paginatedCandidates.length === 0 ? (
               <tr>
-                <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <td colSpan="5" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
                   Không có ứng viên nào phù hợp với bộ lọc hiện tại.
                 </td>
               </tr>
             ) : (
               paginatedCandidates.map((cand) => {
                 const liveScore = getLiveScore(cand);
+                const gapsCount = cand.gaps_summary?.length || 0;
+                const scoreLgClass = liveScore >= 85 ? 'score-high-lg' : liveScore >= 70 ? 'score-medium-lg' : 'score-low-lg';
+
+                // Skill tags array
+                const skillTags = cand.skills_summary 
+                  ? cand.skills_summary.split(',').map(s => s.trim()).filter(Boolean)
+                  : [];
+
                 return (
                   <tr
                     key={cand.id}
@@ -186,68 +193,75 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
                     onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                   >
+                    {/* Candidate Info with Avatar Initials & Skill Chips */}
                     <td style={{ padding: '14px 16px' }}>
-                      <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                        <span>{cand.candidate_name}</span>
-                        {cand.honors_badges && cand.honors_badges.map((badge, idx) => (
-                          <span
-                            key={idx}
-                            style={{
-                              fontSize: '0.68rem',
-                              padding: '2px 8px',
-                              borderRadius: '12px',
-                              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                              color: '#fff',
-                              fontWeight: 700,
-                              boxShadow: '0 2px 6px rgba(245, 158, 11, 0.3)',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px'
-                            }}
-                          >
-                            <Award size={12} /> {badge}
-                          </span>
-                        ))}
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{cand.candidate_email || cand.candidate_file_name}</div>
-                      {(cand.skills_summary || cand.experience_summary) && (
-                        <div style={{ fontSize: '0.72rem', color: 'var(--accent-cyan)', marginTop: '4px', maxWidth: '280px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <Zap size={12} style={{ shrink: 0 }} /> {cand.skills_summary || cand.experience_summary}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{
+                          width: '36px', height: '36px', borderRadius: '10px',
+                          background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-cyan))',
+                          color: '#fff', fontWeight: 800, fontSize: '0.85rem',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                        }}>
+                          {(cand.candidate_name || 'CV').charAt(0).toUpperCase()}
                         </div>
-                      )}
+
+                        <div>
+                          <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                            <span>{cand.candidate_name}</span>
+                            {cand.honors_badges && cand.honors_badges.map((badge, idx) => (
+                              <span key={idx} className="badge" style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.4)', fontSize: '0.68rem' }}>
+                                <Award size={12} /> {badge}
+                              </span>
+                            ))}
+                          </div>
+                          
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                            {cand.candidate_email || cand.candidate_file_name}
+                          </div>
+
+                          {/* Skill Chips */}
+                          {skillTags.length > 0 && (
+                            <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '6px' }}>
+                              {skillTags.slice(0, 4).map((st, sidx) => (
+                                <span key={sidx} className="skill-chip">{st}</span>
+                              ))}
+                              {skillTags.length > 4 && (
+                                <span className="skill-chip">+{skillTags.length - 4}</span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </td>
 
+                    {/* % Match Badge */}
                     <td style={{ padding: '14px 16px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                        <span className={`score-pill ${getScoreBadgeClass(liveScore)}`}>
-                          {liveScore}%
+                        <span className={`score-pill-lg ${scoreLgClass}`}>
+                          {liveScore}% MATCH
                         </span>
                         {cand.stage1_similarity_score > 0 && (
-                          <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '4px', fontFamily: 'var(--font-mono)' }} title="Vector Similarity Tie-Breaker">
+                          <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
                             Vector: {Math.round(cand.stage1_similarity_score * 10) / 10}%
                           </span>
                         )}
                       </div>
                     </td>
 
-                    <td style={{ padding: '14px 16px', fontFamily: 'var(--font-mono)' }}>
-                      <div>{cand.skills_sub_score}%</div>
-                      {cand.skills_summary && (
-                        <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 400, fontFamily: 'sans-serif', maxWidth: '120px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={cand.skills_summary}>
-                          {cand.skills_summary}
-                        </div>
+                    {/* Warning Gap Badge */}
+                    <td style={{ padding: '14px 16px' }}>
+                      {gapsCount > 0 ? (
+                        <span className="gap-warning-badge" onClick={() => onSelectCandidate(cand)} title="Bấm để xem chi tiết lỗ hổng">
+                          <AlertTriangle size={13} /> {gapsCount} Lỗ hổng kỹ năng
+                        </span>
+                      ) : (
+                        <span className="gap-success-badge">
+                          <CheckCircle2 size={13} /> Đạt đủ yêu cầu
+                        </span>
                       )}
                     </td>
 
-                    <td style={{ padding: '14px 16px', fontFamily: 'var(--font-mono)' }}>
-                      <div>{cand.experience_sub_score}%</div>
-                      {cand.experience_summary && (
-                        <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 400, fontFamily: 'sans-serif', maxWidth: '120px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={cand.experience_summary}>
-                          {cand.experience_summary}
-                        </div>
-                      )}
-                    </td>
-
+                    {/* Status Dropdown */}
                     <td style={{ padding: '14px 16px' }}>
                       <select
                         value={cand.recruiter_status}
@@ -262,13 +276,14 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
                       </select>
                     </td>
 
+                    {/* Action Button */}
                     <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                       <button
                         onClick={() => onSelectCandidate(cand)}
                         className="btn btn-secondary"
                         style={{ padding: '6px 12px', fontSize: '0.8rem' }}
                       >
-                        <Eye size={14} /> Phân tích AI
+                        <Eye size={14} /> Xem Profile
                       </button>
                     </td>
                   </tr>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Briefcase, Plus, Play, RefreshCw, Sliders, Edit3, Trash2 } from 'lucide-react';
+import { Briefcase, Plus, Play, RefreshCw, Sliders, Edit3, Trash2, FileText, CheckCircle2, XCircle, Target } from 'lucide-react';
 import { fetchJobs, triggerScreeningStream, fetchJobScreenings, deleteJob } from '../services/api';
 import JobPostingForm from '../components/JobPostingForm';
 import ResumeUploader from '../components/ResumeUploader';
@@ -156,146 +156,224 @@ export default function RecruiterDashboard() {
     }
   };
 
+  // Compute KPI metrics
+  const totalResumes = candidates.length;
+  const shortlistedCount = candidates.filter(c => c.recruiter_status === 'SHORTLISTED' || c.recruiter_status === 'INTERVIEW').length;
+  const rejectedCount = candidates.filter(c => c.recruiter_status === 'REJECTED').length;
+  const avgScore = candidates.length > 0
+    ? Math.round(candidates.reduce((acc, c) => acc + (c.overall_score || 0), 0) / candidates.length * 10) / 10
+    : 0;
+
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
-      {/* Top Header Controls */}
-      <div className="glass-panel" style={{ padding: '20px 24px', marginBottom: '24px', display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', justifyContent: 'space-between' }}>
+      {/* ROW 1: ENTERPRISE KPI STATS SUMMARY CARDS */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
         
-        {/* Job Selection Dropdown */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <Briefcase color="var(--accent-primary)" size={20} />
+        <div className="kpi-card">
+          <div className="kpi-icon-box" style={{ background: 'rgba(99, 102, 241, 0.15)', color: '#818cf8' }}>
+            <FileText size={22} />
+          </div>
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>Vị trí Tuyển dụng Hiện tại</label>
-            <select
-              className="select-field"
-              value={selectedJob?.id || ''}
-              onChange={(e) => {
-                const j = jobs.find((item) => item.id === e.target.value);
-                if (j) selectJob(j);
-              }}
-              style={{ fontWeight: 700, fontSize: '0.95rem', minWidth: '260px' }}
-            >
-              {jobs.map((j) => (
-                <option key={j.id} value={j.id}>
-                  {j.title} ({j.department || 'Chung'})
-                </option>
-              ))}
-            </select>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>TỔNG SỐ CV</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{totalResumes} <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400 }}>Hồ sơ</span></div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <button
-            onClick={() => {
-              setEditingJob(null);
-              setShowJobForm(true);
-            }}
-            className="btn btn-secondary"
-            title="Tạo vị trí tuyển dụng mới"
-          >
-            <Plus size={16} /> Tạo Yêu cầu Mới
-          </button>
+        <div className="kpi-card">
+          <div className="kpi-icon-box" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399' }}>
+            <CheckCircle2 size={22} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ĐƯỢC CHỌN LỌC</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#34d399' }}>
+              {shortlistedCount} <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400 }}>({totalResumes > 0 ? Math.round(shortlistedCount / totalResumes * 100) : 0}%)</span>
+            </div>
+          </div>
+        </div>
 
-          {selectedJob && (
-            <>
-              <button
-                onClick={() => {
-                  setEditingJob(selectedJob);
-                  setShowJobForm(true);
+        <div className="kpi-card">
+          <div className="kpi-icon-box" style={{ background: 'rgba(244, 63, 94, 0.15)', color: '#f87171' }}>
+            <XCircle size={22} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ĐÃ LOẠI</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f87171' }}>
+              {rejectedCount} <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400 }}>({totalResumes > 0 ? Math.round(rejectedCount / totalResumes * 100) : 0}%)</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="kpi-card">
+          <div className="kpi-icon-box" style={{ background: 'rgba(6, 182, 212, 0.15)', color: '#38bdf8' }}>
+            <Target size={22} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ĐIỂM MATCH TRUNG BÌNH</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#38bdf8' }}>{avgScore}%</div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ROW 2: COMBINED AI CONTROL CARD */}
+      <div className="glass-panel" style={{ padding: '24px', background: 'rgba(18, 24, 38, 0.85)', border: '1px solid var(--border-glow)' }}>
+        
+        {/* Step Header: Job Selection */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '18px', borderBottom: '1px solid var(--border-color)', marginBottom: '20px' }}>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(99, 102, 241, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-primary)' }}>
+              <Briefcase size={20} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>BƯỚC 1: CHỌN VỊ TRÍ TUYỂN DỤNG</label>
+              <select
+                className="select-field"
+                value={selectedJob?.id || ''}
+                onChange={(e) => {
+                  const j = jobs.find((item) => item.id === e.target.value);
+                  if (j) selectJob(j);
                 }}
-                className="btn btn-secondary"
-                style={{ padding: '8px 12px' }}
-                title="Chỉnh sửa vị trí tuyển dụng đang chọn"
+                style={{ fontWeight: 800, fontSize: '1rem', minWidth: '280px', marginTop: '2px' }}
               >
-                <Edit3 size={16} /> Sửa Yêu cầu
-              </button>
+                {jobs.map((j) => (
+                  <option key={j.id} value={j.id}>
+                    {j.title} ({j.department || 'Chung'})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-              <button
-                onClick={handleDeleteJob}
-                className="btn btn-secondary"
-                style={{ padding: '8px 12px', color: 'var(--accent-red)', borderColor: 'rgba(239, 68, 68, 0.3)' }}
-                title="Xóa vị trí tuyển dụng đang chọn"
-              >
-                <Trash2 size={16} /> Xóa Yêu cầu
-              </button>
-            </>
-          )}
+          {/* Job Action Buttons */}
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => {
+                setEditingJob(null);
+                setShowJobForm(true);
+              }}
+              className="btn btn-secondary"
+            >
+              <Plus size={16} /> Tạo Yêu cầu Mới
+            </button>
 
+            {selectedJob && (
+              <>
+                <button
+                  onClick={() => {
+                    setEditingJob(selectedJob);
+                    setShowJobForm(true);
+                  }}
+                  className="btn btn-secondary"
+                >
+                  <Edit3 size={16} /> Sửa Yêu cầu
+                </button>
+
+                <button
+                  onClick={handleDeleteJob}
+                  className="btn btn-secondary"
+                  style={{ color: 'var(--accent-rose)', borderColor: 'rgba(244, 63, 94, 0.3)' }}
+                >
+                  <Trash2 size={16} /> Xóa
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Step Body: Sliders + Embedded Upload Zone */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', alignItems: 'center' }}>
+          
+          {/* Section A: Live Criterion Weight Adjusters */}
+          <div style={{ background: 'rgba(0,0,0,0.25)', padding: '16px 20px', borderRadius: '14px', border: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px', color: 'var(--accent-cyan)', fontWeight: 700, fontSize: '0.85rem' }}>
+              <Sliders size={16} /> BƯỚC 2: TỰ ĐIỀU CHỈNH TRỌNG SỐ AI
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.85rem' }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span>Kỹ năng chuyên môn:</span>
+                  <b style={{ color: 'var(--accent-cyan)' }}>{Math.round(sliderWeights.wSkills * 100)}%</b>
+                </div>
+                <input
+                  type="range" min="0" max="1" step="0.05"
+                  value={sliderWeights.wSkills}
+                  onChange={(e) => setSliderWeights(prev => ({ ...prev, wSkills: parseFloat(e.target.value) }))}
+                  style={{ width: '100%', accentColor: 'var(--accent-cyan)' }}
+                />
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span>Kinh nghiệm làm việc:</span>
+                  <b style={{ color: 'var(--accent-primary)' }}>{Math.round(sliderWeights.wExp * 100)}%</b>
+                </div>
+                <input
+                  type="range" min="0" max="1" step="0.05"
+                  value={sliderWeights.wExp}
+                  onChange={(e) => setSliderWeights(prev => ({ ...prev, wExp: parseFloat(e.target.value) }))}
+                  style={{ width: '100%', accentColor: 'var(--accent-primary)' }}
+                />
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span>Học vấn & Bằng cấp:</span>
+                  <b style={{ color: '#a855f7' }}>{Math.round(sliderWeights.wEdu * 100)}%</b>
+                </div>
+                <input
+                  type="range" min="0" max="1" step="0.05"
+                  value={sliderWeights.wEdu}
+                  onChange={(e) => setSliderWeights(prev => ({ ...prev, wEdu: parseFloat(e.target.value) }))}
+                  style={{ width: '100%', accentColor: '#a855f7' }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Section B: Integrated PDF Resume Bulk Uploader */}
+          <div style={{ flex: '1' }}>
+            <ResumeUploader jobId={selectedJob?.id} onResumesUploaded={() => selectedJob && loadScreenings(selectedJob.id)} />
+          </div>
+
+        </div>
+
+        {/* Big Glow Primary Action Button */}
+        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
           <button
             onClick={handleRunScreening}
             className="btn btn-primary"
             disabled={!selectedJob || screeningLoading}
+            style={{
+              padding: '14px 32px',
+              fontSize: '1.05rem',
+              fontWeight: 800,
+              borderRadius: '12px',
+              boxShadow: '0 8px 25px rgba(99, 102, 241, 0.4)'
+            }}
           >
-            {screeningLoading ? <RefreshCw size={16} className="spin" /> : <Play size={16} />}
-            Chạy Động cơ Khớp nối AI
+            {screeningLoading ? <RefreshCw size={20} className="spin" /> : <Play size={20} />}
+            BƯỚC 3: CHẠY ĐỘNG CƠ KHỚP NỐI AI
           </button>
         </div>
 
       </div>
 
-      {/* Selected Job Criteria & Live Sliders Header */}
-      {selectedJob && (
-        <div className="glass-panel" style={{ padding: '18px 24px', marginBottom: '24px', background: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '4px' }}>{selectedJob.title}</h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                Kỹ năng bắt buộc: <b>{(selectedJob.required_skills || []).join(', ')}</b> | Kinh nghiệm tối thiểu: <b>{selectedJob.min_years_experience} năm</b>
-              </p>
-            </div>
+      {/* ROW 3: DYNAMIC CANDIDATE RANKING TABLE & EXPORT PANEL */}
+      <div>
+        {selectedJob && <ExportFeedbackPanel selectedJobId={selectedJob.id} candidateCount={candidates.length} />}
 
-            {/* Live Criterion Weight Adjuster (FR-008) */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '0.8rem', background: 'rgba(0,0,0,0.3)', padding: '10px 16px', borderRadius: '12px' }}>
-              <Sliders size={16} color="var(--accent-cyan)" />
-              <div>
-                <span>Kỹ năng: <b>{Math.round(sliderWeights.wSkills * 100)}%</b></span>
-                <input
-                  type="range" min="0" max="1" step="0.05"
-                  value={sliderWeights.wSkills}
-                  onChange={(e) => setSliderWeights(prev => ({ ...prev, wSkills: parseFloat(e.target.value) }))}
-                  style={{ display: 'block', width: '90px' }}
-                />
-              </div>
-              <div>
-                <span>Kinh nghiệm: <b>{Math.round(sliderWeights.wExp * 100)}%</b></span>
-                <input
-                  type="range" min="0" max="1" step="0.05"
-                  value={sliderWeights.wExp}
-                  onChange={(e) => setSliderWeights(prev => ({ ...prev, wExp: parseFloat(e.target.value) }))}
-                  style={{ display: 'block', width: '90px' }}
-                />
-              </div>
-              <div>
-                <span>Học vấn: <b>{Math.round(sliderWeights.wEdu * 100)}%</b></span>
-                <input
-                  type="range" min="0" max="1" step="0.05"
-                  value={sliderWeights.wEdu}
-                  onChange={(e) => setSliderWeights(prev => ({ ...prev, wEdu: parseFloat(e.target.value) }))}
-                  style={{ display: 'block', width: '90px' }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* PDF Bulk Uploader */}
-      <ResumeUploader jobId={selectedJob?.id} onResumesUploaded={() => selectedJob && loadScreenings(selectedJob.id)} />
-
-      {/* Export Panel */}
-      {selectedJob && <ExportFeedbackPanel selectedJobId={selectedJob.id} candidateCount={candidates.length} />}
-
-      {/* Candidate Table */}
-      <CandidateTable
-        candidates={candidates}
-        jobWeights={sliderWeights}
-        onSelectCandidate={(c) => setSelectedCandidate(c)}
-        onStatusChange={(updated) => {
-          setCandidates(prev => prev.map(c => c.id === updated.id ? updated : c));
-        }}
-      />
+        <CandidateTable
+          candidates={candidates}
+          jobWeights={sliderWeights}
+          onSelectCandidate={(c) => setSelectedCandidate(c)}
+          onStatusChange={(updated) => {
+            setCandidates(prev => prev.map(c => c.id === updated.id ? updated : c));
+          }}
+        />
+      </div>
 
       {/* Modals */}
       {showJobForm && (

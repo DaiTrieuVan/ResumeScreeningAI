@@ -150,10 +150,11 @@ export default function ScreeningProgressModal({ isOpen, progressData, logs, isC
           borderRadius: '10px',
           border: '1px solid rgba(255, 255, 255, 0.08)',
           padding: '12px',
-          maxHeight: '140px',
+          maxHeight: '110px',
           overflowY: 'auto',
           fontSize: '0.75rem',
-          fontFamily: 'monospace'
+          fontFamily: 'monospace',
+          marginBottom: '16px'
         }}>
           <div style={{ color: 'var(--text-muted, #64748b)', marginBottom: '6px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Nhật ký thực thi (Live Console Log):
@@ -168,15 +169,14 @@ export default function ScreeningProgressModal({ isOpen, progressData, logs, isC
         </div>
 
         {/* Action button when complete */}
-        {isCompleted && (
-          <button
-            onClick={onClose}
-            className="btn btn-primary"
-            style={{ width: '100%', marginTop: '20px', justifyContent: 'center' }}
-          >
-            <CheckCircle2 size={16} /> Xem Kết quả Đánh giá
-          </button>
-        )}
+        <button
+          onClick={onClose}
+          className={`btn ${isCompleted ? 'btn-primary' : 'btn-secondary'}`}
+          style={{ width: '100%', justifyContent: 'center' }}
+        >
+          {isCompleted ? <CheckCircle2 size={16} /> : <X size={16} />}
+          {isCompleted ? 'Xem Kết quả Sàng lọc Hoàn tất' : 'Đóng / Chạy ngầm phía dưới'}
+        </button>
       </div>
     </div>
   );
