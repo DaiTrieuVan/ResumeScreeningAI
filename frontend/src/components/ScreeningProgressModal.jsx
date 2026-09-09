@@ -2,10 +2,12 @@ import React, { useEffect, useRef } from 'react';
 import { Cpu, CheckCircle2, AlertCircle, Loader2, Sparkles, X } from 'lucide-react';
 
 export default function ScreeningProgressModal({ isOpen, progressData, logs, isCompleted, error, onClose }) {
-  const logEndRef = useRef(null);
+  const consoleBoxRef = useRef(null);
 
   useEffect(() => {
-    logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (consoleBoxRef.current) {
+      consoleBoxRef.current.scrollTop = consoleBoxRef.current.scrollHeight;
+    }
   }, [logs]);
 
   if (!isOpen) return null;
@@ -145,17 +147,20 @@ export default function ScreeningProgressModal({ isOpen, progressData, logs, isC
         </div>
 
         {/* Live Event Console Log */}
-        <div style={{
-          backgroundColor: 'rgba(15, 23, 42, 0.6)',
-          borderRadius: '10px',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          padding: '12px',
-          maxHeight: '110px',
-          overflowY: 'auto',
-          fontSize: '0.75rem',
-          fontFamily: 'monospace',
-          marginBottom: '16px'
-        }}>
+        <div 
+          ref={consoleBoxRef}
+          style={{
+            backgroundColor: 'rgba(15, 23, 42, 0.6)',
+            borderRadius: '10px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            padding: '12px',
+            maxHeight: '130px',
+            overflowY: 'auto',
+            fontSize: '0.75rem',
+            fontFamily: 'monospace',
+            marginBottom: '16px'
+          }}
+        >
           <div style={{ color: 'var(--text-muted, #64748b)', marginBottom: '6px', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Nhật ký thực thi (Live Console Log):
           </div>
@@ -165,7 +170,6 @@ export default function ScreeningProgressModal({ isOpen, progressData, logs, isC
               <span>{log.text}</span>
             </div>
           ))}
-          <div ref={logEndRef} />
         </div>
 
         {/* Action button when complete */}
