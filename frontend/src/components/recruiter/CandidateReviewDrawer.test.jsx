@@ -1,6 +1,6 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import CandidateReviewDrawer from './CandidateReviewDrawer';
 import * as api from '../../services/recruiterApi';
@@ -9,6 +9,8 @@ vi.mock('../../services/recruiterApi', () => ({
   fetchCandidateDetail: vi.fn(),
   getOriginalResumeUrl: vi.fn(() => '/resume.pdf'),
 }));
+
+afterEach(() => cleanup());
 
 describe('CandidateReviewDrawer', () => {
   it('shows source evidence and keeps unknown distinct from failure', async () => {
@@ -29,5 +31,23 @@ describe('CandidateReviewDrawer', () => {
     expect(screen.getByText('Chưa đủ dữ liệu')).toBeInTheDocument();
     expect(screen.getByText(/không tìm thấy bằng chứng trực tiếp/i)).toBeInTheDocument();
     expect(screen.queryByText('Chưa đạt')).not.toBeInTheDocument();
+  });
+
+  it('renders outside transformed page containers and restores page scrolling on close', async () => {
+    api.fetchCandidateDetail.mockResolvedValue({
+      application_id: 'app-2', candidate_name: 'Trần An', evaluation: null,
+    });
+    const onClose = vi.fn();
+    const { unmount } = render(
+      <div className="animate-fade-in"><CandidateReviewDrawer candidate={{ application_id: 'app-2' }} onClose={onClose} /></div>,
+    );
+
+    const dialog = await screen.findByRole('dialog');
+    expect(dialog.parentElement.parentElement).toBe(document.body);
+    expect(document.body.style.overflow).toBe('hidden');
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledOnce();
+    unmount();
+    expect(document.body.style.overflow).toBe('');
   });
 });

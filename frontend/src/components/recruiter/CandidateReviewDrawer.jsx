@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   AlertCircle, CheckCircle2, ExternalLink, FileText, HelpCircle,
   LoaderCircle, ShieldCheck, X, XCircle,
@@ -119,7 +120,7 @@ export default function CandidateReviewDrawer({ candidate, onClose }) {
     return () => { active = false; };
   }, [applicationId]);
 
-  return (
+  return createPortal(
     <div className="candidate-review-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <aside className="candidate-review" role="dialog" aria-modal="true" aria-label={`Đánh giá hồ sơ ${title}`}>
         <header className="candidate-review__header">
@@ -135,6 +136,7 @@ export default function CandidateReviewDrawer({ candidate, onClose }) {
         {!loading && error && <div className="workspace-state workspace-state--stacked workspace-state--error candidate-review__state"><AlertCircle /><strong>Chưa thể hiển thị bản đánh giá</strong><p>{error}</p></div>}
         {!loading && !error && detail && <CandidateReviewContent detail={detail} />}
       </aside>
-    </div>
+    </div>,
+    document.body,
   );
 }
