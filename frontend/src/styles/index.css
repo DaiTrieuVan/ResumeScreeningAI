@@ -74,6 +74,8 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .brand__name span { color: var(--accent-primary); }
 .brand__tagline { margin-top: 1px; font-size: 0.68rem; color: var(--text-muted); }
 .primary-nav { display: flex; align-items: center; justify-content: center; gap: 6px; margin-left: auto; }
+.primary-nav { scrollbar-width: none; }
+.primary-nav::-webkit-scrollbar { display: none; }
 .nav-item {
   position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 42px;
   padding: 0 14px; border: 0; border-radius: 8px; color: var(--text-secondary);
@@ -175,16 +177,20 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .candidate-table-panel tbody tr:last-child { border-bottom: 0 !important; }
 .resume-uploader { padding: 18px 20px; border: 1px solid var(--border-color); border-radius: 10px; background: #fff; }
 .export-panel { gap: 18px; }
-.jobs-page { width: min(1120px, 100%); margin: 0 auto; }
+.jobs-page { width: 100%; margin: -32px auto 0; }
+.jobs-page > :not(.jobs-hero) { width: min(1120px, 100%); margin-right: auto; margin-left: auto; }
 .jobs-hero {
-  min-height: 370px;
+  width: 100vw;
+  min-height: clamp(520px, 67vh, 720px);
+  margin-left: calc(50% - 50vw);
   margin-bottom: 22px;
-  padding: 42px 46px;
+  padding: 54px max(48px, calc((100vw - 1280px) / 2));
   display: flex;
   flex-direction: column;
   justify-content: center;
-  border: 1px solid #cfe2da;
-  border-radius: var(--radius-lg);
+  border: 0;
+  border-bottom: 1px solid #cfe2da;
+  border-radius: 0;
   background-color: #eef6f3;
   background-image:
     linear-gradient(90deg, rgba(247, 251, 249, 0.98) 0%, rgba(247, 251, 249, 0.92) 36%, rgba(247, 251, 249, 0.55) 55%, rgba(247, 251, 249, 0.04) 78%),
@@ -194,8 +200,8 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   box-shadow: 0 12px 32px rgba(19, 61, 46, 0.08);
   overflow: hidden;
 }
-.jobs-hero__copy { max-width: 610px; }
-.jobs-hero h2 { margin-top: 7px; font-size: clamp(1.6rem, 3vw, 2.25rem); line-height: 1.25; letter-spacing: -0.045em; }
+.jobs-hero__copy { max-width: 650px; }
+.jobs-hero h2 { margin-top: 9px; font-size: clamp(2.15rem, 4vw, 3.4rem); line-height: 1.14; letter-spacing: -0.052em; }
 .jobs-hero p { margin-top: 10px; max-width: 590px; color: #52645c; font-size: 0.9rem; }
 .jobs-hero__actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 22px; }
 .inline-notice { display: inline-block; margin-top: 12px; padding: 8px 12px; border: 1px solid #bde7d8; border-radius: 8px; color: #087455; background: #e5f6ef; font-size: 0.8rem; }
@@ -252,8 +258,9 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   .candidate-table-panel > div:nth-child(2) > div:last-child { align-items: stretch !important; flex-direction: column; width: 100%; }
   .candidate-table-panel > div:nth-child(2) > div:last-child > div { width: 100%; }
   .candidate-table-panel > div:nth-child(2) .select-field { width: 100% !important; }
+  .jobs-page { margin-top: -22px; }
   .jobs-hero {
-    min-height: 440px;
+    min-height: min(680px, calc(100svh - 126px));
     padding: 30px 22px;
     justify-content: flex-end;
     background-image:
@@ -261,6 +268,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
       url('../assets/job-discovery-hero.png');
     background-position: 66% center;
   }
+  .jobs-hero h2 { font-size: clamp(1.75rem, 9vw, 2.25rem); }
   .jobs-hero__actions > * { width: 100%; }
   .pagination-panel { flex-wrap: wrap; gap: 10px; }
   .pagination-panel > div { order: 3; width: 100%; max-width: 100%; padding-bottom: 4px; overflow-x: auto; }

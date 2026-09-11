@@ -5,7 +5,7 @@ import RealJobsPortal from './pages/RealJobsPortal';
 import GapAdvisorView from './pages/GapAdvisorView';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('recruiter');
+  const [activeTab, setActiveTab] = useState('real-jobs');
 
   return (
     <div className="app-container">
