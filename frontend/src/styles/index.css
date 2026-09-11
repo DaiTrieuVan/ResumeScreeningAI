@@ -176,10 +176,27 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .resume-uploader { padding: 18px 20px; border: 1px solid var(--border-color); border-radius: 10px; background: #fff; }
 .export-panel { gap: 18px; }
 .jobs-page { width: min(1120px, 100%); margin: 0 auto; }
-.jobs-hero { margin-bottom: 22px; padding: 30px 32px; border: 1px solid #d3e7df; border-radius: var(--radius-lg); background: linear-gradient(120deg, #ffffff 0%, #eff9f5 100%); }
-.jobs-hero__copy { max-width: 720px; }
+.jobs-hero {
+  min-height: 370px;
+  margin-bottom: 22px;
+  padding: 42px 46px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid #cfe2da;
+  border-radius: var(--radius-lg);
+  background-color: #eef6f3;
+  background-image:
+    linear-gradient(90deg, rgba(247, 251, 249, 0.98) 0%, rgba(247, 251, 249, 0.92) 36%, rgba(247, 251, 249, 0.55) 55%, rgba(247, 251, 249, 0.04) 78%),
+    url('../assets/job-discovery-hero.png');
+  background-position: center;
+  background-size: cover;
+  box-shadow: 0 12px 32px rgba(19, 61, 46, 0.08);
+  overflow: hidden;
+}
+.jobs-hero__copy { max-width: 610px; }
 .jobs-hero h2 { margin-top: 7px; font-size: clamp(1.6rem, 3vw, 2.25rem); line-height: 1.25; letter-spacing: -0.045em; }
-.jobs-hero p { margin-top: 10px; max-width: 680px; color: var(--text-secondary); font-size: 0.9rem; }
+.jobs-hero p { margin-top: 10px; max-width: 590px; color: #52645c; font-size: 0.9rem; }
 .jobs-hero__actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 22px; }
 .inline-notice { display: inline-block; margin-top: 12px; padding: 8px 12px; border: 1px solid #bde7d8; border-radius: 8px; color: #087455; background: #e5f6ef; font-size: 0.8rem; }
 .search-control { position: relative; }
@@ -235,8 +252,18 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   .candidate-table-panel > div:nth-child(2) > div:last-child { align-items: stretch !important; flex-direction: column; width: 100%; }
   .candidate-table-panel > div:nth-child(2) > div:last-child > div { width: 100%; }
   .candidate-table-panel > div:nth-child(2) .select-field { width: 100% !important; }
-  .jobs-hero { padding: 24px 20px; }
+  .jobs-hero {
+    min-height: 440px;
+    padding: 30px 22px;
+    justify-content: flex-end;
+    background-image:
+      linear-gradient(0deg, rgba(247, 251, 249, 0.99) 0%, rgba(247, 251, 249, 0.96) 43%, rgba(247, 251, 249, 0.2) 78%),
+      url('../assets/job-discovery-hero.png');
+    background-position: 66% center;
+  }
   .jobs-hero__actions > * { width: 100%; }
+  .pagination-panel { flex-wrap: wrap; gap: 10px; }
+  .pagination-panel > div { order: 3; width: 100%; max-width: 100%; padding-bottom: 4px; overflow-x: auto; }
   .export-panel { align-items: flex-start !important; flex-direction: column; }
 }
 @media (prefers-reduced-motion: reduce) {

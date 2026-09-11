@@ -284,7 +284,7 @@ export default function RealJobsPortal() {
 
       {/* Pagination Footer Controls */}
       {totalPages > 1 && (
-        <div className="glass-panel" style={{
+        <div className="glass-panel pagination-panel" style={{
           display: 'flex',
           justify: 'space-between',
           alignItems: 'center',
