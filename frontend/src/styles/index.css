@@ -106,6 +106,22 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   font-size: 0.76rem; font-weight: 700; letter-spacing: 0.035em; text-transform: uppercase;
 }
 
+.workspace-state {
+  min-height: 112px; padding: 24px; display: flex; align-items: center; justify-content: center;
+  gap: 10px; color: var(--text-secondary); background: var(--bg-subtle); border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md); text-align: center;
+}
+.workspace-state--stacked { flex-direction: column; }
+.workspace-state--stacked p { max-width: 520px; color: var(--text-muted); font-size: 0.84rem; }
+.workspace-state--error { color: #9f3541; background: #fff5f5; border-color: #efcfd3; }
+.workspace-state__spin { animation: workspace-spin 0.9s linear infinite; }
+.workspace-stale {
+  display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 13px 16px;
+  color: #7a5207; background: #fff8e8; border: 1px solid #efd99f; border-radius: var(--radius-sm);
+}
+.workspace-stale p { margin-top: 2px; color: #876c35; font-size: 0.78rem; }
+@keyframes workspace-spin { to { transform: rotate(360deg); } }
+
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px;
   padding: 9px 16px; border: 1px solid transparent; border-radius: var(--radius-sm); cursor: pointer;

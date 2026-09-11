@@ -6,19 +6,19 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Verify ignore rules and create feature-oriented backend/frontend recruiter directories in `backend/app/` and `frontend/src/components/recruiter/`
-- [ ] T002 Add a versioned database migration runner in `backend/app/core/migrations.py` and wire it through `backend/app/core/database.py`
-- [ ] T003 [P] Add frontend unit-test scripts and dependencies in `frontend/package.json`
-- [ ] T004 [P] Add backend shared enum definitions in `backend/app/models/recruiter_enums.py`
+- [X] T001 Verify ignore rules and create feature-oriented backend/frontend recruiter directories in `backend/app/` and `frontend/src/components/recruiter/`
+- [X] T002 Add a versioned database migration runner in `backend/app/core/migrations.py` and wire it through `backend/app/core/database.py`
+- [X] T003 [P] Add frontend unit-test scripts and dependencies in `frontend/package.json`
+- [X] T004 [P] Add backend shared enum definitions in `backend/app/models/recruiter_enums.py`
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T005 Create shared actor, optimistic-version and audit models in `backend/app/models/audit_event.py`
-- [ ] T006 Add recruiter API router aggregation in `backend/app/api/recruiter.py` and register it in `backend/app/main.py`
-- [ ] T007 [P] Add standard recruiter problem responses and pagination schemas in `backend/app/schemas/recruiter_common.py`
-- [ ] T008 [P] Add recruiter API client primitives, conflict handling and idempotency keys in `frontend/src/services/recruiterApi.js`
-- [ ] T009 Add reusable loading, empty, error and stale-result UI states in `frontend/src/components/recruiter/WorkspaceStates.jsx`
-- [ ] T010 Add migration and compatibility integration tests in `backend/tests/integration/test_recruiter_migrations.py`
+- [X] T005 Create shared actor, optimistic-version and audit models in `backend/app/models/audit_event.py`
+- [X] T006 Add recruiter API router aggregation in `backend/app/api/recruiter.py` and register it in `backend/app/main.py`
+- [X] T007 [P] Add standard recruiter problem responses and pagination schemas in `backend/app/schemas/recruiter_common.py`
+- [X] T008 [P] Add recruiter API client primitives, conflict handling and idempotency keys in `frontend/src/services/recruiterApi.js`
+- [X] T009 Add reusable loading, empty, error and stale-result UI states in `frontend/src/components/recruiter/WorkspaceStates.jsx`
+- [X] T010 Add migration and compatibility integration tests in `backend/tests/integration/test_recruiter_migrations.py`
 
 ## Phase 3: User Story 1 — Reliable screening criteria (Priority: P1) 🎯 MVP
 
