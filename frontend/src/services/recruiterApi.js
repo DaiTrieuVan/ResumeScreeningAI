@@ -112,4 +112,25 @@ export function getOriginalResumeUrl(applicationId) {
   return `${RECRUITER_API_BASE}/applications/${applicationId}/resume`;
 }
 
+export function queryJobCandidates(jobId, params = {}) {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (Array.isArray(value)) value.forEach((item) => query.append(key, item));
+    else if (value !== '' && value !== null && value !== undefined) query.set(key, value);
+  });
+  return recruiterRequest(`/jobs/${jobId}/candidates?${query}`);
+}
+
+export function saveCandidateView(jobId, payload) {
+  return recruiterRequest(`/jobs/${jobId}/saved-views`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+  });
+}
+
+export function executeBulkAction(jobId, payload) {
+  return recruiterRequest(`/jobs/${jobId}/bulk-actions`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': createIdempotencyKey('bulk') }, body: JSON.stringify(payload),
+  });
+}
+
 export { recruiterRequest };

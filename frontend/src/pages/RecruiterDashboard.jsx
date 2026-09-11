@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Briefcase, Plus, Play, RefreshCw, Edit3, Trash2, FileText, CheckCircle2, XCircle, Target } from 'lucide-react';
 import { fetchJobs, triggerScreeningStream, fetchJobScreenings, deleteJob } from '../services/api';
 import JobPostingForm from '../components/JobPostingForm';
-import CandidateTable from '../components/CandidateTable';
+import CandidateGrid from '../components/recruiter/CandidateGrid';
 import CandidateReviewDrawer from '../components/recruiter/CandidateReviewDrawer';
 import ExportFeedbackPanel from '../components/ExportFeedbackPanel';
 import ScreeningProgressModal from '../components/ScreeningProgressModal';
@@ -352,15 +352,7 @@ export default function RecruiterDashboard() {
       <div>
         {selectedJob && <ExportFeedbackPanel selectedJobId={selectedJob.id} candidateCount={candidates.length} />}
 
-        <CandidateTable
-          candidates={candidates}
-          jobWeights={sliderWeights}
-          isSimulation={isScoreSimulation}
-          onSelectCandidate={(c) => setSelectedCandidate(c)}
-          onStatusChange={(updated) => {
-            setCandidates(prev => prev.map(c => c.id === updated.id ? updated : c));
-          }}
-        />
+        {selectedJob && <CandidateGrid jobId={selectedJob.id} refreshToken={candidates} onSelectCandidate={setSelectedCandidate} />}
       </div>
 
       {/* Modals */}

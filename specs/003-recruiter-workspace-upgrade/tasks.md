@@ -69,13 +69,13 @@
 
 **Independent Test**: Filter 500 candidates, save the view, select 20 across pages and execute a bulk stage/tag action with per-item outcomes.
 
-- [ ] T033 [P] [US4] Add candidate query performance and filter integration tests in `backend/tests/integration/test_candidate_query.py`
-- [ ] T034 [P] [US4] Add bulk idempotency/conflict tests in `backend/tests/integration/test_bulk_actions.py`
-- [ ] T035 [US4] Create SavedView, Tag and BulkAction models in `backend/app/models/recruiter_productivity.py`
-- [ ] T036 [US4] Implement indexed candidate query/facets in `backend/app/repositories/candidate_query_repository.py`
-- [ ] T037 [US4] Implement saved-view and bulk-action endpoints in `backend/app/api/recruiter_productivity.py`
-- [ ] T038 [US4] Rebuild candidate table with server pagination and column chooser in `frontend/src/components/recruiter/CandidateGrid.jsx`
-- [ ] T039 [US4] Add cross-page selection and bulk action bar in `frontend/src/components/recruiter/BulkActionBar.jsx`
+- [X] T033 [P] [US4] Add candidate query performance and filter integration tests in `backend/tests/integration/test_candidate_query.py`
+- [X] T034 [P] [US4] Add bulk idempotency/conflict tests in `backend/tests/integration/test_bulk_actions.py`
+- [X] T035 [US4] Create SavedView, Tag and BulkAction models in `backend/app/models/recruiter_productivity.py`
+- [X] T036 [US4] Implement indexed candidate query/facets in `backend/app/repositories/candidate_query_repository.py`
+- [X] T037 [US4] Implement saved-view and bulk-action endpoints in `backend/app/api/recruiter_productivity.py`
+- [X] T038 [US4] Rebuild candidate table with server pagination and column chooser in `frontend/src/components/recruiter/CandidateGrid.jsx`
+- [X] T039 [US4] Add cross-page selection and bulk action bar in `frontend/src/components/recruiter/BulkActionBar.jsx`
 
 ## Phase 7: User Story 5 — Pipeline and decision history (Priority: P2)
 

@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, JSON, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Index, Integer, JSON, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -10,7 +10,11 @@ from app.models.recruiter_enums import EvaluationKind, MandatoryGate, PipelineSt
 
 class CandidateApplication(Base):
     __tablename__ = "candidate_applications"
-    __table_args__ = (UniqueConstraint("job_id", "resume_id", name="uq_job_resume_application"),)
+    __table_args__ = (
+        UniqueConstraint("job_id", "resume_id", name="uq_job_resume_application"),
+        Index("ix_application_job_stage_updated", "job_id", "pipeline_stage", "updated_at"),
+        Index("ix_application_job_received", "job_id", "received_at"),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     job_id: Mapped[str] = mapped_column(String(36), ForeignKey("job_postings.id", ondelete="CASCADE"), nullable=False, index=True)
