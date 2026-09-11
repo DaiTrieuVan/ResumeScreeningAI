@@ -165,69 +165,79 @@ export default function RecruiterDashboard() {
     : 0;
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="dashboard-page animate-fade-in">
+      <div className="page-heading">
+        <div>
+          <span className="page-kicker">Không gian tuyển dụng</span>
+          <h2>Tổng quan tuyển dụng</h2>
+          <p>Quản lý yêu cầu, phân tích hồ sơ và theo dõi ứng viên trong một quy trình liền mạch.</p>
+        </div>
+        <div className="page-heading__meta">
+          <span className="status-dot" /> Hệ thống AI sẵn sàng
+        </div>
+      </div>
       
       {/* ROW 1: ENTERPRISE KPI STATS SUMMARY CARDS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+      <div className="metrics-grid">
         
         <div className="kpi-card">
-          <div className="kpi-icon-box" style={{ background: 'rgba(99, 102, 241, 0.15)', color: '#818cf8' }}>
+          <div className="kpi-icon-box kpi-icon-box--neutral">
             <FileText size={22} />
           </div>
           <div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>TỔNG SỐ CV</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{totalResumes} <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400 }}>Hồ sơ</span></div>
+            <div className="kpi-label">Tổng số CV</div>
+            <div className="kpi-value">{totalResumes} <span>hồ sơ</span></div>
           </div>
         </div>
 
         <div className="kpi-card">
-          <div className="kpi-icon-box" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399' }}>
+          <div className="kpi-icon-box kpi-icon-box--success">
             <CheckCircle2 size={22} />
           </div>
           <div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ĐƯỢC CHỌN LỌC</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#34d399' }}>
-              {shortlistedCount} <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400 }}>({totalResumes > 0 ? Math.round(shortlistedCount / totalResumes * 100) : 0}%)</span>
+            <div className="kpi-label">Được chọn lọc</div>
+            <div className="kpi-value kpi-value--success">
+              {shortlistedCount} <span>{totalResumes > 0 ? Math.round(shortlistedCount / totalResumes * 100) : 0}% tổng số</span>
             </div>
           </div>
         </div>
 
         <div className="kpi-card">
-          <div className="kpi-icon-box" style={{ background: 'rgba(244, 63, 94, 0.15)', color: '#f87171' }}>
+          <div className="kpi-icon-box kpi-icon-box--danger">
             <XCircle size={22} />
           </div>
           <div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ĐÃ LOẠI</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f87171' }}>
-              {rejectedCount} <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 400 }}>({totalResumes > 0 ? Math.round(rejectedCount / totalResumes * 100) : 0}%)</span>
+            <div className="kpi-label">Đã loại</div>
+            <div className="kpi-value kpi-value--danger">
+              {rejectedCount} <span>{totalResumes > 0 ? Math.round(rejectedCount / totalResumes * 100) : 0}% tổng số</span>
             </div>
           </div>
         </div>
 
         <div className="kpi-card">
-          <div className="kpi-icon-box" style={{ background: 'rgba(6, 182, 212, 0.15)', color: '#38bdf8' }}>
+          <div className="kpi-icon-box kpi-icon-box--info">
             <Target size={22} />
           </div>
           <div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ĐIỂM MATCH TRUNG BÌNH</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#38bdf8' }}>{avgScore}%</div>
+            <div className="kpi-label">Điểm phù hợp trung bình</div>
+            <div className="kpi-value kpi-value--info">{avgScore}%</div>
           </div>
         </div>
 
       </div>
 
       {/* ROW 2: COMBINED AI CONTROL CARD */}
-      <div className="glass-panel" style={{ padding: '24px', background: 'rgba(18, 24, 38, 0.85)', border: '1px solid var(--border-glow)' }}>
+      <div className="glass-panel screening-workspace">
         
         {/* Step Header: Job Selection */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '18px', borderBottom: '1px solid var(--border-color)', marginBottom: '20px' }}>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(99, 102, 241, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-primary)' }}>
+            <div className="step-icon">
               <Briefcase size={20} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>BƯỚC 1: CHỌN VỊ TRÍ TUYỂN DỤNG</label>
+              <label className="section-eyebrow">Bước 1 · Chọn vị trí tuyển dụng</label>
               <select
                 className="select-field"
                 value={selectedJob?.id || ''}
@@ -235,7 +245,7 @@ export default function RecruiterDashboard() {
                   const j = jobs.find((item) => item.id === e.target.value);
                   if (j) selectJob(j);
                 }}
-                style={{ fontWeight: 800, fontSize: '1rem', minWidth: '280px', marginTop: '2px' }}
+                style={{ fontWeight: 600, fontSize: '0.94rem', minWidth: '280px', marginTop: '5px' }}
               >
                 {jobs.map((j) => (
                   <option key={j.id} value={j.id}>
@@ -286,9 +296,9 @@ export default function RecruiterDashboard() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', alignItems: 'center' }}>
           
           {/* Section A: Live Criterion Weight Adjusters */}
-          <div style={{ background: 'rgba(0,0,0,0.25)', padding: '16px 20px', borderRadius: '14px', border: '1px solid var(--border-color)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px', color: 'var(--accent-cyan)', fontWeight: 700, fontSize: '0.85rem' }}>
-              <Sliders size={16} /> BƯỚC 2: TỰ ĐIỀU CHỈNH TRỌNG SỐ AI
+          <div className="weight-panel">
+            <div className="section-eyebrow" style={{ marginBottom: '14px' }}>
+              <Sliders size={16} /> Bước 2 · Điều chỉnh trọng số AI
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.85rem' }}>
@@ -321,13 +331,13 @@ export default function RecruiterDashboard() {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                   <span>Học vấn & Bằng cấp:</span>
-                  <b style={{ color: '#a855f7' }}>{Math.round(sliderWeights.wEdu * 100)}%</b>
+                  <b style={{ color: 'var(--accent-primary-dark)' }}>{Math.round(sliderWeights.wEdu * 100)}%</b>
                 </div>
                 <input
                   type="range" min="0" max="1" step="0.05"
                   value={sliderWeights.wEdu}
                   onChange={(e) => setSliderWeights(prev => ({ ...prev, wEdu: parseFloat(e.target.value) }))}
-                  style={{ width: '100%', accentColor: '#a855f7' }}
+                  style={{ width: '100%', accentColor: 'var(--accent-primary-dark)' }}
                 />
               </div>
             </div>
@@ -349,13 +359,13 @@ export default function RecruiterDashboard() {
             style={{
               padding: '14px 32px',
               fontSize: '1.05rem',
-              fontWeight: 800,
+              fontWeight: 700,
               borderRadius: '12px',
-              boxShadow: '0 8px 25px rgba(99, 102, 241, 0.4)'
+              boxShadow: '0 7px 18px rgba(17, 155, 115, 0.18)'
             }}
           >
             {screeningLoading ? <RefreshCw size={20} className="spin" /> : <Play size={20} />}
-            BƯỚC 3: CHẠY ĐỘNG CƠ KHỚP NỐI AI
+            Bước 3 · Bắt đầu sàng lọc bằng AI
           </button>
         </div>
 

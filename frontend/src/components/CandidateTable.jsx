@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Eye, Filter, SlidersHorizontal, ChevronLeft, ChevronRight, Award, Zap, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Search, Eye, Filter, SlidersHorizontal, ChevronLeft, ChevronRight, Award, AlertTriangle, CheckCircle2, Users } from 'lucide-react';
 import { updateCandidateStatus } from '../services/api';
 
 export default function CandidateTable({ candidates, jobWeights, onSelectCandidate, onStatusChange }) {
@@ -97,7 +97,13 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
   };
 
   return (
-    <div className="glass-panel" style={{ padding: '24px' }}>
+    <div className="glass-panel candidate-table-panel">
+      <div className="panel-heading">
+        <div>
+          <span className="section-eyebrow"><Users size={15} /> Danh sách ứng viên</span>
+          <h3>{filteredCandidates.length} hồ sơ phù hợp bộ lọc</h3>
+        </div>
+      </div>
       
       {/* Filter Bar */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
@@ -159,8 +165,8 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
           <thead>
             <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
               <th style={{ padding: '12px 16px' }}>Ứng viên</th>
-              <th style={{ padding: '12px 16px' }}>🎯 % Match AI</th>
-              <th style={{ padding: '12px 16px' }}>⚠️ Khoảng trống (Gaps)</th>
+              <th style={{ padding: '12px 16px' }}>Điểm phù hợp</th>
+              <th style={{ padding: '12px 16px' }}>Khoảng trống kỹ năng</th>
               <th style={{ padding: '12px 16px' }}>Trạng thái</th>
               <th style={{ padding: '12px 16px', textAlign: 'right' }}>Thao tác</th>
             </tr>
@@ -190,7 +196,7 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
                       borderBottom: '1px solid var(--border-color)',
                       transition: 'var(--transition)'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)'}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#f8fbfa'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                   >
                     {/* Candidate Info with Avatar Initials & Skill Chips */}
@@ -209,7 +215,7 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
                           <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                             <span>{cand.candidate_name}</span>
                             {cand.honors_badges && cand.honors_badges.map((badge, idx) => (
-                              <span key={idx} className="badge" style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.4)', fontSize: '0.68rem' }}>
+                              <span key={idx} className="badge badge-review" style={{ fontSize: '0.68rem' }}>
                                 <Award size={12} /> {badge}
                               </span>
                             ))}
@@ -238,7 +244,7 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
                     <td style={{ padding: '14px 16px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                         <span className={`score-pill-lg ${scoreLgClass}`}>
-                          {liveScore}% MATCH
+                          {liveScore}% phù hợp
                         </span>
                         {cand.stage1_similarity_score > 0 && (
                           <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
@@ -252,7 +258,7 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
                     <td style={{ padding: '14px 16px' }}>
                       {gapsCount > 0 ? (
                         <span className="gap-warning-badge" onClick={() => onSelectCandidate(cand)} title="Bấm để xem chi tiết lỗ hổng">
-                          <AlertTriangle size={13} /> {gapsCount} Lỗ hổng kỹ năng
+                          <AlertTriangle size={13} /> {gapsCount} kỹ năng còn thiếu
                         </span>
                       ) : (
                         <span className="gap-success-badge">
@@ -269,10 +275,10 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
                         className={`badge ${getStatusBadgeClass(cand.recruiter_status)}`}
                         style={{ border: 'none', cursor: 'pointer', outline: 'none' }}
                       >
-                        <option value="NEW">MỚI</option>
-                        <option value="SHORTLISTED">ĐÃ CHỌN LỌC</option>
-                        <option value="UNDER_REVIEW">ĐANG XEM XÉT</option>
-                        <option value="REJECTED">TỪ CHỐI</option>
+                        <option value="NEW">Mới</option>
+                        <option value="SHORTLISTED">Đã chọn lọc</option>
+                        <option value="UNDER_REVIEW">Đang xem xét</option>
+                        <option value="REJECTED">Từ chối</option>
                       </select>
                     </td>
 
@@ -283,7 +289,7 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
                         className="btn btn-secondary"
                         style={{ padding: '6px 12px', fontSize: '0.8rem' }}
                       >
-                        <Eye size={14} /> Xem Profile
+                        <Eye size={14} /> Xem hồ sơ
                       </button>
                     </td>
                   </tr>
@@ -344,8 +350,8 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
                     minWidth: '32px',
                     borderRadius: '6px',
                     border: '1px solid var(--border-color)',
-                    background: currentPage === item ? 'var(--accent-primary)' : 'rgba(255, 255, 255, 0.05)',
-                    color: '#fff',
+                    background: currentPage === item ? 'var(--accent-primary)' : '#fff',
+                    color: currentPage === item ? '#fff' : 'var(--text-primary)',
                     fontWeight: currentPage === item ? 700 : 400,
                     cursor: 'pointer',
                     fontSize: '0.8rem',

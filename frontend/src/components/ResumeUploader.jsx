@@ -122,10 +122,10 @@ export default function ResumeUploader({ jobId, onResumesUploaded }) {
   const uploadPercent = selectedFiles.length > 0 ? Math.round((completedCount / selectedFiles.length) * 100) : 0;
 
   return (
-    <div className="glass-panel" style={{ padding: '24px', marginBottom: '24px' }}>
+    <div className="resume-uploader">
       <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
         <UploadCloud color="var(--accent-primary)" size={18} />
-        Tải lên CV Ứng viên hàng loạt (Định dạng PDF)
+        Tải CV ứng viên hàng loạt
       </h3>
 
       {/* Drag & Drop Zone */}
@@ -140,7 +140,7 @@ export default function ResumeUploader({ jobId, onResumesUploaded }) {
           borderRadius: 'var(--radius-md)',
           padding: '28px 16px',
           textAlign: 'center',
-          background: dragActive ? 'rgba(99, 102, 241, 0.08)' : 'rgba(0, 0, 0, 0.2)',
+          background: dragActive ? 'var(--accent-primary-soft)' : '#fafcfb',
           cursor: uploading ? 'not-allowed' : 'pointer',
           transition: 'var(--transition)',
           opacity: uploading ? 0.7 : 1
@@ -161,24 +161,24 @@ export default function ResumeUploader({ jobId, onResumesUploaded }) {
           Kéo & thả file CV PDF vào đây, hoặc <span style={{ color: 'var(--accent-primary)' }}>bấm để chọn file</span>
         </p>
         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-          Hỗ trợ tải lên nhiều file PDF cùng lúc. Trích xuất thông tin tự động theo thời gian thực.
+          Hỗ trợ nhiều tệp PDF · Dữ liệu được trích xuất tự động
         </p>
       </div>
 
       {/* Upload Progress Bar when uploading or completed */}
       {uploading && (
-        <div style={{ marginTop: '16px', background: 'rgba(0, 0, 0, 0.3)', padding: '14px', borderRadius: '10px', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+        <div style={{ marginTop: '16px', background: '#f4f8f6', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 600, marginBottom: '6px' }}>
             <span style={{ color: 'var(--accent-cyan)', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Loader2 size={14} className="spin" /> Đang trích xuất: {completedCount} / {selectedFiles.length} CVs
             </span>
-            <span style={{ color: '#fff' }}>{uploadPercent}%</span>
+            <span style={{ color: 'var(--text-primary)' }}>{uploadPercent}%</span>
           </div>
-          <div style={{ height: '8px', width: '100%', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '6px', overflow: 'hidden' }}>
+          <div style={{ height: '8px', width: '100%', background: '#dfe9e5', borderRadius: '6px', overflow: 'hidden' }}>
             <div style={{
               height: '100%',
               width: `${uploadPercent}%`,
-              background: 'linear-gradient(90deg, #6366f1, #38bdf8)',
+              background: 'var(--accent-gradient)',
               borderRadius: '6px',
               transition: 'width 0.3s ease'
             }} />
@@ -201,22 +201,22 @@ export default function ResumeUploader({ jobId, onResumesUploaded }) {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', maxHeight: '140px', overflowY: 'auto', marginBottom: '14px' }}>
             {selectedFiles.map((f, idx) => {
               const statusInfo = fileProgressMap[f.name] || { status: 'pending' };
-              let badgeBg = 'rgba(255,255,255,0.06)';
+              let badgeBg = '#f5f7f6';
               let badgeBorder = 'var(--border-color)';
               let icon = <FileText size={12} color="var(--accent-cyan)" />;
 
               if (statusInfo.status === 'uploading') {
-                badgeBg = 'rgba(99, 102, 241, 0.2)';
-                badgeBorder = 'rgba(99, 102, 241, 0.4)';
+                badgeBg = '#e7f5f0';
+                badgeBorder = '#b8ddd0';
                 icon = <Loader2 size={12} className="spin" color="var(--accent-cyan)" />;
               } else if (statusInfo.status === 'success') {
-                badgeBg = 'rgba(16, 185, 129, 0.15)';
-                badgeBorder = 'rgba(16, 185, 129, 0.4)';
-                icon = <CheckCircle2 size={12} color="#34d399" />;
+                badgeBg = '#e5f6ef';
+                badgeBorder = '#bde7d8';
+                icon = <CheckCircle2 size={12} color="#087455" />;
               } else if (statusInfo.status === 'error') {
-                badgeBg = 'rgba(244, 63, 94, 0.15)';
-                badgeBorder = 'rgba(244, 63, 94, 0.4)';
-                icon = <XCircle size={12} color="#f87171" />;
+                badgeBg = '#fff0f1';
+                badgeBorder = '#f0c7cb';
+                icon = <XCircle size={12} color="#b84250" />;
               }
 
               return (
@@ -228,8 +228,8 @@ export default function ResumeUploader({ jobId, onResumesUploaded }) {
                   {icon}
                   {f.name}
                   {statusInfo.status === 'uploading' && <span style={{ fontSize: '0.68rem', color: 'var(--accent-cyan)' }}>[Đang xử lý...]</span>}
-                  {statusInfo.status === 'success' && <span style={{ fontSize: '0.68rem', color: '#34d399' }}>[Thành công]</span>}
-                  {statusInfo.status === 'error' && <span style={{ fontSize: '0.68rem', color: '#f87171' }}>[Lỗi]</span>}
+                  {statusInfo.status === 'success' && <span style={{ fontSize: '0.68rem', color: '#087455' }}>[Thành công]</span>}
+                  {statusInfo.status === 'error' && <span style={{ fontSize: '0.68rem', color: '#b84250' }}>[Lỗi]</span>}
                 </span>
               );
             })}
@@ -257,9 +257,9 @@ export default function ResumeUploader({ jobId, onResumesUploaded }) {
         <div style={{
           marginTop: '14px', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem',
           display: 'flex', alignItems: 'center', gap: '8px',
-          background: statusMsg.type === 'success' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(244, 63, 94, 0.15)',
-          color: statusMsg.type === 'success' ? '#34d399' : '#f87171',
-          border: `1px solid ${statusMsg.type === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(244, 63, 94, 0.3)'}`
+          background: statusMsg.type === 'success' ? '#e5f6ef' : '#fff0f1',
+          color: statusMsg.type === 'success' ? '#087455' : '#b84250',
+          border: `1px solid ${statusMsg.type === 'success' ? '#bde7d8' : '#f0c7cb'}`
         }}>
           {statusMsg.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
           {statusMsg.text}
