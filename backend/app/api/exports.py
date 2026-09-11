@@ -1,7 +1,7 @@
 import csv
 import io
 from typing import Optional
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -11,6 +11,8 @@ from app.models.candidate_resume import CandidateResume
 from app.models.job_posting import JobPosting
 from app.services.reranker_service import detect_competition_honors
 from app.core.exceptions import ResourceNotFoundException
+from app.models.audit_event import AuditEvent
+from app.services.candidate_privacy_service import require_candidate_access
 
 router = APIRouter(prefix="/exports", tags=["Export Data"])
 
@@ -18,8 +20,14 @@ router = APIRouter(prefix="/exports", tags=["Export Data"])
 async def export_shortlist_csv(
     job_id: str,
     status_filter: Optional[str] = "SHORTLISTED",
+    x_actor_id: str = Header("system"),
+    x_actor_role: str = Header("system"),
     db: AsyncSession = Depends(get_db)
 ):
+    try:
+        require_candidate_access(x_actor_role)
+    except PermissionError as error:
+        raise HTTPException(403, detail={"code": "FORBIDDEN", "message": str(error)}) from error
     job_res = await db.execute(select(JobPosting).where(JobPosting.id == job_id))
     job = job_res.scalar_one_or_none()
     if not job:
@@ -103,6 +111,8 @@ async def export_shortlist_csv(
     csv_content = "\ufeff" + output.getvalue()
     clean_job_title = job.title.replace(' ', '_').replace('/', '_')
     filename = f"{sf.lower()}_{clean_job_title}.csv"
+
+    db.add(AuditEvent(actor_id=x_actor_id, action="EXPORT_CANDIDATES_CSV", resource_type="JobPosting", resource_id=job.id, metadata_json={"status_filter": sf, "row_count": len(rows)}))
 
     return Response(
         content=csv_content.encode("utf-8-sig"),

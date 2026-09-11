@@ -110,10 +110,10 @@
 
 ## Phase 10: Polish & Cross-Cutting Concerns
 
-- [ ] T050 Add access policy, export/view audit and anonymization flow in `backend/app/services/candidate_privacy_service.py`
-- [ ] T051 [P] Add accessibility and responsive interaction tests in `frontend/tests/e2e/recruiter-workspace.spec.js`
-- [ ] T052 Add legacy backfill/rollout feature flag and release notes in `backend/app/core/migrations.py` and `specs/003-recruiter-workspace-upgrade/quickstart.md`
-- [ ] T053 Run all automated tests and the three acceptance journeys in `specs/003-recruiter-workspace-upgrade/quickstart.md`
+- [X] T050 Add access policy, export/view audit and anonymization flow in `backend/app/services/candidate_privacy_service.py`
+- [X] T051 [P] Add accessibility and responsive interaction tests in `frontend/tests/e2e/recruiter-workspace.spec.js`
+- [X] T052 Add legacy backfill/rollout feature flag and release notes in `backend/app/core/migrations.py` and `specs/003-recruiter-workspace-upgrade/quickstart.md`
+- [X] T053 Run all automated tests and the three acceptance journeys in `specs/003-recruiter-workspace-upgrade/quickstart.md`
 
 ## Dependencies & Execution Order
 

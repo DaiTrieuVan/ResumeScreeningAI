@@ -2,7 +2,15 @@
 
 ## Purpose
 
-Tiêu chuẩn triển khai và nghiệm thu cho Recruiter Workspace v2. Đây chưa phải hướng dẫn của tính năng đã hoàn thành.
+Tiêu chuẩn triển khai và nghiệm thu cho Recruiter Workspace v2.
+
+## Release and rollout
+
+- Bản nâng cấp giữ các API legacy trong ít nhất một release để các màn hình cũ tiếp tục hoạt động.
+- Biến môi trường `RECRUITER_WORKSPACE_V2_ENABLED=true` bật workspace v2; đặt `false` để quay lại UI legacy trong giai đoạn beta.
+- Trước rollout, sao lưu database và thư mục `backend/storage/resumes`; migration chỉ cộng thêm cột, bảng và index.
+- Rollback ứng dụng không xóa bảng v2. Dữ liệu criteria/evaluation/decision được giữ để có thể bật lại mà không mất lịch sử.
+- Mọi lần xem CV, xem chi tiết, xuất CSV và ẩn danh đều tạo audit event không chứa raw CV.
 
 ## Local prerequisites
 
@@ -18,10 +26,10 @@ python -m pytest
 
 cd "D:\Resume Screening AI Project\frontend"
 npm install
+npm test -- --run
+npm run test:e2e
 npm run build
 ```
-
-Khi thêm test frontend, chuẩn hóa `npm test` và `npm run test:e2e`.
 
 ## Migration verification
 

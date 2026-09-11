@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from app.core.config import settings
 
 
 router = APIRouter(prefix="/recruiter", tags=["Recruiter Workspace"])
@@ -6,7 +7,7 @@ router = APIRouter(prefix="/recruiter", tags=["Recruiter Workspace"])
 
 @router.get("/health")
 async def recruiter_health() -> dict[str, str]:
-    return {"status": "healthy", "workspace": "recruiter-v2"}
+    return {"status": "healthy", "workspace": "recruiter-v2", "enabled": str(settings.RECRUITER_WORKSPACE_V2_ENABLED).lower()}
 
 
 from app.api.criteria import router as criteria_router  # noqa: E402

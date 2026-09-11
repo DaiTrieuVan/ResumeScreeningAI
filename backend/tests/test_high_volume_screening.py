@@ -1,6 +1,7 @@
 import time
 import pytest
 import numpy as np
+from app.services import embedding_service
 from app.services.pdf_parser import extract_text_from_pdf, extract_pdfs_from_zip
 from app.services.embedding_service import (
     get_text_embedding,
@@ -8,6 +9,22 @@ from app.services.embedding_service import (
     deserialize_embedding,
     rank_precomputed_vector_candidates
 )
+
+
+class DeterministicEmbeddingModel:
+    def encode(self, texts, **kwargs):
+        def vector(text):
+            value = float(sum(bytearray(text.encode("utf-8"))) % 97 + 1)
+            return np.full(384, value, dtype=np.float32)
+        if isinstance(texts, list):
+            return np.stack([vector(text) for text in texts])
+        return vector(texts)
+
+
+@pytest.fixture(autouse=True)
+def deterministic_embedding_model(monkeypatch):
+    monkeypatch.setattr(embedding_service, "_model", DeterministicEmbeddingModel())
+    monkeypatch.setattr(embedding_service, "_model_load_attempted", True)
 
 def test_embedding_serialization():
     vec = get_text_embedding("Senior Python Developer with 5 years experience in FastAPI and React")

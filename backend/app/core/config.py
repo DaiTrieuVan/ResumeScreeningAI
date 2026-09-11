@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = ""
     DEFAULT_EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
     DEFAULT_LLM_MODEL: str = "gemini-1.5-flash"
+    RECRUITER_WORKSPACE_V2_ENABLED: bool = True
     
     model_config = SettingsConfigDict(
         env_file=".env",

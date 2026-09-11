@@ -1,23 +1,37 @@
 import json
 import logging
+import os
 import numpy as np
 from typing import List, Tuple, Optional
 
 logger = logging.getLogger(__name__)
 
 _model = None
-try:
-    from sentence_transformers import SentenceTransformer
-    # Try multilingual model first for Vietnamese + English support
+_model_load_attempted = False
+
+
+def _get_model():
+    """Load the optional transformer only when an embedding is first requested.
+
+    Importing the FastAPI application must remain cheap and deterministic. This
+    also lets automated tests explicitly exercise the keyword fallback without
+    downloading or initializing a large model during test discovery.
+    """
+    global _model, _model_load_attempted
+    if _model_load_attempted or os.getenv("DISABLE_EMBEDDING_MODEL", "").lower() in {"1", "true", "yes"}:
+        return _model
+    _model_load_attempted = True
     try:
-        _model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
-        logger.info("SentenceTransformer 'paraphrase-multilingual-MiniLM-L12-v2' loaded successfully.")
-    except Exception:
-        _model = SentenceTransformer('all-MiniLM-L6-v2')
-        logger.info("SentenceTransformer 'all-MiniLM-L6-v2' loaded successfully.")
-except Exception as e:
-    _model = None
-    logger.warning(f"SentenceTransformer unavailable: {e}. Falling back to keyword similarity.")
+        from sentence_transformers import SentenceTransformer
+        try:
+            _model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+        except Exception:
+            _model = SentenceTransformer("all-MiniLM-L6-v2")
+        logger.info("SentenceTransformer loaded successfully.")
+    except Exception as error:
+        _model = None
+        logger.warning("SentenceTransformer unavailable: %s. Falling back to keyword similarity.", error)
+    return _model
 
 def compute_cosine_similarity(vec_a: np.ndarray, vec_b: np.ndarray) -> float:
     norm_a = np.linalg.norm(vec_a)
@@ -52,8 +66,9 @@ def fallback_keyword_similarity(text_a: str, text_b: str) -> float:
     return float(len(intersection) / len(union))
 
 def get_text_embedding(text: str) -> np.ndarray:
-    if _model is not None and text:
-        return _model.encode(text, convert_to_numpy=True)
+    model = _get_model()
+    if model is not None and text:
+        return model.encode(text, convert_to_numpy=True)
     return np.zeros(384, dtype=np.float32)
 
 def rank_candidates_by_vector_similarity(
@@ -77,7 +92,8 @@ def rank_precomputed_vector_candidates(
     if not resumes:
         return []
 
-    if _model is None:
+    model = _get_model()
+    if model is None:
         results = [
             (rid, round(max(0.0, min(100.0, fallback_keyword_similarity(job_description_text, raw_text) * 100.0)), 2))
             for rid, raw_text, _ in resumes
@@ -86,7 +102,7 @@ def rank_precomputed_vector_candidates(
         return results
 
     # Encode Job Description
-    jd_emb = _model.encode(job_description_text, convert_to_numpy=True)
+    jd_emb = model.encode(job_description_text, convert_to_numpy=True)
     jd_norm = jd_emb / (np.linalg.norm(jd_emb) + 1e-10)
 
     resume_embeddings = []
@@ -106,7 +122,7 @@ def rank_precomputed_vector_candidates(
 
     # Encode missing embeddings in batch
     if missing_texts:
-        new_embs = _model.encode(missing_texts, batch_size=64, convert_to_numpy=True, show_progress_bar=False)
+        new_embs = model.encode(missing_texts, batch_size=64, convert_to_numpy=True, show_progress_bar=False)
         for missing_idx, new_vec in zip(missing_indices, new_embs):
             resume_embeddings[missing_idx] = new_vec
 
