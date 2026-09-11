@@ -1,14 +1,16 @@
 import React from 'react';
-import { Filter, SlidersHorizontal, MapPin, DollarSign } from 'lucide-react';
+import { Filter, SlidersHorizontal, MapPin, Search } from 'lucide-react';
 
 export default function RealJobFilters({ minScore, setMinScore, locationFilter, setLocationFilter, searchQuery, setSearchQuery, categoryFilter, setCategoryFilter }) {
   return (
-    <div className="glass-panel" style={{ padding: '16px 24px', marginBottom: '20px', display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div className="glass-panel job-filters" style={{ padding: '16px 20px', marginBottom: '20px', display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', justifyContent: 'space-between' }}>
       
       {/* Search Input */}
-      <div style={{ flex: '1', minWidth: '220px' }}>
+      <div className="search-control" style={{ flex: '1', minWidth: '220px' }}>
+        <Search size={17} />
         <input
           className="input-field"
+          style={{ paddingLeft: '40px' }}
           placeholder="Lọc theo tên công việc, kỹ năng, công ty..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
