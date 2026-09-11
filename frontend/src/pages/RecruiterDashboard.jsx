@@ -8,6 +8,7 @@ import ExportFeedbackPanel from '../components/ExportFeedbackPanel';
 import ScreeningProgressModal from '../components/ScreeningProgressModal';
 import CriteriaEditor from '../components/recruiter/CriteriaEditor';
 import BatchUploader from '../components/recruiter/BatchUploader';
+import RecruiterAnalytics from '../components/recruiter/RecruiterAnalytics';
 
 export default function RecruiterDashboard() {
   const [jobs, setJobs] = useState([]);
@@ -227,6 +228,8 @@ export default function RecruiterDashboard() {
         </div>
 
       </div>
+
+      {selectedJob && <RecruiterAnalytics jobId={selectedJob.id} refreshToken={candidates} />}
 
       {/* ROW 2: COMBINED AI CONTROL CARD */}
       <div className="glass-panel screening-workspace">

@@ -152,4 +152,8 @@ export function compareJobCandidates(jobId, applicationIds, criteriaSetId) {
   });
 }
 
+export function fetchRecruiterAnalytics(jobId) {
+  return recruiterRequest(`/jobs/${jobId}/analytics`);
+}
+
 export { recruiterRequest };

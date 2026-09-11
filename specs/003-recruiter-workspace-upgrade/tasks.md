@@ -104,9 +104,9 @@
 
 **Independent Test**: Seed decision/batch history and verify all dashboard aggregates match source records.
 
-- [ ] T047 [P] [US7] Add analytics aggregation tests in `backend/tests/integration/test_recruiter_analytics.py`
-- [ ] T048 [US7] Implement analytics repository and endpoint in `backend/app/repositories/recruiter_analytics_repository.py` and `backend/app/api/recruiter_analytics.py`
-- [ ] T049 [US7] Build recruiter funnel and quality metrics in `frontend/src/components/recruiter/RecruiterAnalytics.jsx`
+- [X] T047 [P] [US7] Add analytics aggregation tests in `backend/tests/integration/test_recruiter_analytics.py`
+- [X] T048 [US7] Implement analytics repository and endpoint in `backend/app/repositories/recruiter_analytics_repository.py` and `backend/app/api/recruiter_analytics.py`
+- [X] T049 [US7] Build recruiter funnel and quality metrics in `frontend/src/components/recruiter/RecruiterAnalytics.jsx`
 
 ## Phase 10: Polish & Cross-Cutting Concerns
 
