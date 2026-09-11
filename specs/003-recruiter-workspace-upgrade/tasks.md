@@ -42,13 +42,13 @@
 
 **Independent Test**: Upload a mixed batch containing valid, corrupt, image-only and duplicate PDFs; successful files complete while failures remain retryable.
 
-- [ ] T020 [P] [US2] Add batch state-machine and dedupe unit tests in `backend/tests/unit/test_upload_batch_service.py`
-- [ ] T021 [P] [US2] Add batch API/reload/retry integration tests in `backend/tests/integration/test_upload_batches.py`
-- [ ] T022 [US2] Create UploadBatch, UploadItem and DuplicateMatch models in `backend/app/models/upload_batch.py`
-- [ ] T023 [US2] Implement hashing, dedupe and per-item processing in `backend/app/services/upload_batch_service.py`
-- [ ] T024 [US2] Implement batch create/status/events/retry endpoints in `backend/app/api/upload_batches.py`
-- [ ] T025 [US2] Build persistent batch uploader and item progress panel in `frontend/src/components/recruiter/BatchUploader.jsx`
-- [ ] T026 [US2] Add duplicate-resolution and retry interactions in `frontend/src/components/recruiter/BatchReviewPanel.jsx`
+- [X] T020 [P] [US2] Add batch state-machine and dedupe unit tests in `backend/tests/unit/test_upload_batch_service.py`
+- [X] T021 [P] [US2] Add batch API/reload/retry integration tests in `backend/tests/integration/test_upload_batches.py`
+- [X] T022 [US2] Create UploadBatch, UploadItem and DuplicateMatch models in `backend/app/models/upload_batch.py`
+- [X] T023 [US2] Implement hashing, dedupe and per-item processing in `backend/app/services/upload_batch_service.py`
+- [X] T024 [US2] Implement batch create/status/events/retry endpoints in `backend/app/api/upload_batches.py`
+- [X] T025 [US2] Build persistent batch uploader and item progress panel in `frontend/src/components/recruiter/BatchUploader.jsx`
+- [X] T026 [US2] Add duplicate-resolution and retry interactions in `frontend/src/components/recruiter/BatchReviewPanel.jsx`
 
 ## Phase 5: User Story 3 — Evidence-backed candidate review (Priority: P1)
 

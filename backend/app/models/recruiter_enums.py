@@ -62,3 +62,37 @@ class PipelineStage(StrEnum):
     OFFER = "OFFER"
     HIRED = "HIRED"
     REJECTED = "REJECTED"
+
+
+class UploadBatchStatus(StrEnum):
+    CREATED = "CREATED"
+    PROCESSING = "PROCESSING"
+    COMPLETED = "COMPLETED"
+    COMPLETED_WITH_ERRORS = "COMPLETED_WITH_ERRORS"
+    CANCELLED = "CANCELLED"
+
+
+class UploadItemStatus(StrEnum):
+    QUEUED = "QUEUED"
+    VALIDATING = "VALIDATING"
+    PARSING = "PARSING"
+    NEEDS_OCR = "NEEDS_OCR"
+    DEDUPE_REVIEW = "DEDUPE_REVIEW"
+    READY = "READY"
+    EVALUATING = "EVALUATING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    CANCELLED = "CANCELLED"
+
+
+class DuplicateMatchType(StrEnum):
+    EXACT_FILE = "EXACT_FILE"
+    CONTACT = "CONTACT"
+    SIMILAR_CONTENT = "SIMILAR_CONTENT"
+
+
+class DuplicateResolution(StrEnum):
+    NEEDS_REVIEW = "NEEDS_REVIEW"
+    KEEP_BOTH = "KEEP_BOTH"
+    LINK_EXISTING = "LINK_EXISTING"
+    SKIP = "SKIP"

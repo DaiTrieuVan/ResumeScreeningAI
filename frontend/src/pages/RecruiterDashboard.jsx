@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Briefcase, Plus, Play, RefreshCw, Edit3, Trash2, FileText, CheckCircle2, XCircle, Target } from 'lucide-react';
 import { fetchJobs, triggerScreeningStream, fetchJobScreenings, deleteJob } from '../services/api';
 import JobPostingForm from '../components/JobPostingForm';
-import ResumeUploader from '../components/ResumeUploader';
 import CandidateTable from '../components/CandidateTable';
 import CandidateDetailModal from '../components/CandidateDetailModal';
 import ExportFeedbackPanel from '../components/ExportFeedbackPanel';
 import ScreeningProgressModal from '../components/ScreeningProgressModal';
 import CriteriaEditor from '../components/recruiter/CriteriaEditor';
+import BatchUploader from '../components/recruiter/BatchUploader';
 
 export default function RecruiterDashboard() {
   const [jobs, setJobs] = useState([]);
@@ -318,7 +318,11 @@ export default function RecruiterDashboard() {
 
           {/* Section B: Integrated PDF Resume Bulk Uploader */}
           <div style={{ flex: '1' }}>
-            <ResumeUploader jobId={selectedJob?.id} onResumesUploaded={() => selectedJob && loadScreenings(selectedJob.id)} />
+            <BatchUploader
+              jobId={selectedJob?.id}
+              criteriaSetId={selectedJob?.active_criteria_set_id}
+              onBatchCompleted={() => selectedJob && loadScreenings(selectedJob.id)}
+            />
           </div>
 
         </div>

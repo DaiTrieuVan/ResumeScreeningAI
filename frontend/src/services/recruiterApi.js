@@ -68,4 +68,40 @@ export function simulateScore(componentScores, proposedWeights) {
   });
 }
 
+export function createUploadBatch(jobId, files, criteriaSetId = null) {
+  const formData = new FormData();
+  files.forEach((file) => formData.append('files', file));
+  if (criteriaSetId) formData.append('criteria_set_id', criteriaSetId);
+  return recruiterRequest(`/jobs/${jobId}/upload-batches`, {
+    method: 'POST',
+    body: formData,
+  });
+}
+
+export function fetchUploadBatch(batchId) {
+  return recruiterRequest(`/upload-batches/${batchId}`);
+}
+
+export function retryUploadBatch(batchId, itemIds = []) {
+  return recruiterRequest(`/upload-batches/${batchId}/retry`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Idempotency-Key': createIdempotencyKey('retry'),
+    },
+    body: JSON.stringify({
+      scope: itemIds.length ? 'SELECTED' : 'FAILED_ONLY',
+      item_ids: itemIds,
+    }),
+  });
+}
+
+export function resolveUploadDuplicate(itemId, resolution) {
+  return recruiterRequest(`/upload-items/${itemId}/duplicate-resolution`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ resolution }),
+  });
+}
+
 export { recruiterRequest };
