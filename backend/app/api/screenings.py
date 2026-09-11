@@ -17,6 +17,7 @@ from app.services.reranker_service import rerank_candidate_resume
 from app.core.exceptions import ResourceNotFoundException
 from app.services.criteria_service import get_official_scoring_config
 from app.services.scoring_service import calculate_weighted_score
+from app.services.evidence_service import sync_screening_evaluation
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +84,7 @@ class ScreeningResultResponse(BaseModel):
     honors_badges: Optional[List[str]] = []
     criteria_set_id: Optional[str] = None
     evaluation_kind: str = "LEGACY"
+    application_id: Optional[str] = None
 
 @router.post("/evaluate", response_model=List[ScreeningResultResponse])
 async def evaluate_screening(
@@ -442,6 +444,7 @@ async def fetch_screenings_for_job(job_id: str, db: AsyncSession) -> List[Screen
 
     out = []
     for s_res, c_res in rows:
+        application, _ = await sync_screening_evaluation(db, s_res, c_res)
         badges = detect_competition_honors(c_res.raw_text or "")
         out.append(ScreeningResultResponse(
             id=s_res.id,
@@ -466,7 +469,8 @@ async def fetch_screenings_for_job(job_id: str, db: AsyncSession) -> List[Screen
             candidate_file_name=c_res.file_name,
             honors_badges=badges,
             criteria_set_id=s_res.criteria_set_id,
-            evaluation_kind=s_res.evaluation_kind or "LEGACY"
+            evaluation_kind=s_res.evaluation_kind or "LEGACY",
+            application_id=application.id,
         ))
     return out
 
@@ -503,6 +507,7 @@ async def update_screening_status(
     # Return with candidate metadata
     c_res = await db.execute(select(CandidateResume).where(CandidateResume.id == s_result.resume_id))
     resume = c_res.scalar_one()
+    application, _ = await sync_screening_evaluation(db, s_result, resume)
     
     return ScreeningResultResponse(
         id=s_result.id,
@@ -526,6 +531,7 @@ async def update_screening_status(
         candidate_email=resume.parsed_email,
         candidate_file_name=resume.file_name,
         criteria_set_id=s_result.criteria_set_id,
-        evaluation_kind=s_result.evaluation_kind or "LEGACY"
+        evaluation_kind=s_result.evaluation_kind or "LEGACY",
+        application_id=application.id,
     )
 

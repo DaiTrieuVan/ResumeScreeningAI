@@ -104,4 +104,12 @@ export function resolveUploadDuplicate(itemId, resolution) {
   });
 }
 
+export function fetchCandidateDetail(applicationId) {
+  return recruiterRequest(`/applications/${applicationId}`);
+}
+
+export function getOriginalResumeUrl(applicationId) {
+  return `${RECRUITER_API_BASE}/applications/${applicationId}/resume`;
+}
+
 export { recruiterRequest };

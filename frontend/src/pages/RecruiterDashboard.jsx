@@ -3,7 +3,7 @@ import { Briefcase, Plus, Play, RefreshCw, Edit3, Trash2, FileText, CheckCircle2
 import { fetchJobs, triggerScreeningStream, fetchJobScreenings, deleteJob } from '../services/api';
 import JobPostingForm from '../components/JobPostingForm';
 import CandidateTable from '../components/CandidateTable';
-import CandidateDetailModal from '../components/CandidateDetailModal';
+import CandidateReviewDrawer from '../components/recruiter/CandidateReviewDrawer';
 import ExportFeedbackPanel from '../components/ExportFeedbackPanel';
 import ScreeningProgressModal from '../components/ScreeningProgressModal';
 import CriteriaEditor from '../components/recruiter/CriteriaEditor';
@@ -376,7 +376,7 @@ export default function RecruiterDashboard() {
       )}
 
       {selectedCandidate && (
-        <CandidateDetailModal
+        <CandidateReviewDrawer
           candidate={selectedCandidate}
           onClose={() => setSelectedCandidate(null)}
         />

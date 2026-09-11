@@ -56,12 +56,12 @@
 
 **Independent Test**: Open an evaluated candidate and verify important conclusions navigate to evidence while low-confidence/missing data is explicitly marked.
 
-- [ ] T027 [P] [US3] Add evidence mapping and no-evidence unit tests in `backend/tests/unit/test_evidence_service.py`
-- [ ] T028 [P] [US3] Add candidate detail/resume authorization contract tests in `backend/tests/contract/test_candidate_detail_api.py`
-- [ ] T029 [US3] Create CandidateApplication, Evaluation, CriterionResult and Evidence models in `backend/app/models/candidate_evaluation.py`
-- [ ] T030 [US3] Implement evidence extraction and legacy evaluation adapter in `backend/app/services/evidence_service.py`
-- [ ] T031 [US3] Implement candidate detail and audited original-resume endpoints in `backend/app/api/candidates.py`
-- [ ] T032 [US3] Replace candidate modal with split evidence/CV drawer in `frontend/src/components/recruiter/CandidateReviewDrawer.jsx`
+- [X] T027 [P] [US3] Add evidence mapping and no-evidence unit tests in `backend/tests/unit/test_evidence_service.py`
+- [X] T028 [P] [US3] Add candidate detail/resume authorization contract tests in `backend/tests/contract/test_candidate_detail_api.py`
+- [X] T029 [US3] Create CandidateApplication, Evaluation, CriterionResult and Evidence models in `backend/app/models/candidate_evaluation.py`
+- [X] T030 [US3] Implement evidence extraction and legacy evaluation adapter in `backend/app/services/evidence_service.py`
+- [X] T031 [US3] Implement candidate detail and audited original-resume endpoints in `backend/app/api/candidates.py`
+- [X] T032 [US3] Replace candidate modal with split evidence/CV drawer in `frontend/src/components/recruiter/CandidateReviewDrawer.jsx`
 
 ## Phase 6: User Story 4 — Filtering and bulk operations (Priority: P2)
 
