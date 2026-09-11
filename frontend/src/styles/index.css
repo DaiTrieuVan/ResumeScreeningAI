@@ -197,6 +197,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .advisor-file-picker span { overflow: hidden; font-size: 0.85rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .advisor-file-picker small { color: var(--text-muted); font-size: 0.69rem; }
 .advisor-result { box-shadow: var(--shadow-lg); }
+.modal-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(17, 33, 27, 0.52); backdrop-filter: blur(7px); }
+.modal-card { box-shadow: 0 24px 64px rgba(13, 38, 29, 0.18); }
+.score-breakdown-card { display: flex; flex-direction: column; justify-content: space-between; padding: 18px; border: 1px solid var(--border-color); border-radius: 10px; background: #f8faf9; }
+.score-breakdown-card__description { margin: 8px 0 0; padding-top: 8px; border-top: 1px dashed #d7e1dd; color: var(--text-muted); font-size: 0.78rem; line-height: 1.45; }
 .skill-chip { display: inline-flex; align-items: center; padding: 3px 8px; border: 1px solid #dde5e1; border-radius: 6px; color: var(--text-secondary); background: #f5f7f6; font-size: 0.68rem; font-weight: 500; }
 .gap-warning-badge, .gap-success-badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 600; transition: var(--transition); }
 .gap-warning-badge { color: #97620b; background: #fff5df; border: 1px solid #efd39b; cursor: pointer; }
