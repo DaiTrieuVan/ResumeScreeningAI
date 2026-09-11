@@ -11,7 +11,7 @@ export default function App() {
     <div className="app-container">
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <main>
+      <main className="app-main">
         {activeTab === 'recruiter' && <RecruiterDashboard />}
         {activeTab === 'real-jobs' && <RealJobsPortal />}
         {activeTab === 'gap-advisor' && <GapAdvisorView />}
