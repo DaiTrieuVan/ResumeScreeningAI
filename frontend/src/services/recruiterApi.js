@@ -133,4 +133,16 @@ export function executeBulkAction(jobId, payload) {
   });
 }
 
+export function fetchDecisionTimeline(applicationId) {
+  return recruiterRequest(`/applications/${applicationId}/decisions`);
+}
+
+export function appendCandidateDecision(applicationId, version, payload) {
+  return recruiterRequest(`/applications/${applicationId}/decisions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'If-Match': String(version) },
+    body: JSON.stringify(payload),
+  });
+}
+
 export { recruiterRequest };

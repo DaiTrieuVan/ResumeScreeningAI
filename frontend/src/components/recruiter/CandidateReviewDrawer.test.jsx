@@ -8,6 +8,8 @@ import * as api from '../../services/recruiterApi';
 vi.mock('../../services/recruiterApi', () => ({
   fetchCandidateDetail: vi.fn(),
   getOriginalResumeUrl: vi.fn(() => '/resume.pdf'),
+  fetchDecisionTimeline: vi.fn(() => Promise.resolve([])),
+  appendCandidateDecision: vi.fn(),
 }));
 
 afterEach(() => cleanup());

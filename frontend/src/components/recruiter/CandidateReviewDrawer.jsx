@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 
 import { fetchCandidateDetail, getOriginalResumeUrl } from '../../services/recruiterApi';
+import DecisionPanel from './DecisionPanel';
 
 const RESULT_META = {
   MET: { label: 'Đạt', icon: CheckCircle2, className: 'is-met' },
@@ -21,7 +22,7 @@ function ResultBadge({ result }) {
   return <span className={`evidence-result ${meta.className}`}><Icon size={14} />{meta.label}</span>;
 }
 
-function CandidateReviewContent({ detail }) {
+function CandidateReviewContent({ detail, onDecisionUpdated }) {
   const evaluation = detail.evaluation;
   const resumeUrl = getOriginalResumeUrl(detail.application_id);
 
@@ -41,6 +42,8 @@ function CandidateReviewContent({ detail }) {
           <div><span>Cổng bắt buộc</span><strong>{evaluation?.mandatory_gate || 'Chưa đánh giá'}</strong></div>
           <div><span>Trạng thái bằng chứng</span><strong>{evaluation?.evidence_status || 'Chưa có'}</strong></div>
         </div>
+
+        <DecisionPanel applicationId={detail.application_id} version={detail.application_version} currentStage={detail.pipeline_stage} onUpdated={onDecisionUpdated} />
 
         {!evaluation ? (
           <div className="workspace-state workspace-state--stacked">
@@ -104,6 +107,15 @@ export default function CandidateReviewDrawer({ candidate, onClose }) {
     };
   }, [onClose]);
 
+  const loadDetail = () => {
+    setLoading(true);
+    setError('');
+    return fetchCandidateDetail(applicationId)
+      .then(setDetail)
+      .catch((reason) => setError(reason.message || 'Không thể tải hồ sơ ứng viên.'))
+      .finally(() => setLoading(false));
+  };
+
   useEffect(() => {
     let active = true;
     if (!applicationId) {
@@ -111,8 +123,6 @@ export default function CandidateReviewDrawer({ candidate, onClose }) {
       setError('Hồ sơ này được tạo trước bản nâng cấp. Hãy chạy lại sàng lọc để liên kết CV với bản đánh giá có bằng chứng.');
       return () => { active = false; };
     }
-    setLoading(true);
-    setError('');
     fetchCandidateDetail(applicationId)
       .then((value) => active && setDetail(value))
       .catch((reason) => active && setError(reason.message || 'Không thể tải hồ sơ ứng viên.'))
@@ -134,7 +144,7 @@ export default function CandidateReviewDrawer({ candidate, onClose }) {
 
         {loading && <div className="workspace-state workspace-state--stacked candidate-review__state"><LoaderCircle className="workspace-state__spin" /><strong>Đang tải hồ sơ và bằng chứng…</strong></div>}
         {!loading && error && <div className="workspace-state workspace-state--stacked workspace-state--error candidate-review__state"><AlertCircle /><strong>Chưa thể hiển thị bản đánh giá</strong><p>{error}</p></div>}
-        {!loading && !error && detail && <CandidateReviewContent detail={detail} />}
+        {!loading && !error && detail && <CandidateReviewContent detail={detail} onDecisionUpdated={loadDetail} />}
       </aside>
     </div>,
     document.body,

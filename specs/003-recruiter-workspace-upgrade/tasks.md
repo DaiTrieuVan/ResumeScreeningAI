@@ -83,10 +83,10 @@
 
 **Independent Test**: Advance and reject candidates, trigger a concurrent edit conflict and reconstruct all actor/time/reason changes from the timeline.
 
-- [ ] T040 [P] [US5] Add pipeline transition and decision audit tests in `backend/tests/integration/test_decisions.py`
-- [ ] T041 [US5] Create decision event model and application projection updater in `backend/app/models/recruitment_decision.py` and `backend/app/services/decision_service.py`
-- [ ] T042 [US5] Implement optimistic decision/note endpoints in `backend/app/api/decisions.py`
-- [ ] T043 [US5] Build pipeline control, reject dialog and timeline in `frontend/src/components/recruiter/DecisionPanel.jsx`
+- [X] T040 [P] [US5] Add pipeline transition and decision audit tests in `backend/tests/integration/test_decisions.py`
+- [X] T041 [US5] Create decision event model and application projection updater in `backend/app/models/recruitment_decision.py` and `backend/app/services/decision_service.py`
+- [X] T042 [US5] Implement optimistic decision/note endpoints in `backend/app/api/decisions.py`
+- [X] T043 [US5] Build pipeline control, reject dialog and timeline in `frontend/src/components/recruiter/DecisionPanel.jsx`
 
 ## Phase 8: User Story 6 — Finalist comparison (Priority: P2)
 
