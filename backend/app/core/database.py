@@ -40,6 +40,7 @@ async def init_db() -> None:
     import app.models.gap_analysis
     import app.models.real_job
     import app.models.audit_event
+    import app.models.screening_criteria
     from app.core.migrations import run_migrations
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

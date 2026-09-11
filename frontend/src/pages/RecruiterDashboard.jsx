@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Briefcase, Plus, Play, RefreshCw, Sliders, Edit3, Trash2, FileText, CheckCircle2, XCircle, Target } from 'lucide-react';
+import { Briefcase, Plus, Play, RefreshCw, Edit3, Trash2, FileText, CheckCircle2, XCircle, Target } from 'lucide-react';
 import { fetchJobs, triggerScreeningStream, fetchJobScreenings, deleteJob } from '../services/api';
 import JobPostingForm from '../components/JobPostingForm';
 import ResumeUploader from '../components/ResumeUploader';
@@ -7,6 +7,7 @@ import CandidateTable from '../components/CandidateTable';
 import CandidateDetailModal from '../components/CandidateDetailModal';
 import ExportFeedbackPanel from '../components/ExportFeedbackPanel';
 import ScreeningProgressModal from '../components/ScreeningProgressModal';
+import CriteriaEditor from '../components/recruiter/CriteriaEditor';
 
 export default function RecruiterDashboard() {
   const [jobs, setJobs] = useState([]);
@@ -28,6 +29,7 @@ export default function RecruiterDashboard() {
 
   // Live Slider Weights for selected job
   const [sliderWeights, setSliderWeights] = useState({ wSkills: 0.5, wExp: 0.35, wEdu: 0.15 });
+  const [isScoreSimulation, setIsScoreSimulation] = useState(false);
 
   useEffect(() => {
     loadJobs();
@@ -295,53 +297,24 @@ export default function RecruiterDashboard() {
         {/* Step Body: Sliders + Embedded Upload Zone */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', alignItems: 'center' }}>
           
-          {/* Section A: Live Criterion Weight Adjusters */}
-          <div className="weight-panel">
-            <div className="section-eyebrow" style={{ marginBottom: '14px' }}>
-              <Sliders size={16} /> Bước 2 · Điều chỉnh trọng số AI
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.85rem' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <span>Kỹ năng chuyên môn:</span>
-                  <b style={{ color: 'var(--accent-cyan)' }}>{Math.round(sliderWeights.wSkills * 100)}%</b>
-                </div>
-                <input
-                  type="range" min="0" max="1" step="0.05"
-                  value={sliderWeights.wSkills}
-                  onChange={(e) => setSliderWeights(prev => ({ ...prev, wSkills: parseFloat(e.target.value) }))}
-                  style={{ width: '100%', accentColor: 'var(--accent-cyan)' }}
-                />
-              </div>
-
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <span>Kinh nghiệm làm việc:</span>
-                  <b style={{ color: 'var(--accent-primary)' }}>{Math.round(sliderWeights.wExp * 100)}%</b>
-                </div>
-                <input
-                  type="range" min="0" max="1" step="0.05"
-                  value={sliderWeights.wExp}
-                  onChange={(e) => setSliderWeights(prev => ({ ...prev, wExp: parseFloat(e.target.value) }))}
-                  style={{ width: '100%', accentColor: 'var(--accent-primary)' }}
-                />
-              </div>
-
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <span>Học vấn & Bằng cấp:</span>
-                  <b style={{ color: 'var(--accent-primary-dark)' }}>{Math.round(sliderWeights.wEdu * 100)}%</b>
-                </div>
-                <input
-                  type="range" min="0" max="1" step="0.05"
-                  value={sliderWeights.wEdu}
-                  onChange={(e) => setSliderWeights(prev => ({ ...prev, wEdu: parseFloat(e.target.value) }))}
-                  style={{ width: '100%', accentColor: 'var(--accent-primary-dark)' }}
-                />
-              </div>
-            </div>
-          </div>
+          {/* Section A: Versioned criterion weights */}
+          {selectedJob && (
+            <CriteriaEditor
+              job={selectedJob}
+              onWeightsChange={(weights, simulation) => {
+                setSliderWeights(weights);
+                setIsScoreSimulation(simulation);
+              }}
+              onPublished={(criteriaSet) => {
+                setSelectedJob((current) => ({
+                  ...current,
+                  version: (current.version || 1) + 1,
+                  active_criteria_set_id: criteriaSet.id,
+                }));
+                setIsScoreSimulation(false);
+              }}
+            />
+          )}
 
           {/* Section B: Integrated PDF Resume Bulk Uploader */}
           <div style={{ flex: '1' }}>
@@ -378,6 +351,7 @@ export default function RecruiterDashboard() {
         <CandidateTable
           candidates={candidates}
           jobWeights={sliderWeights}
+          isSimulation={isScoreSimulation}
           onSelectCandidate={(c) => setSelectedCandidate(c)}
           onStatusChange={(updated) => {
             setCandidates(prev => prev.map(c => c.id === updated.id ? updated : c));

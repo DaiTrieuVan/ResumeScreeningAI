@@ -122,6 +122,21 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .workspace-stale p { margin-top: 2px; color: #876c35; font-size: 0.78rem; }
 @keyframes workspace-spin { to { transform: rotate(360deg); } }
 
+.criteria-editor { padding: 4px 2px; }
+.criteria-editor__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.criteria-editor__header h3 { margin-top: 5px; font-size: 1rem; }
+.criteria-editor__official { display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; color: #087455; background: #e8f7f1; border-radius: var(--radius-full); font-size: 0.7rem; font-weight: 700; }
+.criteria-editor__weights { display: grid; gap: 13px; }
+.criteria-weight span { display: flex; justify-content: space-between; margin-bottom: 5px; color: var(--text-secondary); font-size: 0.82rem; }
+.criteria-weight b { color: var(--accent-primary-dark); }
+.criteria-weight input { width: 100%; accent-color: var(--accent-primary); }
+.criteria-editor__summary { display: flex; align-items: center; gap: 8px; margin-top: 16px; padding: 10px 12px; border-radius: var(--radius-sm); font-size: 0.78rem; }
+.criteria-editor__summary span { flex: 1; }
+.criteria-editor__summary.is-valid { color: #087455; background: #edf8f4; }
+.criteria-editor__summary.is-invalid { color: #9f3541; background: #fff1f2; }
+.criteria-editor__summary .btn { min-height: 34px; padding: 7px 11px; font-size: 0.74rem; }
+.criteria-editor__simulation { margin-top: 10px; padding-left: 10px; color: #876c35; border-left: 3px solid #d7a92f; font-size: 0.74rem; line-height: 1.5; }
+
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px;
   padding: 9px 16px; border: 1px solid transparent; border-radius: var(--radius-sm); cursor: pointer;

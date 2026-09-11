@@ -26,15 +26,15 @@
 
 **Independent Test**: Publish a valid version, reject an invalid total, simulate alternate weights without changing official scores, then publish a new version and observe stale prior results.
 
-- [ ] T011 [P] [US1] Add criteria contract tests in `backend/tests/contract/test_criteria_api.py`
-- [ ] T012 [P] [US1] Add criteria validation and stale-evaluation unit tests in `backend/tests/unit/test_criteria_service.py`
-- [ ] T013 [US1] Create CriteriaSet and Criterion models in `backend/app/models/screening_criteria.py`
-- [ ] T014 [US1] Extend JobPosting and ScreeningResult compatibility fields in `backend/app/models/job_posting.py` and `backend/app/models/screening_result.py`
-- [ ] T015 [US1] Implement criteria draft/publish/backfill service in `backend/app/services/criteria_service.py`
-- [ ] T016 [US1] Implement criteria schemas and endpoints in `backend/app/schemas/screening_criteria.py` and `backend/app/api/criteria.py`
-- [ ] T017 [US1] Implement official versus simulated scoring in `backend/app/services/scoring_service.py`
-- [ ] T018 [US1] Build criteria editor with weight validation and version status in `frontend/src/components/recruiter/CriteriaEditor.jsx`
-- [ ] T019 [US1] Integrate criteria versions and simulation banner in `frontend/src/pages/RecruiterDashboard.jsx`
+- [X] T011 [P] [US1] Add criteria contract tests in `backend/tests/contract/test_criteria_api.py`
+- [X] T012 [P] [US1] Add criteria validation and stale-evaluation unit tests in `backend/tests/unit/test_criteria_service.py`
+- [X] T013 [US1] Create CriteriaSet and Criterion models in `backend/app/models/screening_criteria.py`
+- [X] T014 [US1] Extend JobPosting and ScreeningResult compatibility fields in `backend/app/models/job_posting.py` and `backend/app/models/screening_result.py`
+- [X] T015 [US1] Implement criteria draft/publish/backfill service in `backend/app/services/criteria_service.py`
+- [X] T016 [US1] Implement criteria schemas and endpoints in `backend/app/schemas/screening_criteria.py` and `backend/app/api/criteria.py`
+- [X] T017 [US1] Implement official versus simulated scoring in `backend/app/services/scoring_service.py`
+- [X] T018 [US1] Build criteria editor with weight validation and version status in `frontend/src/components/recruiter/CriteriaEditor.jsx`
+- [X] T019 [US1] Integrate criteria versions and simulation banner in `frontend/src/pages/RecruiterDashboard.jsx`
 
 ## Phase 4: User Story 2 — Resilient batch intake (Priority: P1)
 

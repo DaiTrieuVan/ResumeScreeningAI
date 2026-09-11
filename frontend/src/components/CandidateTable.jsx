@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Eye, Filter, SlidersHorizontal, ChevronLeft, ChevronRight, Award, AlertTriangle, CheckCircle2, Users } from 'lucide-react';
 import { updateCandidateStatus } from '../services/api';
 
-export default function CandidateTable({ candidates, jobWeights, onSelectCandidate, onStatusChange }) {
+export default function CandidateTable({ candidates, jobWeights, isSimulation = false, onSelectCandidate, onStatusChange }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [minScore, setMinScore] = useState(0);
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -244,7 +244,7 @@ export default function CandidateTable({ candidates, jobWeights, onSelectCandida
                     <td style={{ padding: '14px 16px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                         <span className={`score-pill-lg ${scoreLgClass}`}>
-                          {liveScore}% phù hợp
+                          {liveScore}% {isSimulation ? 'mô phỏng' : 'phù hợp'}
                         </span>
                         {cand.stage1_similarity_score > 0 && (
                           <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>

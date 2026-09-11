@@ -30,14 +30,42 @@ async function recruiterRequest(path, options = {}) {
     problem = {};
   }
 
+  const details = problem.detail || problem;
   throw new RecruiterApiError(
-    problem.message || 'Không thể hoàn tất yêu cầu. Vui lòng thử lại.',
-    { status: response.status, code: problem.code, details: problem },
+    details.message || 'Không thể hoàn tất yêu cầu. Vui lòng thử lại.',
+    { status: response.status, code: details.code, details },
   );
 }
 
 export function checkRecruiterWorkspace() {
   return recruiterRequest('/health');
+}
+
+export function fetchCriteriaSets(jobId) {
+  return recruiterRequest(`/jobs/${jobId}/criteria-sets`);
+}
+
+export function createCriteriaSet(jobId, payload) {
+  return recruiterRequest(`/jobs/${jobId}/criteria-sets`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function publishCriteriaSet(criteriaSetId, jobVersion) {
+  return recruiterRequest(`/criteria-sets/${criteriaSetId}/publish`, {
+    method: 'POST',
+    headers: { 'If-Match': String(jobVersion) },
+  });
+}
+
+export function simulateScore(componentScores, proposedWeights) {
+  return recruiterRequest('/score-simulations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ component_scores: componentScores, proposed_weights: proposedWeights }),
+  });
 }
 
 export { recruiterRequest };

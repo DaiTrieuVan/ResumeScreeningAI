@@ -29,6 +29,8 @@ class ScreeningResult(Base):
     recruiter_status: Mapped[str] = mapped_column(String(50), default="NEW") # NEW, SHORTLISTED, UNDER_REVIEW, REJECTED
     recruiter_feedback_notes: Mapped[str] = mapped_column(Text, nullable=True)
     score_override: Mapped[float] = mapped_column(Float, nullable=True)
+    criteria_set_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    evaluation_kind: Mapped[str] = mapped_column(String(20), nullable=False, default="LEGACY")
     
     evaluated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
