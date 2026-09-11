@@ -352,7 +352,7 @@ export default function RecruiterDashboard() {
       <div>
         {selectedJob && <ExportFeedbackPanel selectedJobId={selectedJob.id} candidateCount={candidates.length} />}
 
-        {selectedJob && <CandidateGrid jobId={selectedJob.id} refreshToken={candidates} onSelectCandidate={setSelectedCandidate} />}
+        {selectedJob && <CandidateGrid jobId={selectedJob.id} criteriaSetId={selectedJob.active_criteria_set_id} refreshToken={candidates} onSelectCandidate={setSelectedCandidate} />}
       </div>
 
       {/* Modals */}

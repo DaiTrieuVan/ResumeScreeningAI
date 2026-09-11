@@ -145,4 +145,11 @@ export function appendCandidateDecision(applicationId, version, payload) {
   });
 }
 
+export function compareJobCandidates(jobId, applicationIds, criteriaSetId) {
+  return recruiterRequest(`/jobs/${jobId}/comparisons`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ application_ids: applicationIds, criteria_set_id: criteriaSetId }),
+  });
+}
+
 export { recruiterRequest };

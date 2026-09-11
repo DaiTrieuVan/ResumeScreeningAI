@@ -94,9 +94,9 @@
 
 **Independent Test**: Compare three finalists and see aligned criteria, evidence, notes and UNKNOWN values without false fail states.
 
-- [ ] T044 [P] [US6] Add same-version comparison contract tests in `backend/tests/contract/test_comparison_api.py`
-- [ ] T045 [US6] Implement comparison query/service/endpoint in `backend/app/services/comparison_service.py` and `backend/app/api/comparisons.py`
-- [ ] T046 [US6] Build comparison matrix UI in `frontend/src/components/recruiter/CandidateComparison.jsx`
+- [X] T044 [P] [US6] Add same-version comparison contract tests in `backend/tests/contract/test_comparison_api.py`
+- [X] T045 [US6] Implement comparison query/service/endpoint in `backend/app/services/comparison_service.py` and `backend/app/api/comparisons.py`
+- [X] T046 [US6] Build comparison matrix UI in `frontend/src/components/recruiter/CandidateComparison.jsx`
 
 ## Phase 9: User Story 7 — Analytics and collaboration basics (Priority: P3)
 
