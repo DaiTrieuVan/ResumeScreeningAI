@@ -227,6 +227,14 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   .page-heading { align-items: flex-start; flex-direction: column; }
   .metrics-grid { grid-template-columns: 1fr; }
   .screening-workspace, .candidate-table-panel { padding: 16px; }
+  .screening-workspace > div:first-child { align-items: flex-start !important; }
+  .screening-workspace > div:first-child > div:first-child { width: 100%; min-width: 0; }
+  .screening-workspace > div:first-child > div:first-child > div:last-child { flex: 1; min-width: 0; }
+  .screening-workspace > div:first-child .select-field { min-width: 0 !important; }
+  .candidate-table-panel > div:nth-child(2) { align-items: stretch !important; flex-direction: column; }
+  .candidate-table-panel > div:nth-child(2) > div:last-child { align-items: stretch !important; flex-direction: column; width: 100%; }
+  .candidate-table-panel > div:nth-child(2) > div:last-child > div { width: 100%; }
+  .candidate-table-panel > div:nth-child(2) .select-field { width: 100% !important; }
   .jobs-hero { padding: 24px 20px; }
   .jobs-hero__actions > * { width: 100%; }
   .export-panel { align-items: flex-start !important; flex-direction: column; }
