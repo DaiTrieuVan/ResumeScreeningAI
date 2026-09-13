@@ -115,6 +115,18 @@ export function getOriginalResumeUrl(applicationId) {
   return `${RECRUITER_API_BASE}/applications/${applicationId}/resume`;
 }
 
+export function correctCandidateData(applicationId, version, payload) {
+  return recruiterRequest(`/applications/${applicationId}/corrections`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'If-Match': String(version),
+      'Idempotency-Key': createIdempotencyKey('correction'),
+    },
+    body: JSON.stringify(payload),
+  });
+}
+
 export function queryJobCandidates(jobId, params = {}) {
   const query = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {

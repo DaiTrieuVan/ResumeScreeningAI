@@ -10,8 +10,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.database import get_db
 from app.schemas.candidate_detail import CandidateDetailResponse, EvaluationResponse
+from app.schemas.final_release import CorrectionRequest
 from app.services.evidence_service import load_candidate_detail
 from app.services.candidate_privacy_service import anonymize_candidate, record_candidate_access, require_candidate_access
+from app.services.correction_service import correct_candidate
+from app.services.idempotency_service import IdempotencyConflict
 
 
 router = APIRouter()
@@ -31,6 +34,8 @@ async def get_candidate_detail(application_id: str, x_actor_id: str = Header("sy
     return CandidateDetailResponse(
         application_id=application.id,
         application_version=application.version,
+        evaluation_stale=application.evaluation_stale,
+        stale_reason=application.stale_reason,
         job_id=application.job_id,
         resume_id=resume.id,
         pipeline_stage=application.pipeline_stage,
@@ -48,6 +53,40 @@ async def get_candidate_detail(application_id: str, x_actor_id: str = Header("sy
         },
         evaluation=EvaluationResponse.model_validate(evaluation) if evaluation else None,
     )
+
+
+@router.post("/applications/{application_id}/corrections")
+async def create_candidate_correction(
+    application_id: str,
+    payload: CorrectionRequest,
+    if_match: str = Header(..., alias="If-Match"),
+    idempotency_key: str = Header(..., alias="Idempotency-Key"),
+    x_actor_id: str = Header("system"),
+    x_actor_role: str = Header("system"),
+    db: AsyncSession = Depends(get_db),
+):
+    try:
+        require_candidate_access(x_actor_role)
+        expected_version = int(if_match.strip('"'))
+        return await correct_candidate(
+            db,
+            application_id=application_id,
+            expected_version=expected_version,
+            field_path=payload.field_path,
+            new_value=payload.new_value,
+            reason=payload.reason,
+            actor_id=x_actor_id,
+            idempotency_key=idempotency_key,
+            evidence_id=payload.evidence_id,
+        )
+    except PermissionError as error:
+        raise HTTPException(403, detail={"code": "FORBIDDEN", "message": str(error)}) from error
+    except LookupError as error:
+        raise HTTPException(404, detail={"code": "NOT_FOUND", "message": str(error)}) from error
+    except (RuntimeError, IdempotencyConflict) as error:
+        raise HTTPException(409, detail={"code": "CONFLICT", "message": str(error)}) from error
+    except ValueError as error:
+        raise HTTPException(422, detail={"code": "INVALID_CORRECTION", "message": str(error)}) from error
 
 
 @router.get("/applications/{application_id}/resume")

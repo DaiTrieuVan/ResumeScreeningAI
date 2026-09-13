@@ -71,20 +71,20 @@
 
 ### Tests for User Story 2
 
-- [ ] T022 [P] [US2] Add page extraction, duplicate excerpt, and unknown-location tests in `backend/tests/unit/test_page_aware_evidence.py`
-- [ ] T023 [P] [US2] Add correction concurrency, validation, audit, and stale-state tests in `backend/tests/contract/test_candidate_corrections_api.py`
-- [ ] T024 [P] [US2] Add evidence navigation and correction form component tests in `frontend/src/components/recruiter/CandidateReviewDrawer.test.jsx`
+- [X] T022 [P] [US2] Add page extraction, duplicate excerpt, and unknown-location tests in `backend/tests/unit/test_page_aware_evidence.py`
+- [X] T023 [P] [US2] Add correction concurrency, validation, audit, and stale-state tests in `backend/tests/contract/test_candidate_corrections_api.py`
+- [X] T024 [P] [US2] Add evidence navigation and correction form component tests in `frontend/src/components/recruiter/CandidateReviewDrawer.test.jsx`
 
 ### Implementation for User Story 2
 
-- [ ] T025 [US2] Persist per-page text, offsets, and extraction metadata during parsing in `backend/app/services/pdf_parser.py`
-- [ ] T026 [US2] Resolve evidence to reliable page locations without fabricating unknown pages in `backend/app/services/evidence_service.py`
-- [ ] T027 [US2] Implement authorized field and evidence corrections with optimistic concurrency in `backend/app/services/correction_service.py`
-- [ ] T028 [US2] Implement correction endpoint and evidence-location response projection in `backend/app/api/candidates.py`
-- [ ] T029 [US2] Expose correction and page-aware evidence operations in `frontend/src/services/recruiterApi.js`
-- [ ] T030 [US2] Add clickable evidence, PDF page navigation, unknown-page fallback, and correction UI in `frontend/src/components/recruiter/CandidateReviewDrawer.jsx`
-- [ ] T031 [US2] Add stale-evaluation messaging and rerun affordance in `frontend/src/pages/RecruiterDashboard.jsx`
-- [ ] T032 [US2] Add page navigation and correction journey coverage in `frontend/tests/e2e/recruiter-workspace.spec.js`
+- [X] T025 [US2] Persist per-page text, offsets, and extraction metadata during parsing in `backend/app/services/pdf_parser.py`
+- [X] T026 [US2] Resolve evidence to reliable page locations without fabricating unknown pages in `backend/app/services/evidence_service.py`
+- [X] T027 [US2] Implement authorized field and evidence corrections with optimistic concurrency in `backend/app/services/correction_service.py`
+- [X] T028 [US2] Implement correction endpoint and evidence-location response projection in `backend/app/api/candidates.py`
+- [X] T029 [US2] Expose correction and page-aware evidence operations in `frontend/src/services/recruiterApi.js`
+- [X] T030 [US2] Add clickable evidence, PDF page navigation, unknown-page fallback, and correction UI in `frontend/src/components/recruiter/CandidateReviewDrawer.jsx`
+- [X] T031 [US2] Add stale-evaluation messaging and rerun affordance in `frontend/src/components/recruiter/CandidateReviewDrawer.jsx`
+- [X] T032 [US2] Add page navigation and correction journey coverage in `frontend/tests/e2e/recruiter-workspace.spec.js`
 
 **Checkpoint**: Every displayed evidence location is verifiable or explicitly unknown, and human corrections are traceable.
 

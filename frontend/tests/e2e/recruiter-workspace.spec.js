@@ -18,7 +18,8 @@ test.beforeEach(async ({ page }) => {
     if (url.includes('/analytics')) return route.fulfill(json({ funnel: { AI_ANALYZED: 1 }, upload_counts: { total: 1, success: 1, failed: 0, duplicate: 0 }, median_processing_seconds: 2, ai_override_rate: 0 }));
     if (url.includes('/candidates?')) return route.fulfill(json({ items: [candidate, secondCandidate], total: 2, page: 1, page_size: 25, facets: {} }));
     if (url.includes('/comparisons')) return route.fulfill(json({ criteria_set_id: 'criteria-1', criteria_version: 1, candidates: [{ ...candidate, overall_score: 82, pipeline_stage: candidate.stage }, { ...secondCandidate, overall_score: 78, pipeline_stage: secondCandidate.stage }], criteria: [{ criterion_id: 'criterion-python', label: 'Python', importance: 'MANDATORY', results: { 'app-1': { result: 'MET', explanation: 'Có bằng chứng Python', evidence: [] }, 'app-2': { result: 'UNKNOWN', explanation: 'Chưa đủ dữ liệu', evidence: [] } } }] }));
-    if (url.endsWith('/applications/app-1')) return route.fulfill(json({ application_id: 'app-1', application_version: 1, pipeline_stage: 'AI_ANALYZED', candidate_name: 'Nguyễn An', candidate_email: 'an@example.com', file_name: 'an.pdf', evaluation: { overall_score: 82, mandatory_gate: 'NEEDS_REVIEW', evidence_status: 'PARTIAL', criterion_results: Array.from({ length: 18 }, (_, index) => ({ id: `result-${index}`, label: `Tiêu chí ${index + 1}`, importance: 'PREFERRED', result: 'UNKNOWN', confidence: .2, explanation: 'Chưa có bằng chứng', evidence: [] })) } }));
+    if (url.endsWith('/applications/app-1/corrections')) return route.fulfill(json({ application_id: 'app-1', application_version: 2, evaluation_stale: true }));
+    if (url.endsWith('/applications/app-1')) return route.fulfill(json({ application_id: 'app-1', application_version: 1, pipeline_stage: 'AI_ANALYZED', candidate_name: 'Nguyễn An', candidate_email: 'an@example.com', file_name: 'an.pdf', extracted_skills: ['Python'], evaluation: { overall_score: 82, mandatory_gate: 'NEEDS_REVIEW', evidence_status: 'PARTIAL', criterion_results: Array.from({ length: 18 }, (_, index) => ({ id: `result-${index}`, label: `Tiêu chí ${index + 1}`, importance: 'PREFERRED', result: index === 0 ? 'MET' : 'UNKNOWN', confidence: index === 0 ? .95 : .2, explanation: index === 0 ? 'Có bằng chứng trực tiếp.' : 'Chưa có bằng chứng', evidence: index === 0 ? [{ id: 'evidence-page-3', excerpt: 'Built Python APIs', page_number: 3, confidence: .95, source_method: 'NATIVE' }] : [] })) } }));
     if (url.includes('/decisions')) return route.fulfill(json([]));
     if (url.endsWith('/resume')) return route.fulfill({ status: 200, contentType: 'application/pdf', body: '%PDF-1.4' });
     return route.fulfill(json({}));
@@ -57,4 +58,19 @@ test('multi-page triage selection opens a same-criteria comparison and preserves
   await expect(dialog).toContainText('Nguyễn An');
   await expect(dialog).toContainText('Trần Bình');
   await expect(dialog.getByText('Chưa đủ dữ liệu').first()).toBeVisible();
+});
+
+test('evidence opens its PDF page and recruiter can submit an audited correction', async ({ page }) => {
+  await page.getByRole('button', { name: 'Xem' }).first().click();
+  const dialog = page.getByRole('dialog', { name: /Đánh giá hồ sơ/ });
+  await dialog.getByRole('button', { name: /Built Python APIs/i }).click();
+  await expect(dialog.getByTitle(/CV của/i)).toHaveAttribute('src', /#page=3$/);
+
+  await dialog.getByText('Hiệu chỉnh dữ liệu AI').click();
+  await dialog.getByLabel('Lý do hiệu chỉnh').fill('Đã đối chiếu CV gốc');
+  const correctionRequest = page.waitForRequest((request) => request.url().endsWith('/applications/app-1/corrections'));
+  await dialog.getByRole('button', { name: 'Lưu và đánh dấu cần chạy lại' }).click();
+  const request = await correctionRequest;
+  expect(request.headers()['idempotency-key']).toBeTruthy();
+  expect(request.postDataJSON().field_path).toBe('extracted_skills');
 });

@@ -24,7 +24,8 @@ from app.models.recruiter_enums import (
     UploadItemStatus,
 )
 from app.models.upload_batch import DuplicateMatch, UploadBatch, UploadItem
-from app.services.pdf_parser import extract_resume_metadata, extract_text_from_pdf
+from app.models.final_release import ResumePage
+from app.services.pdf_parser import extract_resume_metadata, extract_text_with_pages
 
 
 MAX_BATCH_FILES = 200
@@ -203,7 +204,7 @@ async def process_upload_item(item_id: str) -> None:
         try:
             item.status = UploadItemStatus.PARSING.value
             await db.commit()
-            raw_text = await asyncio.to_thread(extract_text_from_pdf, item.storage_key)
+            raw_text, page_records = await asyncio.to_thread(extract_text_with_pages, item.storage_key)
             metadata = extract_resume_metadata(raw_text)
             item.content_fingerprint = content_digest(raw_text)
             item.contact_fingerprint = contact_digest(metadata.get("email"), metadata.get("phone"))
@@ -248,6 +249,8 @@ async def process_upload_item(item_id: str) -> None:
                 )
                 db.add(resume)
                 await db.flush()
+                for page in page_records:
+                    db.add(ResumePage(resume_id=resume.id, **page))
                 item.candidate_resume_id = resume.id
                 item.status = UploadItemStatus.COMPLETED.value
         except Exception as error:

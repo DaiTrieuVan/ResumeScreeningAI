@@ -16,12 +16,30 @@ from app.models.candidate_evaluation import (
     ScreeningEvaluation,
 )
 from app.models.candidate_resume import CandidateResume
+from app.models.final_release import ResumePage
 from app.models.recruiter_enums import CriterionOutcome, EvaluationKind, MandatoryGate, PipelineStage
 from app.models.screening_criteria import Criterion, ScreeningCriteriaSet
 from app.models.screening_result import ScreeningResult
 
 
-def find_text_evidence(text: str, terms: list[str], context: int = 90) -> dict | None:
+def _page_value(page, key: str):
+    return page.get(key) if isinstance(page, dict) else getattr(page, key)
+
+
+def _with_source_location(evidence: dict, pages: list | None) -> dict:
+    evidence.update({"page_number": None, "resume_page_id": None, "source_method": "LEGACY_UNKNOWN"})
+    for page in pages or []:
+        if _page_value(page, "normalized_start_offset") <= evidence["start_offset"] < _page_value(page, "normalized_end_offset"):
+            evidence.update({
+                "page_number": _page_value(page, "page_number"),
+                "resume_page_id": None if isinstance(page, dict) else page.id,
+                "source_method": _page_value(page, "extraction_method"),
+            })
+            break
+    return evidence
+
+
+def find_text_evidence(text: str, terms: list[str], context: int = 90, pages: list | None = None) -> dict | None:
     folded = text.casefold()
     for term in sorted((term.strip() for term in terms if term), key=len, reverse=True):
         start = folded.find(term.casefold())
@@ -29,16 +47,16 @@ def find_text_evidence(text: str, terms: list[str], context: int = 90) -> dict |
             end = start + len(term)
             excerpt_start = max(0, start - context)
             excerpt_end = min(len(text), end + context)
-            return {
+            return _with_source_location({
                 "start_offset": start,
                 "end_offset": end,
                 "excerpt": text[excerpt_start:excerpt_end].strip(),
                 "confidence": 0.95,
-            }
+            }, pages)
     return None
 
 
-def evaluate_criterion(criterion: Criterion, resume: CandidateResume) -> tuple[str, float, str, dict | None]:
+def evaluate_criterion(criterion: Criterion, resume: CandidateResume, pages: list | None = None) -> tuple[str, float, str, dict | None]:
     text = resume.raw_text or ""
     expected = criterion.expected_value
     terms = expected if isinstance(expected, list) else [str(expected)]
@@ -51,15 +69,15 @@ def evaluate_criterion(criterion: Criterion, resume: CandidateResume) -> tuple[s
         required = float(expected)
         excerpt_start = max(0, match.start() - 90)
         excerpt_end = min(len(text), match.end() + 90)
-        evidence = {
+        evidence = _with_source_location({
             "start_offset": match.start(), "end_offset": match.end(),
             "excerpt": text[excerpt_start:excerpt_end].strip(), "confidence": 0.82,
-        }
+        }, pages)
         if best_years >= required:
             return CriterionOutcome.MET.value, 0.82, f"CV thể hiện khoảng {best_years} năm kinh nghiệm.", evidence
         return CriterionOutcome.NOT_MET.value, 0.82, f"CV thể hiện {best_years} năm, thấp hơn mức {required:g} năm.", evidence
 
-    evidence = find_text_evidence(text, terms)
+    evidence = find_text_evidence(text, terms, pages=pages)
     if evidence:
         return CriterionOutcome.MET.value, evidence["confidence"], "Tìm thấy bằng chứng trực tiếp trong CV.", evidence
     return CriterionOutcome.UNKNOWN.value, 0.2, "Không tìm thấy bằng chứng trực tiếp trong CV.", None
@@ -140,11 +158,12 @@ async def sync_screening_evaluation(
         criterion_results=[],
     )
 
+    pages = (await db.execute(select(ResumePage).where(ResumePage.resume_id == resume.id).order_by(ResumePage.page_number))).scalars().all()
     outcomes = []
     evidence_count = 0
     if criteria_set:
         for criterion in criteria_set.criteria:
-            outcome, confidence, explanation, evidence = evaluate_criterion(criterion, resume)
+            outcome, confidence, explanation, evidence = evaluate_criterion(criterion, resume, pages)
             outcomes.append((criterion.importance, outcome))
             result = CriterionResult(
                 criterion_id=criterion.id,
@@ -161,11 +180,14 @@ async def sync_screening_evaluation(
                 evidence_count += 1
                 result.evidence.append(EvidenceSnippet(
                     resume_id=resume.id,
+                    page_number=evidence["page_number"],
+                    resume_page_id=evidence["resume_page_id"],
                     start_offset=evidence["start_offset"],
                     end_offset=evidence["end_offset"],
                     excerpt=evidence["excerpt"],
                     polarity="SUPPORTS" if outcome == CriterionOutcome.MET.value else "CONTRADICTS",
                     confidence=evidence["confidence"],
+                    source_method=evidence["source_method"],
                 ))
             evaluation.criterion_results.append(result)
 
