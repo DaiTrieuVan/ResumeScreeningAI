@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai
+# SPDX-License-Identifier: MIT
+
 from app.models.recruiter_enums import UploadItemStatus
 from app.services.upload_batch_service import (
     can_transition,

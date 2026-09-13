@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai
+# SPDX-License-Identifier: MIT
+
 import pytest
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient

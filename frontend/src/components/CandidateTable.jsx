@@ -1,3 +1,6 @@
+/* SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai */
+/* SPDX-License-Identifier: MIT */
+
 import React, { useState, useEffect } from 'react';
 import { Search, Eye, Filter, SlidersHorizontal, ChevronLeft, ChevronRight, Award, AlertTriangle, CheckCircle2, Users } from 'lucide-react';
 import { updateCandidateStatus } from '../services/api';

@@ -1,0 +1,13 @@
+Resume Screening AI
+Copyright (c) 2026 226789SBTC - Trieu Van Dai
+
+This product is licensed under the MIT License. See LICENSE for the complete
+license text.
+
+This product uses third-party open-source libraries. Their copyright notices
+and license terms remain with their respective owners. See DEPENDENCIES.md for
+the direct dependency inventory and upstream license references.
+
+Google Gemini is an optional external AI service. The service and its models
+are not distributed as part of this repository. When no Gemini API key is
+configured, the application uses its documented local fallback paths.

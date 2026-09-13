@@ -1,0 +1,59 @@
+name: Báo lỗi
+description: Báo một lỗi có thể tái hiện mà không chứa dữ liệu cá nhân
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: "Không đính kèm CV thật, API key, email, số điện thoại hoặc database."
+  - type: input
+    id: version
+    attributes:
+      label: Phiên bản hoặc commit
+      placeholder: v1.1.0 hoặc SHA
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Phân hệ
+      options:
+        - Recruiter Workspace
+        - Candidate Detail
+        - Real Jobs Portal
+        - Career Gap Advisor
+        - Backend/API
+        - Build/Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Các bước tái hiện
+      description: Dùng dữ liệu tổng hợp hoặc đã ẩn danh.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Kết quả mong đợi
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Kết quả thực tế
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Môi trường
+      placeholder: Windows 11, Edge 130, Python 3.13, Node.js 24
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Kiểm tra dữ liệu
+      options:
+        - label: Tôi đã loại bỏ thông tin cá nhân và khóa bí mật khỏi báo cáo.
+          required: true

@@ -1,8 +1,13 @@
+# SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai
+# SPDX-License-Identifier: MIT
+
 import json
 import logging
 import os
 import numpy as np
 from typing import List, Tuple, Optional
+
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +29,7 @@ def _get_model():
     try:
         from sentence_transformers import SentenceTransformer
         try:
-            _model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+            _model = SentenceTransformer(settings.DEFAULT_EMBEDDING_MODEL)
         except Exception:
             _model = SentenceTransformer("all-MiniLM-L6-v2")
         logger.info("SentenceTransformer loaded successfully.")

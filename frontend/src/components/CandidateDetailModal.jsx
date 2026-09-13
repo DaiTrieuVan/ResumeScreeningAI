@@ -1,3 +1,6 @@
+/* SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai */
+/* SPDX-License-Identifier: MIT */
+
 import React from 'react';
 import { X, CheckCircle2, AlertTriangle, Cpu, Code2, Briefcase, GraduationCap, Award } from 'lucide-react';
 

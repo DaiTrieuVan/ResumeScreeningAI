@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai
+# SPDX-License-Identifier: MIT
+
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel

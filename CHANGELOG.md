@@ -5,6 +5,34 @@ Tất cả thay đổi quan trọng của dự án được ghi lại trong file
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.0.0/),
 và dự án tuân theo [Semantic Versioning](https://semver.org/lang/vi/).
 
+## [Unreleased]
+
+### Added
+- Recruiter Workspace v2 với criteria versioning, mandatory/preferred/bonus requirements và mô phỏng trọng số trước khi publish.
+- Batch upload bền vững, trạng thái từng file, phát hiện trùng lặp và retry có kiểm soát.
+- Candidate evidence review hiển thị kết quả từng tiêu chí, confidence và trích dẫn từ CV.
+- Candidate triage với filter/sort/pagination, saved views, cross-page selection và bulk actions.
+- Decision pipeline có optimistic locking, reason bắt buộc, timeline và audit trail.
+- So sánh 2-5 finalist trên cùng criteria version và biểu diễn `UNKNOWN` tách biệt.
+- Recruiter analytics cho funnel, chất lượng upload, thời gian xử lý và tỷ lệ override AI.
+- Access audit và anonymization xóa CV gốc, PII cùng nội dung dẫn xuất nhạy cảm.
+- Playwright acceptance journeys cho keyboard, responsive, scrolling và comparison.
+- Bộ tài liệu mã nguồn mở, AI, quyền riêng tư, build/deploy và showcase cuộc thi.
+
+### Changed
+- Refactor giao diện theo phong cách sáng, chuyên nghiệp và responsive.
+- Trang khám phá việc làm sử dụng hero banner toàn chiều rộng.
+- Sentence Transformer được lazy-load để ứng dụng và test khởi động ổn định.
+
+### Fixed
+- Candidate detail drawer có vùng cuộn độc lập, không còn bị kẹt ở viewport thấp.
+- Test discovery không còn tải model embedding nặng.
+
+### Security
+- Kiểm tra vai trò khi xem/tải/xuất dữ liệu ứng viên.
+- Audit các lần xem chi tiết, mở CV gốc, xuất CSV và ẩn danh.
+- Loại bỏ dữ liệu evidence và ghi chú có thể chứa PII khi ẩn danh.
+
 ## [1.0.0] - 2026-08-15
 
 ### Added

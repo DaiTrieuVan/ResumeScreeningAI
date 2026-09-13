@@ -1,3 +1,6 @@
+/* SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai */
+/* SPDX-License-Identifier: MIT */
+
 import React, { useState, useEffect } from 'react';
 import { Briefcase, Plus, Play, RefreshCw, Edit3, Trash2, FileText, CheckCircle2, XCircle, Target } from 'lucide-react';
 import { fetchJobs, triggerScreeningStream, fetchJobScreenings, deleteJob } from '../services/api';

@@ -1,3 +1,6 @@
+/* SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai */
+/* SPDX-License-Identifier: MIT */
+
 import React, { useState, useEffect } from 'react';
 import { Sparkles, UploadCloud, Loader2, RefreshCw } from 'lucide-react';
 import RealJobCard from '../components/RealJobCard';
@@ -24,7 +27,7 @@ export default function RealJobsPortal() {
 
   const fetchInitialJobs = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/real-jobs');
+      const res = await fetch('/api/real-jobs');
       const data = await res.json();
       setMatchResults(data.map((j) => ({
         real_job: j,
@@ -52,7 +55,7 @@ export default function RealJobsPortal() {
     setCrawling(true);
     setCrawlStatusMsg('');
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/real-jobs/crawl?limit=50', {
+      const res = await fetch('/api/real-jobs/crawl?limit=50', {
         method: 'POST'
       });
       if (!res.ok) throw new Error('Lấy dữ liệu thất bại');
@@ -77,7 +80,7 @@ export default function RealJobsPortal() {
         formData.append('file', cvFile);
       }
 
-      const res = await fetch('http://127.0.0.1:8000/api/real-jobs/match', {
+      const res = await fetch('/api/real-jobs/match', {
         method: 'POST',
         body: formData
       });

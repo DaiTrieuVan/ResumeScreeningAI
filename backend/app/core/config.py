@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai
+# SPDX-License-Identifier: MIT
+
 import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -7,7 +10,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite+aiosqlite:///./resume_screening.db"
     STORAGE_DIR: str = os.path.abspath("./storage/resumes")
     GEMINI_API_KEY: str = ""
-    DEFAULT_EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
+    DEFAULT_EMBEDDING_MODEL: str = "paraphrase-multilingual-MiniLM-L12-v2"
     DEFAULT_LLM_MODEL: str = "gemini-1.5-flash"
     RECRUITER_WORKSPACE_V2_ENABLED: bool = True
     

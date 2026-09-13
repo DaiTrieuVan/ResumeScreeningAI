@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai
+# SPDX-License-Identifier: MIT
+
 import app.models.candidate_evaluation  # noqa: F401
 import app.models.candidate_resume  # noqa: F401
 import app.models.job_posting  # noqa: F401

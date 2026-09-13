@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai
+# SPDX-License-Identifier: MIT
+
 import re
 import pdfplumber
 from app.core.exceptions import ParsingException
@@ -18,28 +21,9 @@ def sanitize_extracted_text(text: str) -> str:
 
 def extract_text_from_pdf(file_path: str) -> str:
     """
-    Extracts text stream from a PDF file using PyMuPDF (fitz) for maximum speed (5-15ms),
-    with pdfplumber as a fallback.
+    Extracts text from a digital PDF with the MIT-licensed pdfplumber package.
     """
     full_text = []
-    
-    # Primary: PyMuPDF (fitz) - High performance C engine
-    try:
-        import fitz
-        doc = fitz.open(file_path)
-        for page in doc:
-            text = page.get_text()
-            if text:
-                full_text.append(text)
-        doc.close()
-        extracted = " ".join(full_text)
-        sanitized = sanitize_extracted_text(extracted)
-        if sanitized:
-            return sanitized
-    except Exception:
-        pass  # Fallback to pdfplumber below
-
-    # Fallback: pdfplumber
     try:
         with pdfplumber.open(file_path) as pdf:
             for page in pdf.pages:

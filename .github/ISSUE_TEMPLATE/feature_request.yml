@@ -1,0 +1,29 @@
+name: Đề xuất tính năng
+description: Đề xuất cải tiến có vấn đề người dùng và tiêu chí nghiệm thu rõ ràng
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Vấn đề người dùng
+      description: Ai gặp vấn đề gì, trong bối cảnh nào?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Kết quả mong muốn
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Tiêu chí nghiệm thu
+      placeholder: "- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Rủi ro AI, quyền riêng tư hoặc tương thích
