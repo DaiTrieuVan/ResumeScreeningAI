@@ -1,283 +1,370 @@
-# Kịch bản thuyết trình Resume Screening AI
+# Kịch bản thuyết trình toàn bộ dự án Resume Screening AI
 
-## Chiến lược trình bày
+## 1. Cách kể đúng về sản phẩm
 
-Không trình bày theo kiểu liệt kê tính năng và cũng không mở đầu bằng kiến trúc kỹ thuật. Cấu trúc thuyết phục nhất là:
-
-```text
-Nỗi đau thật -> Quyết định khó -> Demo giải pháp -> Bằng chứng cơ chế -> Kết quả đo -> Tác động
-```
-
-Tỷ trọng đề xuất cho 6 phút 30 giây:
-
-- 55% câu chuyện nghiệp vụ và live demo.
-- 25% cơ chế AI/kiến trúc để chứng minh độ tin cậy.
-- 15% kết quả đo, mã nguồn mở và khả năng tái tạo.
-- 5% kết luận và lời mời cộng đồng.
-
-Nguyên tắc: mỗi chức năng chỉ xuất hiện khi nó trả lời một câu hỏi của recruiter. Sau mỗi thao tác, nói một câu về giá trị và tối đa một câu về cơ chế.
-
-## Thông điệp trung tâm
-
-> Resume Screening AI không thay recruiter bằng một con số. Hệ thống giúp họ xử lý hàng trăm CV nhanh hơn, nhưng mọi kết luận đều có tiêu chí, bằng chứng và quyết định cuối cùng vẫn thuộc về con người.
-
-Ba điểm khán giả phải nhớ sau phần thi:
-
-1. AI không bịa kết luận khi thiếu dữ liệu: hệ thống trả `UNKNOWN`.
-2. Mọi nhận định quan trọng dẫn về bằng chứng trong CV và có thể được con người sửa/audit.
-3. Hệ thống vẫn chạy khi mất Internet/Gemini và có thể build lại từ mã nguồn mở.
-
-## Ba khoảnh khắc “wow” chính
-
-### Wow 1 - Điểm cao chưa chắc phù hợp
-
-Chọn một ứng viên có điểm tổng cao nhưng thiếu một yêu cầu bắt buộc. Hệ thống không tự shortlist; mandatory gate chuyển sang cần kiểm tra hoặc không đạt.
-
-**Thông điệp**: “Một điểm trung bình đẹp không được phép che khuất điều kiện tuyển dụng quan trọng.”
-
-### Wow 2 - Bấm vào kết luận, tới đúng bằng chứng
-
-Từ criterion “Git” hoặc “2 năm kinh nghiệm”, bấm evidence để CV chuyển tới đúng trang/đoạn. Sau đó mở một criterion thiếu dữ liệu để thấy `UNKNOWN`, không phải `NOT_MET`.
-
-**Thông điệp**: “AI phải chỉ ra nó đọc thấy điều gì, ở đâu và tự tin đến mức nào.”
-
-### Wow 3 - Con người có quyền sửa và quyết định
-
-Sửa một dữ liệu trích xuất sai hoặc override recommendation, nhập lý do rồi mở timeline. Kết quả AI gốc vẫn còn, quyết định con người được lưu riêng.
-
-**Thông điệp**: “Chúng tôi tự động hóa việc đọc hồ sơ, không tự động hóa trách nhiệm.”
-
-## Kịch bản mục tiêu 6 phút 30 giây
-
-### 0:00-0:30 - Hook: 300 CV và một quyết định không thể giải thích
-
-**Màn hình**: Slide mở đầu tối giản, chỉ có “300 CV - 1 vị trí - Bạn sẽ tin điểm AI nào?”
-
-**Lời thoại**:
-
-“Hãy tưởng tượng anh chị là recruiter và sáng nay nhận 300 CV cho một vị trí. Đọc thủ công thì mất nhiều ngày. Nhưng nếu AI chỉ trả về ‘82% phù hợp’, chúng ta vẫn chưa biết 82% dựa trên tiêu chí nào, bằng chứng ở đâu và liệu một yêu cầu bắt buộc có bị che khuất hay không.”
-
-“Đó là lý do nhóm xây dựng Resume Screening AI: tăng tốc sàng lọc nhưng vẫn giữ được bằng chứng, khả năng kiểm tra và trách nhiệm của con người.”
-
-**Không làm**: giới thiệu tên từng thành viên dài, đọc stack công nghệ hoặc kể lịch sử dự án.
-
-### 0:30-1:05 - Đặt luật chơi trước khi AI chấm
-
-**Màn hình**: Recruiter Workspace, một JD đã chuẩn bị; criteria mandatory/preferred và tổng trọng số.
-
-**Thao tác**:
-
-1. Chọn JD demo.
-2. Chỉ vào mandatory/preferred.
-3. Thử tổng trọng số 95% để validation xuất hiện, sau đó trở về cấu hình đã publish.
-
-**Lời thoại**:
-
-“AI không tự nghĩ ra thế nào là ứng viên tốt. Recruiter đặt luật chơi trước: đâu là bắt buộc, đâu là ưu tiên và trọng số nào được dùng. Mỗi bộ tiêu chí được lưu thành phiên bản; slider chưa publish chỉ là mô phỏng và không âm thầm đổi điểm chính thức.”
-
-**Cơ chế một câu**: “Mỗi evaluation luôn gắn với một criteria version bất biến nên có thể tái hiện.”
-
-### 1:05-1:50 - Upload batch chịu lỗi
-
-**Màn hình**: Batch gồm 8-10 CV synthetic: hợp lệ, trùng, scan và PDF lỗi.
-
-**Thao tác**:
-
-1. Kéo thả cả lô.
-2. Chỉ trạng thái từng file và progress tổng.
-3. Xử lý một duplicate hoặc retry item lỗi.
-
-**Lời thoại**:
-
-“Trong thực tế, 300 CV không bao giờ sạch như nhau. Vì vậy lỗi một file không được làm dừng cả lô. Hệ thống theo dõi từng CV, phát hiện trùng ở nhiều lớp, giữ kết quả đã thành công và đưa file scan sang đường kiểm tra/OCR thay vì coi ứng viên là không đạt.”
-
-**Cơ chế một câu**: “Mỗi item có state riêng, idempotency và recovery nên retry hoặc restart không tạo hồ sơ trùng.”
-
-### 1:50-3:15 - Wow trung tâm: AI có bằng chứng
-
-**Màn hình**: Bảng xếp hạng rồi Candidate Review Drawer chia đôi CV/kết quả.
-
-**Thao tác**:
-
-1. Mở ứng viên điểm cao nhưng mandatory gate chưa qua.
-2. Bấm evidence “Git” để tới đúng trang CV.
-3. Mở criterion “RESTful API” không có evidence và chỉ `UNKNOWN`.
-4. Chỉ confidence và nguồn NATIVE/OCR/MANUAL.
-
-**Lời thoại**:
-
-“Ứng viên này đạt điểm tổng cao, nhưng hệ thống không tự shortlist vì còn một yêu cầu bắt buộc chưa đủ bằng chứng.”
-
-“Với Git, AI không chỉ nói ‘đạt’. Chúng ta bấm vào đây và quay lại đúng đoạn CV mà hệ thống đã dùng. Còn với RESTful API, không tìm thấy bằng chứng không có nghĩa là ứng viên chắc chắn không biết. Kết quả đúng phải là ‘chưa đủ dữ liệu’ và cần recruiter xác minh.”
-
-“Đây là khác biệt giữa một công cụ xếp hạng và một hệ thống hỗ trợ quyết định có thể kiểm chứng.”
-
-**Cơ chế 20 giây**:
+Resume Screening AI không chỉ là một màn hình sàng lọc CV. Đây là một nền tảng AI hai chiều cho thị trường tuyển dụng:
 
 ```text
-PDF -> text theo trang -> semantic/rule matching
-    -> criteria result -> evidence validation -> recruiter decision
+Doanh nghiệp có JD                         Ứng viên có CV
+        │                                      │
+        ├── tìm đúng người      tìm đúng việc ─┤
+        │                                      │
+        └────────── AI Matching Core ──────────┘
+                     │
+          Điểm + bằng chứng + khoảng trống
+                     │
+             Con người ra quyết định
 ```
 
-“Embedding giúp tìm tương đồng ngữ nghĩa; rule kiểm tra tiêu chí; Gemini là lớp reasoning tùy chọn. Evidence validator không cho một kết luận thiếu nguồn trở thành sự thật chắc chắn.”
+Câu chuyện thuyết trình phải đi qua cả hai phía:
 
-### 3:15-4:00 - Human-in-the-loop và audit
+- Nhà tuyển dụng: tạo yêu cầu, xử lý nhiều CV, đánh giá và ra quyết định.
+- Người tìm việc: khám phá việc làm thật và nhận lộ trình cải thiện CV.
 
-**Màn hình**: Correction/Decision Panel và timeline.
+Không trình bày theo menu và không đọc danh sách tính năng. Mỗi phân hệ phải trả lời một câu hỏi thực tế trong cùng một hành trình.
+
+## 2. Thông điệp trung tâm
+
+> Resume Screening AI là cầu nối thông minh giữa yêu cầu của doanh nghiệp và năng lực của ứng viên: giúp doanh nghiệp tìm đúng người, giúp ứng viên tìm đúng việc, đồng thời giải thích rõ vì sao hai phía phù hợp hoặc còn thiếu điều gì.
+
+Ba điều khán giả cần nhớ:
+
+1. Một AI matching core được tái sử dụng cho cả recruiter và ứng viên.
+2. AI không chỉ cho điểm mà còn đưa ra thành phần điểm, bằng chứng, điểm mạnh và khoảng trống.
+3. Hệ thống hoạt động như công cụ hỗ trợ quyết định, có fallback và có thể tái tạo từ mã nguồn mở.
+
+## 3. Tỷ trọng bài trình bày
+
+Trong 7 phút:
+
+- 15% bài toán và tầm nhìn toàn dự án.
+- 50% live demo bốn phân hệ.
+- 15% cơ chế AI và kiến trúc.
+- 10% độ ổn định, mã nguồn mở và khả năng tái tạo.
+- 10% kết quả, tác động và kết luận.
+
+Cơ chế hoạt động cần được trình bày, nhưng chỉ sau khi khán giả đã thấy giá trị. Công thức cho mỗi đoạn demo là:
+
+> Người dùng cần gì → sản phẩm làm gì → kết quả có ý nghĩa gì → một câu giải thích cơ chế.
+
+## 4. Bốn khoảnh khắc nổi bật của toàn dự án
+
+### Khoảnh khắc 1 - Từ hàng trăm CV đến shortlist có kiểm soát
+
+Upload một batch gồm CV tốt, CV thiếu dữ liệu, file trùng và file lỗi. Bảng xếp hạng vẫn hình thành; lỗi một file không làm dừng cả lô.
+
+**Giá trị**: tự động hóa công việc lặp lại của recruiter mà không mất khả năng kiểm soát.
+
+### Khoảnh khắc 2 - Từ điểm số về đúng CV gốc
+
+Mở Candidate Detail, xem điểm Skills/Experience/Education, strengths/gaps và bấm vào evidence để kiểm tra trong CV. Một yêu cầu không có bằng chứng phải là `UNKNOWN`, không tự động là không đạt.
+
+**Giá trị**: biến AI từ “hộp đen cho điểm” thành trợ lý có thể kiểm chứng.
+
+### Khoảnh khắc 3 - Một CV tự tìm ra việc phù hợp
+
+Tải cùng CV lên Real Jobs Portal. AI nhận diện nhóm nghề, xếp lại công việc từ TopCV/ITViec theo tỷ lệ phù hợp và giải thích điểm mạnh/khoảng trống trước khi ứng tuyển.
+
+**Giá trị**: đảo chiều bài toán matching để phục vụ người tìm việc.
+
+### Khoảnh khắc 4 - Khoảng trống trở thành lộ trình
+
+Đưa CV và JD mục tiêu vào Career Gap Advisor. Hệ thống không dừng ở “chưa phù hợp” mà chỉ ra kỹ năng đã có, kỹ năng thiếu và các bước ưu tiên tiếp theo.
+
+**Giá trị**: chuyển kết quả matching thành hành động phát triển nghề nghiệp.
+
+## 5. Kịch bản sân khấu 7 phút
+
+### 0:00-0:40 - Hook: cùng một khoảng cách, hai phía đều gặp khó
+
+**Màn hình**: Slide mở đầu với hai cột “Doanh nghiệp: quá nhiều CV” và “Ứng viên: quá nhiều việc làm”. Ở giữa là chữ “Mismatch”.
+
+**Lời thoại**:
+
+“Thị trường tuyển dụng đang có một nghịch lý. Doanh nghiệp nhận hàng trăm CV nhưng vẫn khó tìm đúng người. Ứng viên nhìn thấy hàng nghìn tin tuyển dụng nhưng vẫn không biết công việc nào thực sự phù hợp với mình.”
+
+“Hai vấn đề này thực chất là cùng một bài toán: khoảng cách giữa yêu cầu công việc và năng lực được thể hiện trong CV.”
+
+“Resume Screening AI sử dụng một lõi matching chung để giải quyết khoảng cách đó cho cả hai phía.”
+
+### 0:40-1:05 - Bản đồ toàn bộ sản phẩm
+
+**Màn hình**: Slide một dòng gồm bốn phân hệ.
+
+```text
+Recruiter Workspace → Candidate Intelligence → Real Jobs → Career Gap Advisor
+```
+
+**Lời thoại**:
+
+“Sản phẩm có bốn phân hệ liên kết. Nhà tuyển dụng tổ chức một đợt sàng lọc; Candidate Intelligence giải thích từng hồ sơ; Real Jobs giúp ứng viên tìm cơ hội phù hợp; Career Gap Advisor biến phần còn thiếu thành lộ trình cải thiện.”
+
+“Sau đây tôi sẽ dùng một JD và một nhóm CV xuyên suốt để cho thấy dữ liệu di chuyển qua toàn hệ thống như thế nào.”
+
+### 1:05-2:20 - Phân hệ 1: Recruiter Workspace
+
+**Màn hình**: Không gian tuyển dụng với JD demo và batch CV đã chuẩn bị.
 
 **Thao tác**:
 
-1. Sửa một kỹ năng/số năm bị parser đọc sai, kèm lý do.
-2. Cho thấy evaluation chuyển stale/cần chạy lại.
-3. Shortlist hoặc reject một ứng viên với reason.
-4. Mở timeline.
+1. Chọn hoặc tạo JD “Software Engineer”.
+2. Chỉ vào trọng số Skills/Experience/Education và tiêu chí bắt buộc.
+3. Upload 8-10 CV synthetic cùng lúc.
+4. Cho thấy progress từng file, duplicate, file lỗi và ranking/filter.
 
 **Lời thoại**:
 
-“AI có thể sai, nên recruiter phải sửa được dữ liệu. Khi sửa, hệ thống không âm thầm thay quá khứ: evaluation bị đánh dấu cần chạy lại, còn timeline lưu người sửa, thời gian và lý do.”
+“Đầu tiên, recruiter mô tả vị trí và xác định điều gì quan trọng. Trọng số cho phép điều chỉnh theo từng vai trò, còn tiêu chí bắt buộc được đánh giá riêng để một điểm trung bình cao không che khuất yêu cầu quan trọng.”
 
-“Recommendation của AI và quyết định con người tồn tại song song. Đây là cách hệ thống tăng tốc mà không đẩy trách nhiệm sang thuật toán.”
+“Thay vì tải từng hồ sơ, recruiter có thể đưa cả batch vào hệ thống. Mỗi file có trạng thái riêng: hợp lệ, đang phân tích, trùng, cần kiểm tra hoặc lỗi. Một PDF hỏng không làm mất kết quả của các CV còn lại.”
 
-### 4:00-4:35 - So sánh finalist và blind review
+“Kết quả được xếp hạng, tìm kiếm, lọc theo điểm/trạng thái/khoảng trống và có thể đưa qua các bước xử lý tuyển dụng.”
 
-**Màn hình**: Comparison 3 ứng viên, bật Blind Review.
+**Cơ chế một câu**: “Mỗi lần chấm gắn với đúng JD, trọng số và phiên bản tiêu chí đã sử dụng nên kết quả có thể truy vết.”
+
+### 2:20-3:20 - Phân hệ 2: Candidate Intelligence
+
+**Màn hình**: Candidate Detail của một hồ sơ có điểm khá cao nhưng còn thiếu mandatory evidence.
 
 **Thao tác**:
 
-1. So sánh 3 hồ sơ cùng criteria version.
-2. Bật blind review để tên/email/file/evidence nhận diện được che.
+1. Mở hồ sơ từ bảng xếp hạng.
+2. Chỉ breakdown Skills/Experience/Education.
+3. Chỉ strengths, gaps và honors nếu fixture có.
+4. Mở evidence trong CV và một criterion `UNKNOWN`.
+5. Nếu final đã hoàn thiện, sửa một dữ liệu sai hoặc mở decision timeline.
 
 **Lời thoại**:
 
-“Ở vòng cuối, recruiter so sánh ứng viên trên cùng một bộ tiêu chí thay vì ghi nhớ nhiều cửa sổ. Với blind review, các trường nhận diện được che ở bảng, hồ sơ, so sánh và export để vòng đánh giá đầu tập trung vào bằng chứng nghề nghiệp.”
+“Một con số 82% chưa đủ để tuyển dụng. Vì vậy hồ sơ chi tiết phân rã điểm thành kỹ năng, kinh nghiệm và học vấn; đồng thời chỉ ra điểm mạnh, khoảng trống và thành tích nổi bật.”
 
-**Lưu ý**: Chỉ demo blind review khi privacy test matrix đã pass 100%.
+“Quan trọng hơn, mỗi kết luận có thể dẫn về bằng chứng trong CV. Với kỹ năng này, hệ thống tìm thấy nguồn trực tiếp. Với yêu cầu kia, hệ thống không tìm thấy bằng chứng nên trả về ‘chưa đủ dữ liệu’, không tự quy kết ứng viên không đạt.”
 
-### 4:35-5:05 - Hai phía của thị trường lao động
+“AI đưa ra recommendation; recruiter mới là người shortlist hoặc từ chối. Nếu con người quyết định khác AI, cả hai kết quả được giữ riêng trong lịch sử.”
 
-**Màn hình**: Real Jobs Portal và Career Gap Advisor; mỗi màn chỉ 10-12 giây.
+**Câu nhấn**: “Chúng tôi tự động hóa việc đọc hồ sơ, không tự động hóa trách nhiệm tuyển dụng.”
+
+### 3:20-4:20 - Phân hệ 3: Real Jobs Portal
+
+**Màn hình**: Trang Khám phá việc làm với banner, danh sách việc làm và CV đã chọn sẵn.
+
+**Thao tác**:
+
+1. Cho thấy dữ liệu việc làm từ TopCV/ITViec hoặc curated fallback.
+2. Upload một CV.
+3. Bấm “Gợi ý việc phù hợp”.
+4. Chỉ ngành nghề được nhận diện, match percentage và lý do.
+5. Lọc theo địa điểm/ngành/điểm rồi mở link ứng tuyển.
 
 **Lời thoại**:
 
-“Cùng nền tảng matching này còn phục vụ người tìm việc: CV được ghép với tin tuyển dụng thực tế và chỉ ra khoảng trống so với JD mục tiêu. Vì vậy sản phẩm không chỉ giúp doanh nghiệp tìm đúng người, mà còn giúp ứng viên biết mình cần cải thiện điều gì.”
+“Bây giờ chúng ta chuyển sang phía ứng viên. Thay vì nhập hàng loạt từ khóa, người dùng chỉ cần tải CV. Hệ thống nhận diện nhóm chuyên môn rồi xếp lại các công việc thực tế theo mức phù hợp cá nhân.”
 
-**Không làm**: cuộn danh sách việc làm dài hoặc giải thích crawler chi tiết.
+“Mỗi kết quả không chỉ có tỷ lệ match. Ứng viên biết mình phù hợp ở kỹ năng nào, còn thiếu điều gì, mức kinh nghiệm ra sao và có thể đi tới nguồn tuyển dụng gốc.”
 
-### 5:05-5:40 - Chứng minh AI bằng số liệu
+“Nếu website nguồn thay đổi hoặc mất mạng, curated feed giữ hành trình demo hoạt động và hệ thống thể hiện rõ đang dùng fallback.”
 
-**Màn hình**: Một slide/report chỉ có 4 metric chính và cỡ mẫu.
+**Cơ chế một câu**: “Cùng biểu diễn CV/JD và scoring core ở phía recruiter được đảo chiều để xếp hạng nhiều việc làm cho một ứng viên.”
+
+### 4:20-5:05 - Phân hệ 4: Career Gap Advisor
+
+**Màn hình**: Cố vấn nghề nghiệp với cùng CV và một JD mục tiêu cao hơn.
+
+**Thao tác**:
+
+1. Dán JD mục tiêu.
+2. Chọn CV đã chuẩn bị.
+3. Chạy phân tích.
+4. Chỉ matched skills, missing skills và roadmap.
+
+**Lời thoại**:
+
+“Nếu ứng viên chưa phù hợp thì sao? Một hệ thống tốt không nên chỉ trả về ‘không đạt’.”
+
+“Career Gap Advisor so sánh CV với vị trí mục tiêu, tách rõ năng lực hiện có và khoảng trống, sau đó ưu tiên các bước cải thiện. Kết quả matching vì vậy trở thành một lộ trình hành động chứ không phải một bản án.”
+
+“Đây là vòng khép kín của sản phẩm: doanh nghiệp hiểu ứng viên, ứng viên hiểu thị trường và hiểu mình cần phát triển điều gì.”
+
+### 5:05-5:50 - Cơ chế AI chung của toàn hệ thống
+
+**Màn hình**: Một slide kiến trúc đơn giản, không mở source code.
+
+```text
+CV/JD/PDF
+   ↓
+Trích xuất và chuẩn hóa dữ liệu
+   ↓
+Semantic matching + scoring theo thành phần
+   ↓
+Gemini reasoning/reranking (tùy chọn)
+   ↓
+Evidence, strengths, gaps và recommendation
+   ↓
+Recruiter hoặc ứng viên hành động
+```
+
+**Lời thoại**:
+
+“Bốn phân hệ không phải bốn demo rời rạc. Chúng dùng chung một pipeline.”
+
+“PDF được trích xuất và chuẩn hóa. Embedding đo tương đồng ngữ nghĩa thay vì chỉ đếm từ khóa. Scoring phân tích kỹ năng, kinh nghiệm và học vấn. Gemini có thể bổ sung reasoning/reranking, nhưng không phải dependency bắt buộc.”
+
+“Lớp cuối cùng chuyển kết quả thành evidence cho recruiter, job recommendation cho ứng viên hoặc skill roadmap cho định hướng nghề nghiệp.”
+
+**Không nói**: chi tiết class, database table, endpoint hoặc công thức dài trừ khi giám khảo hỏi.
+
+### 5:50-6:20 - Độ ổn định, Responsible AI và mã nguồn mở
+
+**Màn hình**: Slide ba cột “Reliable - Responsible - Open”.
+
+**Lời thoại**:
+
+“Hệ thống có local fallback khi Gemini, model hoặc crawler không khả dụng; batch chịu lỗi theo từng file; test tự động bao phủ backend, component và hành trình trình duyệt.”
+
+“AI không auto-reject. Thiếu bằng chứng là UNKNOWN. Dữ liệu demo là synthetic/ẩn danh, và hệ thống hỗ trợ audit, quyền truy cập và anonymization.”
+
+“Dự án phát hành theo MIT, mã nguồn có SPDX, dependency/license được kiểm kê và release có thể build lại từ source.”
+
+### 6:20-6:40 - Kết quả đo được
+
+**Màn hình**: Slide metric final.
 
 **Lời thoại mẫu**:
 
-“Chúng tôi không dùng target làm kết quả. Trên bộ [N] CV synthetic/ẩn danh, [M] JD, phiên bản [dataset], chế độ [offline/online], hệ thống đạt mandatory recall [x], evidence precision [y], UNKNOWN accuracy [z] và ranking agreement [r]. Báo cáo ghi đầy đủ model, criteria, prompt, release SHA và case lỗi.”
+“Trên bộ [N] CV synthetic/ẩn danh và [M] JD, phiên bản [dataset], hệ thống đạt mandatory recall [x], evidence precision [y], UNKNOWN accuracy [z] và ranking agreement [r]. Toàn bộ report gắn với release SHA và cấu hình AI cụ thể.”
 
-**Quy tắc bắt buộc**:
+**Quy tắc**:
 
-- Chỉ điền số từ benchmark final đã commit/release.
-- Hiển thị sample size cạnh metric.
-- Nếu metric chưa đạt, nói rõ giới hạn và cách manual review giảm rủi ro.
-- Không dùng từ “chính xác tuyệt đối”, “không thiên lệch” hoặc “production-ready”.
+- Chỉ thay placeholder bằng kết quả benchmark final.
+- Luôn hiển thị sample size và mode online/offline.
+- Không dùng target hoặc số test tự động thay cho chất lượng AI thực đo.
 
-### 5:40-6:10 - Mã nguồn mở và khả năng sống sót khi mất mạng
+### 6:40-7:00 - Kết luận toàn dự án
 
-**Màn hình**: Slide kiến trúc + repository/release, không mở terminal dài.
-
-**Lời thoại**:
-
-“Sản phẩm được phát hành theo MIT, mỗi file code có SPDX, dependency và license được kiểm kê. Giám khảo có thể clone đúng release, build từ source và chạy lại benchmark.”
-
-“Gemini, embedding model và crawler đều có fallback. Khi mất Internet, demo recruiter vẫn hoạt động bằng pipeline deterministic và dữ liệu curated; trạng thái fallback được hiển thị thay vì che giấu.”
-
-### 6:10-6:30 - Kết thúc có câu nhớ
-
-**Màn hình**: Logo + ba từ khóa “Nhanh hơn - Có bằng chứng - Con người quyết định”.
+**Màn hình**: Hai phía thị trường được nối bằng Resume Screening AI.
 
 **Lời thoại**:
 
-“Resume Screening AI không cố thay thế recruiter. Chúng tôi loại bỏ hàng giờ đọc lặp lại, nhưng giữ lại phần quan trọng nhất: tiêu chí minh bạch, bằng chứng kiểm chứng được và quyền quyết định của con người.”
+“Resume Screening AI không chỉ giúp đọc CV nhanh hơn. Sản phẩm tạo một ngôn ngữ chung giữa điều doanh nghiệp cần và điều ứng viên có.”
 
-“AI tuyển dụng đáng tin không phải AI luôn trả lời. Đó là AI biết khi nào mình chưa đủ dữ liệu.”
+“Doanh nghiệp tìm đúng người bằng kết quả có thể kiểm chứng. Ứng viên tìm đúng việc và biết bước tiếp theo để tiến gần hơn tới công việc mình muốn.”
 
-## Cấu trúc slide tối đa 7 trang
+“Tìm đúng người. Tìm đúng việc. Và luôn hiểu vì sao.”
 
-1. **Hook**: 300 CV - 1 vị trí - tin điểm AI nào?
-2. **Luồng nghiệp vụ**: Criteria -> Batch -> Evidence -> Human decision.
-3. **Điểm khác biệt**: evidence, UNKNOWN, versioning, audit.
-4. **AI mechanism**: pipeline 5 bước, online/offline fallback.
-5. **Measured results**: 4 metric + sample size + version.
-6. **Open source/reproducibility**: MIT, CI, release, clean-room.
-7. **Closing**: Nhanh hơn - Có bằng chứng - Con người quyết định.
+## 6. Cấu trúc slide tối đa 8 trang
 
-Slide không lặp lại UI. Live demo là bằng chứng chính; slide chỉ giúp khán giả hiểu ý nghĩa.
+1. **The mismatch**: doanh nghiệp quá nhiều CV, ứng viên quá nhiều lựa chọn.
+2. **One core, two journeys**: sơ đồ hai phía và bốn phân hệ.
+3. **Recruiter flow**: JD → batch → ranking → decision.
+4. **Explainable candidate intelligence**: score breakdown + evidence + UNKNOWN.
+5. **Candidate flow**: Real Jobs → Gap Advisor.
+6. **Shared AI mechanism**: pipeline năm bước.
+7. **Proof**: benchmark + reliability + open-source release.
+8. **Closing**: “Tìm đúng người. Tìm đúng việc. Luôn hiểu vì sao.”
 
-## Dữ liệu demo cần chuẩn bị
+Slide 3-5 chỉ dùng ảnh hoặc sơ đồ đơn giản; phần chứng minh chính diễn ra trong live demo.
 
-- Một JD Software Engineer có 3 mandatory, 3 preferred và trọng số hợp lệ.
-- 8-10 CV synthetic có tên rõ để thao tác nhưng không giống người thật.
-- Một CV điểm cao nhưng thiếu mandatory.
-- Một CV có evidence rõ ở trang 2 hoặc 3.
-- Một CV không đủ dữ liệu để tạo `UNKNOWN`.
-- Một CV trùng, một PDF scan và một PDF lỗi.
-- Ba finalist phù hợp để comparison.
-- Dataset/report benchmark final và một bản offline.
+## 7. Dữ liệu demo xuyên suốt
 
-Không chọn dữ liệu quá hoàn hảo. File lỗi, duplicate và `UNKNOWN` chính là bằng chứng sản phẩm xử lý thế giới thực.
+Không dùng dữ liệu khác nhau cho từng phân hệ. Chuẩn bị một “demo universe” thống nhất:
 
-## Phương án dự phòng khi demo lỗi
+- Một JD Software Engineer và một JD mục tiêu Senior AI Engineer.
+- 8-10 CV synthetic, trong đó một CV được dùng xuyên suốt phía ứng viên.
+- Một hồ sơ điểm cao nhưng thiếu mandatory.
+- Một hồ sơ có evidence rõ ở trang 2/3 và một criterion `UNKNOWN`.
+- Một file trùng, một PDF scan và một PDF hỏng.
+- 15-20 job listing thuộc nhiều ngành, có ít nhất 3 kết quả phù hợp với CV chính.
+- Gap Advisor phải cho ra 2-3 matched skills, 2-3 gaps và roadmap dễ hiểu.
 
-| Sự cố | Câu chuyển | Hành động |
+Sự liên tục của dữ liệu giúp khán giả cảm thấy đây là một sản phẩm thống nhất thay vì bốn trang web ghép lại.
+
+## 8. Những thứ nên khoe và không nên sa đà
+
+### Nên khoe
+
+- Bốn phân hệ dùng chung matching core.
+- Batch CV chịu lỗi và phát hiện trùng.
+- Scoring theo Skills/Experience/Education và mandatory gate.
+- Candidate evidence, `UNKNOWN`, strengths/gaps và human decision.
+- Nhận diện chuyên môn CV và rerank việc làm thật.
+- Gap roadmap có hành động cụ thể.
+- Online/offline fallback.
+- Test, MIT/SPDX, tài liệu và release tái tạo được.
+
+### Chỉ nói khi được hỏi
+
+- Danh sách endpoint và database table.
+- Chi tiết migration hoặc state enum.
+- Tên mọi dependency.
+- Tất cả filter/export/button phụ.
+- Toàn bộ lịch sử refactor giao diện.
+
+### Không tuyên bố
+
+- “AI chính xác tuyệt đối”.
+- “Không có bias”.
+- “Thay thế recruiter”.
+- “Production-ready” khi authentication, encryption và hạ tầng production chưa hoàn chỉnh.
+- “Dữ liệu real-time” nếu đang sử dụng curated fallback.
+
+## 9. Câu hỏi phản biện toàn dự án
+
+### “Sản phẩm giải quyết một hay nhiều bài toán?”
+
+“Một bài toán nền tảng là đo và giải thích khoảng cách CV-JD. Bốn phân hệ là bốn hành động khác nhau trên cùng kết quả: recruiter sàng lọc, kiểm chứng ứng viên, người tìm việc khám phá việc và xây lộ trình.”
+
+### “Điểm khác biệt với ATS hoặc job portal thông thường?”
+
+“ATS thường quản lý pipeline, job portal thường tìm bằng từ khóa. Sản phẩm kết nối hai phía bằng cùng AI core, đồng thời bổ sung criteria version, component score, evidence, UNKNOWN, strengths/gaps và human audit.”
+
+### “Gemini có phải toàn bộ AI không?”
+
+“Không. Trích xuất, semantic embedding, component scoring và rule/evidence vẫn hoạt động độc lập. Gemini là reasoning/reranking tùy chọn; report luôn ghi rõ mode.”
+
+### “Dữ liệu TopCV/ITViec có thực sự trực tiếp không?”
+
+“Hệ thống có connector để cập nhật metadata và link nguồn. Vì website ngoài có thể thay đổi hoặc giới hạn truy cập, demo có curated fallback và hiển thị rõ nguồn/mode; người dùng luôn đi tới tin gốc để ứng tuyển.”
+
+### “Nếu CV thiếu thông tin thì sao?”
+
+“Thiếu dữ liệu không đồng nghĩa không đạt. Hệ thống dùng UNKNOWN/manual review, hiển thị confidence và cho kiểm chứng trên CV gốc.”
+
+### “Career Gap Advisor có bịa khóa học không?”
+
+“Kết quả tập trung vào khoảng trống kỹ năng và thứ tự ưu tiên. Chỉ hiển thị tài nguyên cụ thể khi nguồn được kiểm chứng; không biến nội dung sinh tự động thành chứng chỉ hay cam kết việc làm.”
+
+### “AI có ra quyết định tuyển dụng không?”
+
+“Không. AI đưa ra recommendation và evidence; recruiter quyết định. Override và lý do được lưu riêng để audit.”
+
+### “Tại sao đây là dự án mã nguồn mở có thể tin được?”
+
+“Repository có lịch sử phát triển thực, giấy phép MIT/SPDX, dependency inventory, test/CI, build guide, AI documentation, benchmark và release được kiểm tra clean-room.”
+
+## 10. Phương án dự phòng sân khấu
+
+| Sự cố | Hành động | Câu chuyển |
 |---|---|---|
-| Gemini/Internet lỗi | “Đây cũng là tình huống hệ thống được thiết kế để chịu được.” | Chỉ fallback badge và tiếp tục offline |
-| Crawler lỗi | “Nguồn ngoài thay đổi không được phép làm hỏng hành trình chính.” | Dùng curated feed |
-| Batch chạy chậm | “Trạng thái được lưu ở từng item; tôi chuyển sang batch đã chuẩn bị.” | Mở batch pre-seeded |
-| PDF viewer lỗi | “Evidence vẫn giữ page và excerpt để kiểm chứng.” | Mở CV tab dự phòng/screenshot |
-| Máy demo lỗi | “Đây là cùng release và dataset đã được ghi trong benchmark.” | Phát video offline |
+| Gemini/Internet lỗi | Bật/open offline seed | “Đây là lúc fallback chứng minh hệ thống không phụ thuộc một dịch vụ.” |
+| Crawler lỗi | Dùng curated job feed | “Nguồn ngoài không được phép làm hỏng trải nghiệm cốt lõi.” |
+| Batch live chạy chậm | Mở batch pre-seeded | “Trạng thái được lưu theo từng CV; đây là batch đã hoàn tất từ cùng dataset.” |
+| PDF viewer lỗi | Mở tab CV/screenshot evidence | “Evidence vẫn giữ trang và excerpt để người dùng kiểm chứng.” |
+| Gap Advisor phản hồi chậm | Mở result đã chuẩn bị | “Kết quả này được tạo từ cùng CV và JD trong demo.” |
+| Máy demo lỗi | Phát video offline | “Video sử dụng đúng release SHA và dataset được công bố.” |
 
-Không xin lỗi dài và không cố sửa code trên sân khấu.
+Không sửa code, cài dependency hoặc nhập API key trên sân khấu.
 
-## Câu hỏi phản biện và câu trả lời ngắn
+## 11. Checklist diễn tập
 
-### “Điểm AI được tính như thế nào?”
-
-“Điểm tổng là tổng có trọng số của kỹ năng, kinh nghiệm và học vấn theo criteria version đã publish. Mandatory gate được đánh giá riêng nên điểm cao không che được điều kiện bắt buộc.”
-
-### “Gemini có phải toàn bộ AI của sản phẩm không?”
-
-“Không. Semantic embedding và rule scoring là nền tảng; Gemini là reasoning/reranking tùy chọn. Khi không có Gemini, pipeline fallback vẫn chạy và benchmark ghi rõ chế độ.”
-
-### “Nếu AI hallucinate thì sao?”
-
-“Kết luận quan trọng phải có evidence. Không tìm thấy nguồn thì kết quả là UNKNOWN/manual review, không tự biến thành pass hoặc fail.”
-
-### “Làm sao biết hệ thống tốt hơn keyword matching?”
-
-“Chúng tôi so sánh trên cùng dataset/ground truth và công bố ranking agreement, evidence precision cùng cấu hình từng run. Chỉ dùng số từ benchmark final.”
-
-### “Hệ thống có thiên lệch không?”
-
-“Không mô hình nào được tuyên bố không thiên lệch tuyệt đối. Sản phẩm giảm rủi ro bằng blind review, criteria minh bạch, evidence, UNKNOWN, human override và theo dõi chất lượng theo version.”
-
-### “Có dùng dữ liệu ứng viên để train không?”
-
-“Không trong bản dự thi. Demo/benchmark dùng dữ liệu synthetic hoặc đã ẩn danh; CV không được dùng để huấn luyện nếu chưa có căn cứ và đồng ý phù hợp.”
-
-### “Đây có phải production-ready không?”
-
-“Đây là competition-ready, single-node prototype có test và recovery. Production cần identity provider, RBAC đầy đủ, encryption, malware scanning và hạ tầng worker riêng; các giới hạn được công bố rõ.”
-
-### “Điểm khác biệt với ATS là gì?”
-
-“Nhiều công cụ dừng ở ranking. Sản phẩm này quản trị criteria theo phiên bản, tách mandatory gate, đưa evidence về CV, biểu diễn thiếu dữ liệu bằng UNKNOWN và giữ riêng AI recommendation với human decision/audit.”
-
-## Checklist diễn tập
-
-- [ ] Lời thoại 6:00-6:30, không vượt 7 phút.
-- [ ] Ba wow moment chạy liên tiếp không cần nhập dữ liệu dài.
-- [ ] Metric đã thay placeholder bằng số benchmark final.
-- [ ] Batch pre-seeded và batch live đều sẵn sàng.
-- [ ] Online/offline mode đều đã chạy thử.
-- [ ] Không có API key, notification, terminal history hoặc PII trên màn hình.
-- [ ] Browser zoom/font phù hợp máy chiếu.
-- [ ] Video offline mở được không cần mạng.
-- [ ] Release SHA và dataset version xuất hiện trong slide/report.
-- [ ] Mỗi thành viên biết phần nói và câu chuyển khi sự cố.
+- [ ] Bốn phân hệ đều xuất hiện và liên kết thành một câu chuyện.
+- [ ] Không phân hệ nào chiếm quá 75 giây, trừ Recruiter + Candidate Detail cộng lại.
+- [ ] Một CV được dùng xuyên suốt Recruiter, Real Jobs và Gap Advisor.
+- [ ] Mỗi phân hệ có một câu “giá trị” và tối đa một câu “cơ chế”.
+- [ ] Slide kiến trúc dưới 45 giây.
+- [ ] Benchmark đã thay placeholder bằng số thực và sample size.
+- [ ] Online/offline demo đều chạy được.
+- [ ] Không có PII, API key, notification hoặc terminal history trên màn hình.
+- [ ] Video dự phòng mở được không cần mạng.
+- [ ] Hai lượt diễn tập liên tiếp hoàn tất trong 6:30-7:00.
+- [ ] Người thuyết trình nhớ ba câu chuyển khi demo lỗi.
+- [ ] Kết thúc bằng “Tìm đúng người. Tìm đúng việc. Và luôn hiểu vì sao.”
