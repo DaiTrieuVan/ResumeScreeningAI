@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Báo cáo bảo mật
+    url: https://github.com/DaiTrieuVan/ResumeScreeningAI/security
+    about: Không công bố lỗ hổng hoặc dữ liệu nhạy cảm trong issue công khai.
