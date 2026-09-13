@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 from contextlib import asynccontextmanager
+import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -15,6 +16,11 @@ from app.api import jobs, resumes, screenings, gap_advisor, exports, real_jobs, 
 async def lifespan(app: FastAPI):
     # Initialize DB tables on startup
     await init_db()
+    from app.services.upload_batch_service import process_upload_batch
+    from app.services.upload_recovery_service import reconcile_all_interrupted_items
+    resumed = await reconcile_all_interrupted_items()
+    for batch_id, item_ids in resumed.items():
+        asyncio.create_task(process_upload_batch(batch_id, item_ids))
     yield
 
 app = FastAPI(

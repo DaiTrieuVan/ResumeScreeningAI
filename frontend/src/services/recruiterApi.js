@@ -77,6 +77,7 @@ export function createUploadBatch(jobId, files, criteriaSetId = null) {
   if (criteriaSetId) formData.append('criteria_set_id', criteriaSetId);
   return recruiterRequest(`/jobs/${jobId}/upload-batches`, {
     method: 'POST',
+    headers: { 'Idempotency-Key': createIdempotencyKey('create-batch') },
     body: formData,
   });
 }
@@ -96,6 +97,24 @@ export function retryUploadBatch(batchId, itemIds = []) {
       scope: itemIds.length ? 'SELECTED' : 'FAILED_ONLY',
       item_ids: itemIds,
     }),
+  });
+}
+
+export function recoverUploadBatch(batchId) {
+  return recruiterRequest(`/upload-batches/${batchId}/recover`, {
+    method: 'POST',
+    headers: { 'Idempotency-Key': createIdempotencyKey('recover-batch') },
+  });
+}
+
+export function submitManualRecovery(itemId, verifiedText, reason) {
+  return recruiterRequest(`/upload-items/${itemId}/manual-recovery`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Idempotency-Key': createIdempotencyKey('manual-recovery'),
+    },
+    body: JSON.stringify({ mode: 'VERIFIED_TEXT', verified_text: verifiedText, reason }),
   });
 }
 

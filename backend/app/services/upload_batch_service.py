@@ -25,11 +25,12 @@ from app.models.recruiter_enums import (
 )
 from app.models.upload_batch import DuplicateMatch, UploadBatch, UploadItem
 from app.models.final_release import ResumePage
-from app.services.pdf_parser import extract_resume_metadata, extract_text_with_pages
+from app.services.pdf_parser import build_page_records, extract_resume_metadata, extract_text_with_pages
+from app.services.upload_recovery_service import acquire_processing_lease, release_processing_lease
 
 
-MAX_BATCH_FILES = 200
-MAX_FILE_BYTES = 15 * 1024 * 1024
+MAX_BATCH_FILES = settings.MAX_BATCH_FILES
+MAX_FILE_BYTES = settings.MAX_UPLOAD_FILE_BYTES
 PROCESSING_STATUSES = {
     UploadItemStatus.VALIDATING.value,
     UploadItemStatus.PARSING.value,
@@ -196,7 +197,10 @@ async def process_upload_item(item_id: str) -> None:
         batch = await db.get(UploadBatch, item.batch_id)
         if not batch:
             return
-        item.attempt_count += 1
+        lease_token = await acquire_processing_lease(db, item)
+        if not lease_token:
+            await db.commit()
+            return
         item.status = UploadItemStatus.VALIDATING.value
         item.error_code = item.user_message = item.technical_detail = None
         await db.commit()
@@ -204,7 +208,12 @@ async def process_upload_item(item_id: str) -> None:
         try:
             item.status = UploadItemStatus.PARSING.value
             await db.commit()
-            raw_text, page_records = await asyncio.to_thread(extract_text_with_pages, item.storage_key)
+            if item.manual_text:
+                raw_text, page_records = build_page_records([item.manual_text], extraction_method="MANUAL")
+                item.extraction_method = "MANUAL"
+            else:
+                raw_text, page_records = await asyncio.to_thread(extract_text_with_pages, item.storage_key)
+                item.extraction_method = "NATIVE"
             metadata = extract_resume_metadata(raw_text)
             item.content_fingerprint = content_digest(raw_text)
             item.contact_fingerprint = contact_digest(metadata.get("email"), metadata.get("phone"))
@@ -239,7 +248,7 @@ async def process_upload_item(item_id: str) -> None:
                 resume = CandidateResume(
                     job_id=batch.job_id,
                     file_name=item.original_file_name,
-                    file_path=item.storage_key,
+                    file_path=item.storage_key or "",
                     file_size_bytes=item.byte_size,
                     raw_text=raw_text,
                     parsed_name=metadata.get("candidate_name"),
@@ -264,7 +273,9 @@ async def process_upload_item(item_id: str) -> None:
                 item.error_code = "PARSE_FAILED"
                 item.user_message = "Không thể đọc CV. Bạn có thể thử lại hoặc thay tệp khác."
             item.technical_detail = message[:2000]
+            item.last_failure_at = datetime.utcnow()
         item.version += 1
+        await release_processing_lease(db, item.id, lease_token)
         await db.commit()
 
 
@@ -320,11 +331,31 @@ async def queue_retry(
     selected = []
     for item in batch.items:
         if item.status in retryable and (not item_ids or item.id in item_ids):
+            if item.attempt_count >= settings.UPLOAD_MAX_ATTEMPTS:
+                item.error_code = "RETRY_LIMIT_REACHED"
+                item.user_message = "Đã đạt giới hạn thử lại. Hãy kiểm tra hoặc thay tệp thủ công."
+                continue
             item.status = UploadItemStatus.QUEUED.value
             item.version += 1
             selected.append(item.id)
     await recalculate_batch(db, batch_id)
     return selected
+
+
+async def queue_manual_recovery(db: AsyncSession, item_id: str, verified_text: str) -> UploadItem:
+    item = await db.get(UploadItem, item_id)
+    if not item:
+        raise LookupError("Không tìm thấy CV cần phục hồi.")
+    if item.status not in {UploadItemStatus.NEEDS_OCR.value, UploadItemStatus.FAILED.value}:
+        raise RuntimeError("Chỉ có thể nhập nội dung xác minh cho CV đang cần xử lý.")
+    item.manual_text = verified_text.strip()
+    item.extraction_method = "MANUAL"
+    item.status = UploadItemStatus.QUEUED.value
+    item.error_code = None
+    item.user_message = "Đã nhận văn bản xác minh; CV sẵn sàng xử lý lại."
+    item.version += 1
+    await recalculate_batch(db, item.batch_id)
+    return item
 
 
 async def resolve_duplicate(

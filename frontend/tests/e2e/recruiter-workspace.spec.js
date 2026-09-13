@@ -18,6 +18,8 @@ test.beforeEach(async ({ page }) => {
     if (url.includes('/analytics')) return route.fulfill(json({ funnel: { AI_ANALYZED: 1 }, upload_counts: { total: 1, success: 1, failed: 0, duplicate: 0 }, median_processing_seconds: 2, ai_override_rate: 0 }));
     if (url.includes('/candidates?')) return route.fulfill(json({ items: [candidate, secondCandidate], total: 2, page: 1, page_size: 25, facets: {} }));
     if (url.includes('/comparisons')) return route.fulfill(json({ criteria_set_id: 'criteria-1', criteria_version: 1, candidates: [{ ...candidate, overall_score: 82, pipeline_stage: candidate.stage }, { ...secondCandidate, overall_score: 78, pipeline_stage: secondCandidate.stage }], criteria: [{ criterion_id: 'criterion-python', label: 'Python', importance: 'MANDATORY', results: { 'app-1': { result: 'MET', explanation: 'Có bằng chứng Python', evidence: [] }, 'app-2': { result: 'UNKNOWN', explanation: 'Chưa đủ dữ liệu', evidence: [] } } }] }));
+    if (url.includes('/upload-items/scan-item/manual-recovery')) return route.fulfill(json({ id: 'batch-scan', status: 'PROCESSING', total_count: 1, success_count: 0, failed_count: 0, duplicate_count: 0, cancelled_count: 0, items: [{ id: 'scan-item', original_file_name: 'scan.pdf', status: 'QUEUED', extraction_method: 'MANUAL' }] }));
+    if (url.includes('/jobs/job-1/upload-batches')) return route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify({ id: 'batch-scan', status: 'COMPLETED_WITH_ERRORS', total_count: 1, success_count: 0, failed_count: 1, duplicate_count: 0, cancelled_count: 0, items: [{ id: 'scan-item', original_file_name: 'scan.pdf', status: 'NEEDS_OCR', error_code: 'OCR_REQUIRED', user_message: 'PDF không có lớp chữ' }] }) });
     if (url.endsWith('/applications/app-1/corrections')) return route.fulfill(json({ application_id: 'app-1', application_version: 2, evaluation_stale: true }));
     if (url.endsWith('/applications/app-1')) return route.fulfill(json({ application_id: 'app-1', application_version: 1, pipeline_stage: 'AI_ANALYZED', candidate_name: 'Nguyễn An', candidate_email: 'an@example.com', file_name: 'an.pdf', extracted_skills: ['Python'], evaluation: { overall_score: 82, mandatory_gate: 'NEEDS_REVIEW', evidence_status: 'PARTIAL', criterion_results: Array.from({ length: 18 }, (_, index) => ({ id: `result-${index}`, label: `Tiêu chí ${index + 1}`, importance: 'PREFERRED', result: index === 0 ? 'MET' : 'UNKNOWN', confidence: index === 0 ? .95 : .2, explanation: index === 0 ? 'Có bằng chứng trực tiếp.' : 'Chưa có bằng chứng', evidence: index === 0 ? [{ id: 'evidence-page-3', excerpt: 'Built Python APIs', page_number: 3, confidence: .95, source_method: 'NATIVE' }] : [] })) } }));
     if (url.includes('/decisions')) return route.fulfill(json([]));
@@ -73,4 +75,16 @@ test('evidence opens its PDF page and recruiter can submit an audited correction
   const request = await correctionRequest;
   expect(request.headers()['idempotency-key']).toBeTruthy();
   expect(request.postDataJSON().field_path).toBe('extracted_skills');
+});
+
+test('scan-only CV has a manual recovery path without re-uploading the batch', async ({ page }) => {
+  await page.locator('.batch-dropzone input[type="file"]').setInputFiles({ name: 'scan.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF scan') });
+  await page.getByRole('button', { name: 'Tải lên 1 CV' }).click();
+  await page.getByText('Nhập nội dung đã xác minh').click();
+  await page.getByLabel('Văn bản xác minh cho scan.pdf').fill('Verified Python and FastAPI experience from scan.');
+  const requestPromise = page.waitForRequest((request) => request.url().includes('/upload-items/scan-item/manual-recovery'));
+  await page.getByRole('button', { name: 'Xác nhận và xử lý lại' }).click();
+  const request = await requestPromise;
+  expect(request.headers()['idempotency-key']).toBeTruthy();
+  expect(request.postDataJSON().mode).toBe('VERIFIED_TEXT');
 });

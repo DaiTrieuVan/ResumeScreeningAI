@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.audit_event import AuditEvent
 
 
-SENSITIVE_KEYS = {"name", "email", "phone", "address", "raw_text", "excerpt", "cv", "resume", "new_value", "old_value"}
+SENSITIVE_KEYS = {"name", "email", "phone", "address", "raw_text", "verified_text", "excerpt", "cv", "resume", "new_value", "old_value"}
 
 
 def redact_audit_value(value: Any) -> Any:

@@ -98,21 +98,21 @@
 
 ### Tests for User Story 3
 
-- [ ] T033 [P] [US3] Add idempotency replay and payload-conflict tests in `backend/tests/unit/test_idempotency_service.py`
-- [ ] T034 [P] [US3] Add lease expiry, retry ceiling, and restart reconciliation tests in `backend/tests/unit/test_upload_recovery_service.py`
-- [ ] T035 [P] [US3] Add manual verified-text recovery contract tests in `backend/tests/contract/test_upload_recovery_api.py`
-- [ ] T036 [P] [US3] Add recovery controls and failure guidance tests in `frontend/src/components/recruiter/BatchReviewPanel.test.jsx`
+- [X] T033 [P] [US3] Add idempotency replay and payload-conflict tests in `backend/tests/unit/test_idempotency_service.py`
+- [X] T034 [P] [US3] Add lease expiry, retry ceiling, and restart reconciliation tests in `backend/tests/unit/test_upload_recovery_service.py`
+- [X] T035 [P] [US3] Add manual verified-text recovery contract tests in `backend/tests/contract/test_upload_recovery_api.py`
+- [X] T036 [P] [US3] Add recovery controls and failure guidance tests in `frontend/src/components/recruiter/BatchReviewPanel.test.jsx`
 
 ### Implementation for User Story 3
 
-- [ ] T037 [US3] Integrate durable idempotency for create, retry, and recover operations in `backend/app/services/upload_batch_service.py`
-- [ ] T038 [US3] Implement processing leases, bounded attempts, expired-lease reconciliation, and safe resume in `backend/app/services/upload_recovery_service.py`
-- [ ] T039 [US3] Implement manual verified-text recovery and provenance tracking in `backend/app/services/upload_batch_service.py`
-- [ ] T040 [US3] Add create idempotency, batch recovery, and manual recovery endpoints in `backend/app/api/upload_batches.py`
-- [ ] T041 [US3] Reconcile interrupted work during application startup in `backend/app/main.py`
-- [ ] T042 [US3] Add recovery and manual-text API clients in `frontend/src/services/recruiterApi.js`
-- [ ] T043 [US3] Add scan guidance, manual recovery form, retry ceiling, and resume controls in `frontend/src/components/recruiter/BatchReviewPanel.jsx`
-- [ ] T044 [US3] Add crash/replay/manual-recovery E2E coverage in `frontend/tests/e2e/recruiter-workspace.spec.js`
+- [X] T037 [US3] Integrate durable idempotency for create, retry, and recover operations in `backend/app/api/upload_batches.py`
+- [X] T038 [US3] Implement processing leases, bounded attempts, expired-lease reconciliation, and safe resume in `backend/app/services/upload_recovery_service.py`
+- [X] T039 [US3] Implement manual verified-text recovery and provenance tracking in `backend/app/services/upload_batch_service.py`
+- [X] T040 [US3] Add create idempotency, batch recovery, and manual recovery endpoints in `backend/app/api/upload_batches.py`
+- [X] T041 [US3] Reconcile interrupted work during application startup in `backend/app/main.py`
+- [X] T042 [US3] Add recovery and manual-text API clients in `frontend/src/services/recruiterApi.js`
+- [X] T043 [US3] Add scan guidance, manual recovery form, retry ceiling, and resume controls in `frontend/src/components/recruiter/BatchReviewPanel.jsx`
+- [X] T044 [US3] Add crash/replay/manual-recovery E2E coverage in `frontend/tests/e2e/recruiter-workspace.spec.js`
 
 **Checkpoint**: Mixed batches degrade gracefully and can be resumed without re-uploading successful files.
 

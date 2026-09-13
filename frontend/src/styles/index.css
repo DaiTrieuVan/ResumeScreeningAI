@@ -165,6 +165,14 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .batch-item__body span { color: var(--text-muted); font-size: 0.66rem; }
 .batch-item__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
 .batch-item__actions button { padding: 4px 7px; display: inline-flex; align-items: center; gap: 3px; color: var(--accent-primary-dark); background: #fff; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.62rem; cursor: pointer; }
+.batch-item__manual { grid-column: 2 / -1; padding: 8px 10px; background: #fff9ea; border-radius: 7px; }
+.batch-item__manual summary { color: #85600d; font-size: 0.68rem; font-weight: 700; cursor: pointer; }
+.batch-item__manual label { margin-top: 8px; display: grid; gap: 4px; color: var(--text-secondary); font-size: 0.63rem; }
+.batch-item__manual textarea, .batch-item__manual input { width: 100%; padding: 7px 8px; background: #fff; border: 1px solid var(--border-color); border-radius: 6px; font: inherit; font-size: 0.68rem; }
+.batch-item__manual textarea { min-height: 64px; resize: vertical; }
+.batch-item__manual button { margin-top: 8px; padding: 7px 9px; color: #fff; background: var(--accent-primary); border: 0; border-radius: 6px; font-size: 0.65rem; font-weight: 700; cursor: pointer; }
+.batch-item__manual button:disabled { opacity: 0.5; cursor: not-allowed; }
+.batch-item__limit { grid-column: 2 / -1; color: #a63d49; font-size: 0.65rem; }
 .batch-review__retry { width: 100%; margin-top: 10px; }
 
 .btn {
