@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.core.database import init_db
 from app.core.exceptions import AppException, app_exception_handler
-from app.api import jobs, resumes, screenings, gap_advisor, exports, real_jobs, recruiter
+from app.api import jobs, resumes, screenings, gap_advisor, exports, real_jobs, recruiter, evaluations
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -44,6 +44,7 @@ app.include_router(gap_advisor.router, prefix=settings.API_V1_STR)
 app.include_router(exports.router, prefix=settings.API_V1_STR)
 app.include_router(real_jobs.router, prefix=settings.API_V1_STR)
 app.include_router(recruiter.router, prefix=settings.API_V1_STR)
+app.include_router(evaluations.router, prefix=settings.API_V1_STR)
 
 @app.get("/health")
 async def health_check():

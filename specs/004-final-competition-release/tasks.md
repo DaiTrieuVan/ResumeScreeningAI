@@ -45,19 +45,19 @@
 
 ### Tests for User Story 1
 
-- [ ] T012 [P] [US1] Add metric formula and threshold tests in `backend/tests/unit/test_evaluation_service.py`
-- [ ] T013 [P] [US1] Add evaluation API contract tests in `backend/tests/contract/test_evaluation_api.py`
-- [ ] T014 [P] [US1] Add dataset validation and minimum-coverage tests in `backend/tests/integration/test_evaluation_dataset.py`
+- [X] T012 [P] [US1] Add metric formula and threshold tests in `backend/tests/unit/test_evaluation_service.py`
+- [X] T013 [P] [US1] Add evaluation API contract tests in `backend/tests/contract/test_evaluation_api.py`
+- [X] T014 [P] [US1] Add dataset validation and minimum-coverage tests in `backend/tests/integration/test_evaluation_dataset.py`
 
 ### Implementation for User Story 1
 
-- [ ] T015 [P] [US1] Create versioned manifests, three synthetic JDs, and at least thirty synthetic CV labels in `evaluation/datasets/competition-v1/`
-- [ ] T016 [US1] Implement dataset validation and mandatory recall, evidence precision, UNKNOWN accuracy, ranking agreement, and batch completion metrics in `backend/app/services/evaluation_service.py`
-- [ ] T017 [US1] Implement JSON and Markdown benchmark report generation in `backend/app/services/evaluation_report_service.py`
-- [ ] T018 [US1] Implement evaluation run and result endpoints in `backend/app/api/evaluations.py`
-- [ ] T019 [US1] Register evaluation routes in `backend/app/main.py`
-- [ ] T020 [US1] Add a reproducible benchmark CLI with release SHA/model/fallback metadata in `scripts/run_ai_benchmark.py`
-- [ ] T021 [US1] Run the benchmark and store measured reports in `artifacts/benchmark/competition-v1.json` and `artifacts/benchmark/competition-v1.md`
+- [X] T015 [P] [US1] Create versioned manifests, three synthetic JDs, and at least thirty synthetic CV labels in `evaluation/datasets/competition-v1/`
+- [X] T016 [US1] Implement dataset validation and mandatory recall, evidence precision, UNKNOWN accuracy, ranking agreement, and batch completion metrics in `backend/app/services/evaluation_service.py`
+- [X] T017 [US1] Implement JSON and Markdown benchmark report generation in `backend/app/services/evaluation_report_service.py`
+- [X] T018 [US1] Implement evaluation run and result endpoints in `backend/app/api/evaluations.py`
+- [X] T019 [US1] Register evaluation routes in `backend/app/main.py`
+- [X] T020 [US1] Add a reproducible benchmark CLI with release SHA/model/fallback metadata in `scripts/run_ai_benchmark.py`
+- [X] T021 [US1] Run the benchmark and store measured reports in `artifacts/benchmark/competition-v1.json` and `artifacts/benchmark/competition-v1.md`
 
 **Checkpoint**: AI claims are backed by reproducible measured evidence rather than target-only statements.
 
