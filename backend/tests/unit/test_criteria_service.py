@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai
+# SPDX-License-Identifier: MIT
+
 import pytest
 
 from app.services.criteria_service import CriteriaValidationError, validate_scoring_weights

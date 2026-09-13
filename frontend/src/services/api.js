@@ -1,3 +1,6 @@
+/* SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai */
+/* SPDX-License-Identifier: MIT */
+
 const API_BASE = '/api';
 
 export async function fetchJobs() {

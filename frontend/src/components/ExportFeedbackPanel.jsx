@@ -1,3 +1,6 @@
+/* SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai */
+/* SPDX-License-Identifier: MIT */
+
 import React from 'react';
 import { Download, FileSpreadsheet } from 'lucide-react';
 import { getExportCsvUrl } from '../services/api';

@@ -1,3 +1,6 @@
+/* SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai */
+/* SPDX-License-Identifier: MIT */
+
 import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';

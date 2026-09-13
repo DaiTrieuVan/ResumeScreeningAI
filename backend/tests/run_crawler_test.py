@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai
+# SPDX-License-Identifier: MIT
+
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

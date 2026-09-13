@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai
+# SPDX-License-Identifier: MIT
+
 from typing import List, Optional, Any
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict

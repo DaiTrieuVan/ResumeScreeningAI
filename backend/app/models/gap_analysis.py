@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai
+# SPDX-License-Identifier: MIT
+
 import uuid
 from datetime import datetime
 from sqlalchemy import String, Text, DateTime, JSON

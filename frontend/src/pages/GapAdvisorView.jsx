@@ -1,3 +1,6 @@
+/* SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai */
+/* SPDX-License-Identifier: MIT */
+
 import React, { useState } from 'react';
 import { UserCheck, Sparkles, CheckCircle2, AlertTriangle, ArrowRight, Loader2, UploadCloud, Compass } from 'lucide-react';
 import { analyzeGap } from '../services/api';

@@ -1,3 +1,6 @@
+/* SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai */
+/* SPDX-License-Identifier: MIT */
+
 import React, { useState } from 'react';
 import { CheckCircle2, LoaderCircle, Tags, Users, X } from 'lucide-react';
 import { executeBulkAction } from '../../services/recruiterApi';

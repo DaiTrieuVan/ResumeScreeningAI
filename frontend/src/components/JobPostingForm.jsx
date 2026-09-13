@@ -1,3 +1,6 @@
+/* SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai */
+/* SPDX-License-Identifier: MIT */
+
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Edit3, Sliders, X } from 'lucide-react';
 import { createJob, updateJob } from '../services/api';

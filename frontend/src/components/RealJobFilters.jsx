@@ -1,3 +1,6 @@
+/* SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai */
+/* SPDX-License-Identifier: MIT */
+
 import React from 'react';
 import { Filter, SlidersHorizontal, MapPin, Search } from 'lucide-react';
 

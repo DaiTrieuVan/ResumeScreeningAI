@@ -1,3 +1,6 @@
+/* SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai */
+/* SPDX-License-Identifier: MIT */
+
 import React, { useEffect, useState } from 'react';
 import { Check, Clock3, MessageSquarePlus, Send, XCircle } from 'lucide-react';
 

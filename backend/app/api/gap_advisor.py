@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai
+# SPDX-License-Identifier: MIT
+
 from fastapi import APIRouter, Depends, UploadFile, File, Form, status
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession

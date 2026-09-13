@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai
+# SPDX-License-Identifier: MIT
+
 def calculate_weighted_score(
     component_scores: dict[str, float], scoring_weights: dict[str, float]
 ) -> float:
