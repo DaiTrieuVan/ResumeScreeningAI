@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserCheck, Sparkles, CheckCircle2, AlertTriangle, ArrowRight, Loader2 } from 'lucide-react';
+import { UserCheck, Sparkles, CheckCircle2, AlertTriangle, ArrowRight, Loader2, UploadCloud, Compass } from 'lucide-react';
 import { analyzeGap } from '../services/api';
 
 export default function GapAdvisorView() {
@@ -30,43 +30,45 @@ export default function GapAdvisorView() {
   };
 
   return (
-    <div className="animate-fade-in" style={{ maxWidth: '1000px', margin: '0 auto' }}>
+    <div className="advisor-page animate-fade-in">
       
       {/* Intro Header */}
-      <div className="glass-panel" style={{ padding: '28px', marginBottom: '24px', textAlign: 'center' }}>
-        <div style={{
-          width: '50px', height: '50px', borderRadius: '14px', background: 'var(--accent-gradient)',
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px'
-        }}>
-          <UserCheck size={26} color="#fff" />
+      <div className="advisor-hero">
+        <div className="advisor-hero__icon"><Compass size={24} /></div>
+        <div>
+          <span className="page-kicker">Cố vấn nghề nghiệp cùng AI</span>
+          <h2>Biến khoảng trống kỹ năng thành lộ trình phát triển</h2>
+          <p>So sánh CV với vị trí mục tiêu để biết bạn đã sẵn sàng đến đâu và nên ưu tiên cải thiện điều gì tiếp theo.</p>
         </div>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Tư vấn Lộ trình & Khoảng trống CV (Career Gap Advisor)</h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '600px', margin: '8px auto 0' }}>
-          So sánh CV của bạn với Mô tả Công việc (JD) mục tiêu để khám phá độ khớp kỹ năng, điểm thiếu sót và bước đi cụ thể để nâng cao hồ sơ ứng tuyển.
-        </p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: result ? '1fr 1.2fr' : '1fr', gap: '24px' }}>
         
         {/* Input Form */}
-        <div className="glass-panel" style={{ padding: '24px' }}>
+        <div className="glass-panel advisor-form-card">
+          <div className="panel-heading">
+            <div>
+              <span className="section-eyebrow"><UserCheck size={15} /> Thông tin phân tích</span>
+              <h3>Cho AI biết mục tiêu của bạn</h3>
+            </div>
+          </div>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '6px', color: 'var(--text-secondary)' }}>Tên Vị trí Mục tiêu (Tùy chọn)</label>
+              <label style={{ display: 'block', fontSize: '0.82rem', marginBottom: '6px', color: 'var(--text-secondary)', fontWeight: 600 }}>Vị trí mục tiêu <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(không bắt buộc)</span></label>
               <input
                 className="input-field"
-                placeholder="VD: Kỹ sư Hệ thống AI Senior"
+                placeholder="Ví dụ: Kỹ sư hệ thống AI cấp cao"
                 value={jobTitle}
                 onChange={(e) => setJobTitle(e.target.value)}
               />
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '6px', color: 'var(--text-secondary)' }}>Mô tả Công việc Mục tiêu (JD) *</label>
+              <label style={{ display: 'block', fontSize: '0.82rem', marginBottom: '6px', color: 'var(--text-secondary)', fontWeight: 600 }}>Mô tả công việc mục tiêu <span style={{ color: 'var(--accent-rose)' }}>*</span></label>
               <textarea
                 className="textarea-field"
                 rows="6"
-                placeholder="Dán toàn bộ văn bản yêu cầu công việc hoặc mô tả JD vào đây..."
+                placeholder="Dán nội dung mô tả công việc và các yêu cầu của vị trí vào đây..."
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
                 required
@@ -74,30 +76,36 @@ export default function GapAdvisorView() {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '6px', color: 'var(--text-secondary)' }}>Tải lên CV của bạn (Định dạng PDF)</label>
+              <label style={{ display: 'block', fontSize: '0.82rem', marginBottom: '6px', color: 'var(--text-secondary)', fontWeight: 600 }}>CV của bạn</label>
               <input
                 type="file"
                 accept=".pdf"
-                className="input-field"
+                id="advisor-cv-file"
+                style={{ display: 'none' }}
                 onChange={(e) => setCvFile(e.target.files ? e.target.files[0] : null)}
               />
+              <label htmlFor="advisor-cv-file" className="advisor-file-picker">
+                <UploadCloud size={20} />
+                <span>{cvFile ? cvFile.name : 'Chọn CV định dạng PDF'}</span>
+                <small>{cvFile ? 'Bấm để chọn tệp khác' : 'Tệp tối đa 10 MB'}</small>
+              </label>
             </div>
 
             <button type="submit" className="btn btn-primary" disabled={loading} style={{ justifyContent: 'center', marginTop: '8px' }}>
               {loading ? (
                 <>
-                  <Loader2 size={16} className="spin" /> Đang phân tích độ khớp nối...
+                  <Loader2 size={16} className="spin" /> Đang phân tích hồ sơ...
                 </>
               ) : (
                 <>
-                  <Sparkles size={16} /> Phân tích Khoảng trống CV
+                  <Sparkles size={16} /> Xây dựng lộ trình cho tôi
                 </>
               )}
             </button>
           </form>
 
           {error && (
-            <div style={{ marginTop: '16px', color: '#f87171', fontSize: '0.85rem', background: 'rgba(244,63,94,0.1)', padding: '10px', borderRadius: '8px' }}>
+            <div style={{ marginTop: '16px', color: '#b84250', fontSize: '0.85rem', background: '#fff0f1', padding: '10px', borderRadius: '8px', border: '1px solid #f0c7cb' }}>
               {error}
             </div>
           )}
@@ -105,19 +113,19 @@ export default function GapAdvisorView() {
 
         {/* Results Panel */}
         {result && (
-          <div className="glass-panel animate-fade-in" style={{ padding: '28px', border: '1px solid var(--border-glow)' }}>
+          <div className="glass-panel advisor-result animate-fade-in" style={{ padding: '28px', border: '1px solid var(--border-glow)' }}>
             
             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Sparkles color="var(--accent-cyan)" size={20} />
-              Kết quả Phân tích Khoảng trống CV
+              Lộ trình dành cho bạn
             </h3>
 
             {/* Matched vs Missing */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '20px' }}>
               
-              <div style={{ background: 'rgba(16, 185, 129, 0.08)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                <h4 style={{ fontSize: '0.85rem', color: '#34d399', fontWeight: 700, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <CheckCircle2 size={16} /> Kỹ năng Phù hợp & Điểm mạnh
+              <div style={{ background: '#eaf7f2', padding: '16px', borderRadius: '10px', border: '1px solid #cceade' }}>
+                <h4 style={{ fontSize: '0.85rem', color: '#087455', fontWeight: 700, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CheckCircle2 size={16} /> Điểm mạnh hiện có
                 </h4>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                   {result.matched_skills.map((s, idx) => (
@@ -126,9 +134,9 @@ export default function GapAdvisorView() {
                 </div>
               </div>
 
-              <div style={{ background: 'rgba(244, 63, 94, 0.08)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(244, 63, 94, 0.2)' }}>
-                <h4 style={{ fontSize: '0.85rem', color: '#f87171', fontWeight: 700, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <AlertTriangle size={16} /> Kỹ năng & Yêu cầu Còn thiếu
+              <div style={{ background: '#fff4f4', padding: '16px', borderRadius: '10px', border: '1px solid #f0d4d7' }}>
+                <h4 style={{ fontSize: '0.85rem', color: '#b84250', fontWeight: 700, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <AlertTriangle size={16} /> Năng lực cần bổ sung
                 </h4>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                   {result.missing_skills.map((s, idx) => (
@@ -142,12 +150,12 @@ export default function GapAdvisorView() {
             {/* Action Items */}
             <div style={{ marginBottom: '20px' }}>
               <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '10px', color: 'var(--accent-cyan)' }}>
-                Khuyến nghị Hành động Nâng cấp CV:
+                Những việc nên ưu tiên tiếp theo
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {result.suggested_action_items.map((item, idx) => (
                   <div key={idx} style={{
-                    display: 'flex', alignItems: 'flex-start', gap: '10px', background: 'rgba(0,0,0,0.3)',
+                    display: 'flex', alignItems: 'flex-start', gap: '10px', background: '#f7faf8',
                     padding: '12px', borderRadius: '8px', fontSize: '0.85rem'
                   }}>
                     <ArrowRight size={16} color="var(--accent-primary)" style={{ marginTop: '2px', flexShrink: 0 }} />
@@ -158,8 +166,8 @@ export default function GapAdvisorView() {
             </div>
 
             {/* Explanation */}
-            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '14px', borderRadius: '10px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              <b>Tóm tắt:</b> {result.summary_explanation}
+            <div style={{ background: '#eef5f2', padding: '14px', borderRadius: '10px', fontSize: '0.85rem', color: 'var(--text-secondary)', borderLeft: '3px solid var(--accent-primary)' }}>
+              <b style={{ color: 'var(--text-primary)' }}>Nhận định tổng quan:</b> {result.summary_explanation}
             </div>
 
           </div>

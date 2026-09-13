@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Sparkles, UploadCloud, FileText, Loader2, Globe, RefreshCw, Bot } from 'lucide-react';
+import { Sparkles, UploadCloud, Loader2, RefreshCw } from 'lucide-react';
 import RealJobCard from '../components/RealJobCard';
 import RealJobFilters from '../components/RealJobFilters';
 
@@ -132,23 +132,18 @@ export default function RealJobsPortal() {
   const paginatedMatches = filteredMatches.slice(startIndex, startIndex + pageSize);
 
   return (
-    <div className="animate-fade-in" style={{ maxWidth: '1050px', margin: '0 auto' }}>
+    <div className="jobs-page animate-fade-in">
 
       {/* Hero Header */}
-      <div className="glass-panel" style={{ padding: '28px', marginBottom: '24px', textAlign: 'center' }}>
-        <div style={{
-          width: '52px', height: '52px', borderRadius: '16px', background: 'var(--accent-gradient)',
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px'
-        }}>
-          <Globe size={28} color="#fff" />
+      <div className="jobs-hero">
+        <div className="jobs-hero__copy">
+          <span className="page-kicker">Việc làm dành riêng cho bạn</span>
+          <h2>Tìm công việc phù hợp với năng lực của bạn</h2>
+          <p>Đối chiếu CV với cơ hội mới nhất từ TopCV và ITViec. AI giúp bạn hiểu mức độ phù hợp trước khi ứng tuyển.</p>
         </div>
-        <h2 style={{ fontSize: '1.6rem', fontWeight: 800 }}>Tìm Việc Thật Đa Ngành Trực Tiếp từ TopCV & ITViec</h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '650px', margin: '8px auto 0' }}>
-          Tải CV của bạn (Đầu bếp, IT, Marketing, Sales, Kế toán...) để Động cơ AI quét toàn bộ công việc thực tế, phân loại đúng ngành nghề và chấm điểm độ phù hợp (%).
-        </p>
 
         {/* Upload & Crawl Control Bar */}
-        <form onSubmit={handleScanJobs} style={{ marginTop: '20px', display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center', alignItems: 'center' }}>
+        <form onSubmit={handleScanJobs} className="jobs-hero__actions">
           <div style={{ position: 'relative' }}>
             <input
               type="file"
@@ -163,18 +158,18 @@ export default function RealJobsPortal() {
               style={{ cursor: 'pointer', padding: '10px 18px', fontSize: '0.9rem' }}
             >
               <UploadCloud size={18} color="var(--accent-cyan)" />
-              {cvFile ? cvFile.name : 'Chọn File CV (PDF)'}
+              {cvFile ? cvFile.name : 'Chọn CV (PDF)'}
             </label>
           </div>
 
           <button type="submit" className="btn btn-primary" disabled={loading} style={{ padding: '10px 24px', fontSize: '0.9rem' }}>
             {loading ? (
               <>
-                <Loader2 size={18} className="spin" /> Đang Phân tích & Quét Việc Thật...
+                <Loader2 size={18} className="spin" /> Đang phân tích CV...
               </>
             ) : (
               <>
-                <Sparkles size={18} /> Quét Việc Thật Phù Hợp Với CV
+                <Sparkles size={18} /> Gợi ý việc phù hợp
               </>
             )}
           </button>
@@ -188,18 +183,18 @@ export default function RealJobsPortal() {
           >
             {crawling ? (
               <>
-                <Loader2 size={18} className="spin" /> Đang Lấy Dữ Liệu Đa Ngành...
+                <Loader2 size={18} className="spin" /> Đang cập nhật dữ liệu...
               </>
             ) : (
               <>
-                <Bot size={18} /> Lấy Dữ Liệu Việc Làm Đa Ngành
+                <RefreshCw size={18} /> Cập nhật việc làm
               </>
             )}
           </button>
         </form>
 
         {crawlStatusMsg && (
-          <div style={{ marginTop: '12px', padding: '8px 16px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', fontSize: '0.85rem', display: 'inline-block' }}>
+          <div className="inline-notice">
             {crawlStatusMsg}
           </div>
         )}
@@ -209,16 +204,16 @@ export default function RealJobsPortal() {
             marginTop: '16px',
             padding: '12px 20px',
             borderRadius: '12px',
-            background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)',
+            background: '#e5f6ef',
             border: '1px solid var(--accent-cyan)',
-            color: '#fff',
+            color: 'var(--accent-primary-dark)',
             fontSize: '0.9rem',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px'
           }}>
             <Sparkles size={18} color="var(--accent-cyan)" />
-            <span>AI Nhận diện CV thuộc ngành: <b>{detectedCvDomain}</b>. Đã tự động lọc và gợi ý công việc phù hợp nhất!</span>
+            <span>AI nhận diện chuyên môn: <b>{detectedCvDomain}</b>. Danh sách đã được xếp theo độ phù hợp.</span>
           </div>
         )}
       </div>
@@ -239,7 +234,7 @@ export default function RealJobsPortal() {
       <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', padding: '12px 20px' }}>
         <div>
           <h4 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>
-            {hasScanned ? 'Công việc Thật Phù hợp nhất với CV của bạn' : 'Danh sách Công việc Thật Mới nhất'}
+            {hasScanned ? 'Công việc phù hợp nhất với CV của bạn' : 'Cơ hội việc làm mới nhất'}
           </h4>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '2px 0 0' }}>
             Hiển thị <b>{totalItems > 0 ? startIndex + 1 : 0} - {Math.min(startIndex + pageSize, totalItems)}</b> trong tổng số <b>{totalItems}</b> vị trí tuyển dụng
@@ -258,8 +253,8 @@ export default function RealJobsPortal() {
                 setCurrentPage(1);
               }}
               style={{
-                background: 'rgba(0,0,0,0.4)',
-                color: '#fff',
+                background: '#fff',
+                color: 'var(--text-primary)',
                 border: '1px solid var(--border-color)',
                 borderRadius: '6px',
                 padding: '4px 8px',
@@ -289,7 +284,7 @@ export default function RealJobsPortal() {
 
       {/* Pagination Footer Controls */}
       {totalPages > 1 && (
-        <div className="glass-panel" style={{
+        <div className="glass-panel pagination-panel" style={{
           display: 'flex',
           justify: 'space-between',
           alignItems: 'center',
@@ -316,8 +311,8 @@ export default function RealJobsPortal() {
                   height: '32px',
                   borderRadius: '8px',
                   border: pg === validCurrentPage ? '1px solid var(--accent-cyan)' : '1px solid var(--border-color)',
-                  background: pg === validCurrentPage ? 'var(--accent-gradient)' : 'rgba(255,255,255,0.05)',
-                  color: '#fff',
+                  background: pg === validCurrentPage ? 'var(--accent-primary)' : '#fff',
+                  color: pg === validCurrentPage ? '#fff' : 'var(--text-primary)',
                   fontWeight: pg === validCurrentPage ? 700 : 400,
                   cursor: 'pointer',
                   fontSize: '0.85rem',

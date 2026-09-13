@@ -21,6 +21,9 @@ backend/storage/resumes/*
 !storage/resumes/.gitkeep
 !backend/storage/resumes/.gitkeep
 .vite/
+playwright-report/
+test-results/
+coverage/
 
 *.db
 *.sqlite

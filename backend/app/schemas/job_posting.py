@@ -30,6 +30,8 @@ class JobPostingUpdate(BaseModel):
 class JobPostingResponse(JobPostingBase):
     id: str
     status: str
+    active_criteria_set_id: Optional[str] = None
+    version: int = 1
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

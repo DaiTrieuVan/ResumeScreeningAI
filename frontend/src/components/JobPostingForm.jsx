@@ -60,19 +60,15 @@ export default function JobPostingForm({ initialData = null, onJobSaved, onClose
   };
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 1000,
-      background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(8px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
-    }}>
-      <div className="glass-panel animate-fade-in" style={{ width: '100%', maxWidth: '600px', padding: '28px', border: '1px solid var(--border-glow)' }}>
+    <div className="modal-overlay" role="presentation">
+      <div className="glass-panel modal-card animate-fade-in" role="dialog" aria-modal="true" aria-label={isEdit ? 'Chỉnh sửa yêu cầu tuyển dụng' : 'Tạo yêu cầu tuyển dụng'} style={{ width: '100%', maxWidth: '600px', padding: '28px', border: '1px solid var(--border-glow)' }}>
         
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2 style={{ fontSize: '1.2rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
             {isEdit ? <Edit3 color="var(--accent-cyan)" size={20} /> : <PlusCircle color="var(--accent-primary)" size={20} />}
-            {isEdit ? 'Chỉnh sửa Yêu cầu Tuyển dụng' : 'Tạo Yêu cầu Tuyển dụng Mới'}
+            {isEdit ? 'Chỉnh sửa yêu cầu tuyển dụng' : 'Tạo yêu cầu tuyển dụng'}
           </h2>
-          <button onClick={onClose} className="btn btn-secondary" style={{ padding: '6px' }}>
+          <button onClick={onClose} className="btn btn-secondary" style={{ padding: '6px' }} aria-label="Đóng biểu mẫu">
             <X size={18} />
           </button>
         </div>
@@ -133,7 +129,7 @@ export default function JobPostingForm({ initialData = null, onJobSaved, onClose
           </div>
 
           {/* Criterion Weighting Sliders (FR-008) */}
-          <div style={{ background: 'rgba(0,0,0,0.2)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+          <div style={{ background: '#f7faf8', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
               <Sliders size={16} color="var(--accent-cyan)" />
               <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Trọng số Đánh giá AI</span>

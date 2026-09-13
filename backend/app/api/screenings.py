@@ -15,6 +15,9 @@ from app.models.screening_result import ScreeningResult
 from app.services.embedding_service import rank_candidates_by_vector_similarity, rank_precomputed_vector_candidates
 from app.services.reranker_service import rerank_candidate_resume
 from app.core.exceptions import ResourceNotFoundException
+from app.services.criteria_service import get_official_scoring_config
+from app.services.scoring_service import calculate_weighted_score
+from app.services.evidence_service import sync_screening_evaluation
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +82,9 @@ class ScreeningResultResponse(BaseModel):
     candidate_email: Optional[str] = None
     candidate_file_name: Optional[str] = None
     honors_badges: Optional[List[str]] = []
+    criteria_set_id: Optional[str] = None
+    evaluation_kind: str = "LEGACY"
+    application_id: Optional[str] = None
 
 @router.post("/evaluate", response_model=List[ScreeningResultResponse])
 async def evaluate_screening(
@@ -94,6 +100,7 @@ async def evaluate_screening(
     job = job_res.scalar_one_or_none()
     if not job:
         raise ResourceNotFoundException("JobPosting", req.job_id)
+    criteria_set_id, scoring_weights = await get_official_scoring_config(db, job)
 
     # Fetch candidate resumes prioritizing job_id linked resumes
     resumes = await get_resumes_for_job(req.job_id, req.resume_ids, db)
@@ -141,6 +148,8 @@ async def evaluate_screening(
         s_result.strengths_summary = ["Điểm vector similarity thấp"]
         s_result.gaps_summary = ["Không đạt ngưỡng khớp nối tối thiểu"]
         s_result.ai_reasoning = f"Vector similarity {sim_score:.1f}% < ngưỡng {TOP_K_SIMILARITY_THRESHOLD}%."
+        s_result.criteria_set_id = criteria_set_id
+        s_result.evaluation_kind = "OFFICIAL"
 
     await db.commit()
 
@@ -185,11 +194,9 @@ async def evaluate_screening(
         s_score = eval_data["skills_sub_score"]
         e_score = eval_data["experience_sub_score"]
         ed_score = eval_data["education_sub_score"]
-        overall = round(
-            (s_score * job.weight_skills) +
-            (e_score * job.weight_experience) +
-            (ed_score * job.weight_education),
-            1
+        overall = calculate_weighted_score(
+            {"skills": s_score, "experience": e_score, "education": ed_score},
+            scoring_weights,
         )
 
         existing_res = await db.execute(
@@ -213,6 +220,8 @@ async def evaluate_screening(
         s_result.strengths_summary = eval_data["strengths_summary"]
         s_result.gaps_summary = eval_data["gaps_summary"]
         s_result.ai_reasoning = eval_data["ai_reasoning"]
+        s_result.criteria_set_id = criteria_set_id
+        s_result.evaluation_kind = "OFFICIAL"
 
     await db.commit()
 
@@ -235,6 +244,7 @@ async def evaluate_screening_stream(req: EvaluateRequest):
             if not job:
                 yield f"data: {json.dumps({'stage': 'error', 'message': f'Vị trí tuyển dụng {req.job_id} không tồn tại'})}\n\n"
                 return
+            criteria_set_id, scoring_weights = await get_official_scoring_config(db, job)
 
             resumes = await get_resumes_for_job(req.job_id, req.resume_ids, db)
 
@@ -296,6 +306,8 @@ async def evaluate_screening_stream(req: EvaluateRequest):
                 s_result.strengths_summary = ["Điểm vector similarity thấp - bỏ qua đánh giá LLM"]
                 s_result.gaps_summary = ["Không đạt ngưỡng khớp nối tối thiểu để vào vòng đánh giá AI"]
                 s_result.ai_reasoning = f"Ứng viên có điểm vector similarity {sim_score:.1f}% (ngưỡng: {TOP_K_SIMILARITY_THRESHOLD}%). Bỏ qua đánh giá LLM chuyên sâu."
+                s_result.criteria_set_id = criteria_set_id
+                s_result.evaluation_kind = "OFFICIAL"
 
             await db.commit()
 
@@ -370,11 +382,9 @@ async def evaluate_screening_stream(req: EvaluateRequest):
                 s_score = eval_data["skills_sub_score"]
                 e_score = eval_data["experience_sub_score"]
                 ed_score = eval_data["education_sub_score"]
-                overall = round(
-                    (s_score * job.weight_skills) +
-                    (e_score * job.weight_experience) +
-                    (ed_score * job.weight_education),
-                    1
+                overall = calculate_weighted_score(
+                    {"skills": s_score, "experience": e_score, "education": ed_score},
+                    scoring_weights,
                 )
 
                 existing_res = await db.execute(
@@ -399,6 +409,8 @@ async def evaluate_screening_stream(req: EvaluateRequest):
                 s_result.strengths_summary = eval_data["strengths_summary"]
                 s_result.gaps_summary = eval_data["gaps_summary"]
                 s_result.ai_reasoning = eval_data["ai_reasoning"]
+                s_result.criteria_set_id = criteria_set_id
+                s_result.evaluation_kind = "OFFICIAL"
 
                 await db.commit()
 
@@ -432,6 +444,7 @@ async def fetch_screenings_for_job(job_id: str, db: AsyncSession) -> List[Screen
 
     out = []
     for s_res, c_res in rows:
+        application, _ = await sync_screening_evaluation(db, s_res, c_res)
         badges = detect_competition_honors(c_res.raw_text or "")
         out.append(ScreeningResultResponse(
             id=s_res.id,
@@ -454,7 +467,10 @@ async def fetch_screenings_for_job(job_id: str, db: AsyncSession) -> List[Screen
             candidate_name=c_res.parsed_name or c_res.file_name,
             candidate_email=c_res.parsed_email,
             candidate_file_name=c_res.file_name,
-            honors_badges=badges
+            honors_badges=badges,
+            criteria_set_id=s_res.criteria_set_id,
+            evaluation_kind=s_res.evaluation_kind or "LEGACY",
+            application_id=application.id,
         ))
     return out
 
@@ -491,6 +507,7 @@ async def update_screening_status(
     # Return with candidate metadata
     c_res = await db.execute(select(CandidateResume).where(CandidateResume.id == s_result.resume_id))
     resume = c_res.scalar_one()
+    application, _ = await sync_screening_evaluation(db, s_result, resume)
     
     return ScreeningResultResponse(
         id=s_result.id,
@@ -512,6 +529,9 @@ async def update_screening_status(
         score_override=s_result.score_override,
         candidate_name=resume.parsed_name or resume.file_name,
         candidate_email=resume.parsed_email,
-        candidate_file_name=resume.file_name
+        candidate_file_name=resume.file_name,
+        criteria_set_id=s_result.criteria_set_id,
+        evaluation_kind=s_result.evaluation_kind or "LEGACY",
+        application_id=application.id,
     )
 
