@@ -48,6 +48,7 @@ async def init_db() -> None:
     import app.models.candidate_evaluation
     import app.models.recruiter_productivity
     import app.models.recruitment_decision
+    import app.models.final_release
     from app.core.migrations import run_migrations
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

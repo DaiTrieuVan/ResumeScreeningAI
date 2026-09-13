@@ -27,6 +27,8 @@ class CandidateApplication(Base):
     human_decision: Mapped[str | None] = mapped_column(String(30), nullable=True)
     decision_reason_code: Mapped[str | None] = mapped_column(String(80), nullable=True)
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    evaluation_stale: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    stale_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     received_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -81,10 +83,17 @@ class EvidenceSnippet(Base):
     criterion_result_id: Mapped[str] = mapped_column(String(36), ForeignKey("criterion_results.id", ondelete="CASCADE"), nullable=False, index=True)
     resume_id: Mapped[str] = mapped_column(String(36), ForeignKey("candidate_resumes.id", ondelete="CASCADE"), nullable=False)
     page_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Kept as an additive logical reference so legacy test/database subsets that
+    # do not load ResumePage metadata remain compatible. The service validates it.
+    resume_page_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     start_offset: Mapped[int | None] = mapped_column(Integer, nullable=True)
     end_offset: Mapped[int | None] = mapped_column(Integer, nullable=True)
     excerpt: Mapped[str] = mapped_column(Text, nullable=False)
     polarity: Mapped[str] = mapped_column(String(20), nullable=False, default="SUPPORTS")
     confidence: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    bbox_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    source_method: Mapped[str] = mapped_column(String(20), nullable=False, default="LEGACY_UNKNOWN")
+    verified_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     criterion_result = relationship("CriterionResult", back_populates="evidence")
