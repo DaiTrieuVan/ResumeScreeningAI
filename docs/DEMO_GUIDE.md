@@ -1,5 +1,8 @@
 # Competition Demo Guide
 
+Kịch bản lời thoại, thao tác sân khấu, ba điểm “wow” và phương án xử lý sự cố
+được chuẩn hóa tại [SHOWCASE_SCRIPT.md](SHOWCASE_SCRIPT.md).
+
 ## Mục tiêu
 
 Trong 5-7 phút, chứng minh ba ý: sản phẩm giải quyết vấn đề thật, AI có thể kiểm

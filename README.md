@@ -133,6 +133,7 @@ docs/               Architecture, AI, build, testing, privacy và demo guide
 - [Kiểm thử](docs/TESTING.md)
 - [Quyền riêng tư và Responsible AI](docs/PRIVACY_AND_RESPONSIBLE_AI.md)
 - [Kịch bản demo](docs/DEMO_GUIDE.md)
+- [Kịch bản thuyết trình 6 phút 30 giây](docs/SHOWCASE_SCRIPT.md)
 - [Checklist cuộc thi](docs/COMPETITION_CHECKLIST.md)
 - [Thư viện và giấy phép](DEPENDENCIES.md)
 - [Hướng dẫn đóng góp](CONTRIBUTING.md)
