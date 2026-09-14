@@ -14,6 +14,7 @@ class EvidenceResponse(BaseModel):
     excerpt: str
     polarity: str
     confidence: float
+    source_method: str = "LEGACY_UNKNOWN"
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -47,6 +48,10 @@ class EvaluationResponse(BaseModel):
 class CandidateDetailResponse(BaseModel):
     application_id: str
     application_version: int
+    evaluation_stale: bool = False
+    stale_reason: str | None = None
+    privacy_mode: str = "IDENTIFIED"
+    resume_available: bool = True
     job_id: str
     resume_id: str
     pipeline_stage: str

@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 import hashlib
+import re
 from pathlib import Path
 
 from sqlalchemy import delete, select, update
@@ -13,9 +14,15 @@ from app.models.candidate_evaluation import CandidateApplication, CriterionResul
 from app.models.candidate_resume import CandidateResume
 from app.models.recruitment_decision import RecruitmentDecisionEvent
 from app.models.screening_result import ScreeningResult
+from app.models.final_release import ReviewPrivacyPolicy
+from app.services.audit_service import add_audit_event
 
 
 ALLOWED_PII_ROLES = {"system", "recruiter", "hiring_manager", "admin"}
+MASKED_FIELDS = ["name", "email", "phone", "photo", "address", "file_name", "employer", "school"]
+EMAIL_PATTERN = re.compile(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", re.IGNORECASE)
+PHONE_PATTERN = re.compile(r"(?:\+?\d[\d .()-]{7,}\d)")
+MASKED_VALUE = "[ĐÃ ẨN]"
 
 
 def require_candidate_access(actor_role: str | None) -> None:
@@ -25,6 +32,86 @@ def require_candidate_access(actor_role: str | None) -> None:
 
 def record_candidate_access(db: AsyncSession, application: CandidateApplication, actor_id: str, action: str) -> None:
     db.add(AuditEvent(actor_id=actor_id, action=action, resource_type="CandidateApplication", resource_id=application.id, resource_version=application.version, metadata_json={"job_id": application.job_id}))
+
+
+def anonymous_candidate_name(application_id: str) -> str:
+    return f"Ứng viên {hashlib.sha256(application_id.encode()).hexdigest()[:8].upper()}"
+
+
+def redact_identifiers(text: str | None, identifiers: list[str] | tuple[str, ...] = ()) -> str | None:
+    if not text:
+        return text
+    redacted = PHONE_PATTERN.sub("[SỐ ĐIỆN THOẠI ĐÃ ẨN]", EMAIL_PATTERN.sub("[EMAIL ĐÃ ẨN]", text))
+    for identifier in sorted({value.strip() for value in identifiers if value and len(value.strip()) >= 3}, key=len, reverse=True):
+        redacted = re.sub(re.escape(identifier), MASKED_VALUE, redacted, flags=re.IGNORECASE)
+    return redacted
+
+
+def candidate_identifiers(resume: CandidateResume) -> list[str]:
+    identifiers = [resume.parsed_name, resume.parsed_email, resume.parsed_phone, resume.file_name]
+    for entry in resume.work_history or []:
+        if isinstance(entry, dict):
+            identifiers.extend([entry.get("employer"), entry.get("company"), entry.get("organization")])
+    for entry in resume.education or []:
+        if isinstance(entry, dict):
+            identifiers.extend([entry.get("school"), entry.get("institution"), entry.get("university")])
+    return [value for value in identifiers if isinstance(value, str) and value.strip()]
+
+
+def _mask_nested(value, identifiers: list[str], key: str | None = None):
+    normalized_key = (key or "").casefold()
+    if normalized_key in {"candidate_email", "candidate_phone", "parsed_email", "parsed_phone", "email", "phone"}:
+        return None
+    if normalized_key in {"employer", "company", "organization", "school", "institution", "university", "address", "photo"}:
+        return MASKED_VALUE
+    if isinstance(value, dict):
+        return {child_key: _mask_nested(child_value, identifiers, child_key) for child_key, child_value in value.items()}
+    if isinstance(value, list):
+        return [_mask_nested(item, identifiers) for item in value]
+    if isinstance(value, str):
+        return redact_identifiers(value, identifiers)
+    return value
+
+
+def mask_sensitive_payload(payload, identifiers: list[str] | None = None):
+    return _mask_nested(payload, identifiers or [])
+
+
+async def get_review_privacy_policy(db: AsyncSession, job_id: str) -> ReviewPrivacyPolicy:
+    policy = await db.get(ReviewPrivacyPolicy, job_id)
+    if policy:
+        return policy
+    policy = ReviewPrivacyPolicy(
+        job_id=job_id,
+        mode=settings.DEFAULT_REVIEW_PRIVACY_MODE,
+        masked_fields=MASKED_FIELDS,
+    )
+    db.add(policy)
+    await db.flush()
+    return policy
+
+
+async def update_review_privacy_policy(db: AsyncSession, job_id: str, mode: str, reveal_stage: str | None, expected_version: int, actor_id: str) -> ReviewPrivacyPolicy:
+    policy = await get_review_privacy_policy(db, job_id)
+    if policy.version != expected_version:
+        raise RuntimeError("Chính sách đã thay đổi; vui lòng tải lại.")
+    policy.mode = mode
+    policy.reveal_stage = reveal_stage
+    policy.updated_by = actor_id
+    policy.version += 1
+    add_audit_event(db, actor_id=actor_id, action="UPDATE_REVIEW_PRIVACY", resource_type="JobPosting", resource_id=job_id, resource_version=policy.version, metadata={"mode": mode, "reveal_stage": reveal_stage})
+    await db.flush()
+    return policy
+
+
+def mask_candidate_projection(application_id: str, payload: dict, identifiers: list[str] | None = None) -> dict:
+    identifiers = identifiers or []
+    masked = mask_sensitive_payload(payload, identifiers)
+    masked["candidate_name"] = anonymous_candidate_name(application_id)
+    masked["candidate_email"] = None
+    masked["candidate_phone"] = None
+    masked["file_name"] = f"hoso-{application_id[:8]}.pdf"
+    return masked
 
 
 async def anonymize_candidate(db: AsyncSession, application_id: str, actor_id: str = "system"):

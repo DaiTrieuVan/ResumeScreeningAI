@@ -1,0 +1,50 @@
+{
+  "id": "competition-synthetic",
+  "version": "competition-v1",
+  "title": "Resume Screening AI deterministic competition baseline",
+  "description": "Synthetic boundary cases for reproducible offline metric plumbing. This is not a real-world accuracy claim.",
+  "license": "CC0-1.0",
+  "label_schema_version": "1.0.0",
+  "source_files": {"jobs": "jobs.md", "candidate_cards": "synthetic-cvs.md", "label_guide": "LABELING_GUIDE.md"},
+  "provenance": {
+    "kind": "SYNTHETIC",
+    "statement": "Authored for automated testing; no record describes a real person."
+  },
+  "jobs": [
+    {"id": "backend-engineer", "title": "Backend Engineer", "criteria_version": "backend-v1"},
+    {"id": "data-analyst", "title": "Data Analyst", "criteria_version": "data-v1"},
+    {"id": "product-owner", "title": "Product Owner", "criteria_version": "product-v1"}
+  ],
+  "candidates": [
+    {"id":"be-01","job_id":"backend-engineer","expert_rank":1,"predicted_score":96,"criteria":[{"mandatory":true,"expected":"PASS","predicted":"PASS","evidence":[{"verified":true,"page":1}]}],"batch_status":"COMPLETED"},
+    {"id":"be-02","job_id":"backend-engineer","expert_rank":2,"predicted_score":91,"criteria":[{"mandatory":true,"expected":"PASS","predicted":"PASS","evidence":[{"verified":true,"page":2}]}],"batch_status":"COMPLETED"},
+    {"id":"be-03","job_id":"backend-engineer","expert_rank":3,"predicted_score":87,"criteria":[{"mandatory":true,"expected":"PASS","predicted":"PASS","evidence":[{"verified":true,"page":1}]}],"batch_status":"COMPLETED"},
+    {"id":"be-04","job_id":"backend-engineer","expert_rank":4,"predicted_score":82,"criteria":[{"mandatory":true,"expected":"PASS","predicted":"PASS","evidence":[{"verified":true,"page":3}]}],"batch_status":"COMPLETED"},
+    {"id":"be-05","job_id":"backend-engineer","expert_rank":5,"predicted_score":78,"criteria":[{"mandatory":true,"expected":"PASS","predicted":"PASS","evidence":[{"verified":true,"page":1}]}],"batch_status":"COMPLETED"},
+    {"id":"be-06","job_id":"backend-engineer","expert_rank":6,"predicted_score":65,"criteria":[{"mandatory":true,"expected":"FAIL","predicted":"FAIL","evidence":[]}],"batch_status":"COMPLETED"},
+    {"id":"be-07","job_id":"backend-engineer","expert_rank":7,"predicted_score":58,"criteria":[{"mandatory":true,"expected":"FAIL","predicted":"FAIL","evidence":[]}],"batch_status":"COMPLETED"},
+    {"id":"be-08","job_id":"backend-engineer","expert_rank":8,"predicted_score":51,"criteria":[{"mandatory":true,"expected":"FAIL","predicted":"FAIL","evidence":[]}],"batch_status":"NEEDS_OCR"},
+    {"id":"be-09","job_id":"backend-engineer","expert_rank":9,"predicted_score":44,"criteria":[{"mandatory":true,"expected":"FAIL","predicted":"FAIL","evidence":[]}],"batch_status":"DEDUPE_REVIEW"},
+    {"id":"be-10","job_id":"backend-engineer","expert_rank":10,"predicted_score":35,"criteria":[{"mandatory":true,"expected":"UNKNOWN","predicted":"UNKNOWN","evidence":[]}],"batch_status":"FAILED"},
+    {"id":"da-01","job_id":"data-analyst","expert_rank":1,"predicted_score":95,"criteria":[{"mandatory":true,"expected":"PASS","predicted":"PASS","evidence":[{"verified":true,"page":1}]}],"batch_status":"COMPLETED"},
+    {"id":"da-02","job_id":"data-analyst","expert_rank":2,"predicted_score":90,"criteria":[{"mandatory":true,"expected":"PASS","predicted":"PASS","evidence":[{"verified":true,"page":2}]}],"batch_status":"COMPLETED"},
+    {"id":"da-03","job_id":"data-analyst","expert_rank":3,"predicted_score":86,"criteria":[{"mandatory":true,"expected":"PASS","predicted":"PASS","evidence":[{"verified":true,"page":1}]}],"batch_status":"COMPLETED"},
+    {"id":"da-04","job_id":"data-analyst","expert_rank":4,"predicted_score":81,"criteria":[{"mandatory":true,"expected":"PASS","predicted":"PASS","evidence":[{"verified":true,"page":2}]}],"batch_status":"COMPLETED"},
+    {"id":"da-05","job_id":"data-analyst","expert_rank":5,"predicted_score":76,"criteria":[{"mandatory":true,"expected":"PASS","predicted":"PASS","evidence":[{"verified":true,"page":1}]}],"batch_status":"COMPLETED"},
+    {"id":"da-06","job_id":"data-analyst","expert_rank":6,"predicted_score":64,"criteria":[{"mandatory":true,"expected":"FAIL","predicted":"FAIL","evidence":[]}],"batch_status":"COMPLETED"},
+    {"id":"da-07","job_id":"data-analyst","expert_rank":7,"predicted_score":57,"criteria":[{"mandatory":true,"expected":"FAIL","predicted":"FAIL","evidence":[]}],"batch_status":"COMPLETED"},
+    {"id":"da-08","job_id":"data-analyst","expert_rank":8,"predicted_score":50,"criteria":[{"mandatory":true,"expected":"FAIL","predicted":"FAIL","evidence":[]}],"batch_status":"NEEDS_OCR"},
+    {"id":"da-09","job_id":"data-analyst","expert_rank":9,"predicted_score":43,"criteria":[{"mandatory":true,"expected":"FAIL","predicted":"FAIL","evidence":[]}],"batch_status":"DEDUPE_REVIEW"},
+    {"id":"da-10","job_id":"data-analyst","expert_rank":10,"predicted_score":34,"criteria":[{"mandatory":true,"expected":"UNKNOWN","predicted":"UNKNOWN","evidence":[]}],"batch_status":"FAILED"},
+    {"id":"po-01","job_id":"product-owner","expert_rank":1,"predicted_score":94,"criteria":[{"mandatory":true,"expected":"PASS","predicted":"PASS","evidence":[{"verified":true,"page":1}]}],"batch_status":"COMPLETED"},
+    {"id":"po-02","job_id":"product-owner","expert_rank":2,"predicted_score":89,"criteria":[{"mandatory":true,"expected":"PASS","predicted":"PASS","evidence":[{"verified":true,"page":2}]}],"batch_status":"COMPLETED"},
+    {"id":"po-03","job_id":"product-owner","expert_rank":3,"predicted_score":85,"criteria":[{"mandatory":true,"expected":"PASS","predicted":"PASS","evidence":[{"verified":true,"page":1}]}],"batch_status":"COMPLETED"},
+    {"id":"po-04","job_id":"product-owner","expert_rank":4,"predicted_score":80,"criteria":[{"mandatory":true,"expected":"PASS","predicted":"PASS","evidence":[{"verified":true,"page":2}]}],"batch_status":"COMPLETED"},
+    {"id":"po-05","job_id":"product-owner","expert_rank":5,"predicted_score":75,"criteria":[{"mandatory":true,"expected":"PASS","predicted":"PASS","evidence":[{"verified":true,"page":1}]}],"batch_status":"COMPLETED"},
+    {"id":"po-06","job_id":"product-owner","expert_rank":6,"predicted_score":63,"criteria":[{"mandatory":true,"expected":"FAIL","predicted":"FAIL","evidence":[]}],"batch_status":"COMPLETED"},
+    {"id":"po-07","job_id":"product-owner","expert_rank":7,"predicted_score":56,"criteria":[{"mandatory":true,"expected":"FAIL","predicted":"FAIL","evidence":[]}],"batch_status":"COMPLETED"},
+    {"id":"po-08","job_id":"product-owner","expert_rank":8,"predicted_score":49,"criteria":[{"mandatory":true,"expected":"FAIL","predicted":"FAIL","evidence":[]}],"batch_status":"NEEDS_OCR"},
+    {"id":"po-09","job_id":"product-owner","expert_rank":9,"predicted_score":42,"criteria":[{"mandatory":true,"expected":"FAIL","predicted":"FAIL","evidence":[]}],"batch_status":"DEDUPE_REVIEW"},
+    {"id":"po-10","job_id":"product-owner","expert_rank":10,"predicted_score":33,"criteria":[{"mandatory":true,"expected":"UNKNOWN","predicted":"UNKNOWN","evidence":[]}],"batch_status":"FAILED"}
+  ]
+}

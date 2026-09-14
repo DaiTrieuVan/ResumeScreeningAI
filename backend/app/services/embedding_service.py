@@ -23,7 +23,7 @@ def _get_model():
     downloading or initializing a large model during test discovery.
     """
     global _model, _model_load_attempted
-    if _model_load_attempted or os.getenv("DISABLE_EMBEDDING_MODEL", "").lower() in {"1", "true", "yes"}:
+    if settings.OFFLINE_MODE or _model_load_attempted or os.getenv("DISABLE_EMBEDDING_MODEL", "").lower() in {"1", "true", "yes"}:
         return _model
     _model_load_attempted = True
     try:

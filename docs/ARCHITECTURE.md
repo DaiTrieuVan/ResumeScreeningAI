@@ -102,3 +102,19 @@ object storage và migration framework chuyên dụng.
 - **Performance**: query indexes, server-side pagination, cached embeddings.
 - **Accessibility**: semantic dialog/regions, keyboard journeys, responsive CTA.
 - **Testability**: external AI có fallback; E2E mock API deterministically.
+
+## 10. Competition release path
+
+`OFFLINE_MODE=true` là ranh giới vận hành rõ ràng: embedding, Gemini và crawler
+không được gọi; API `/api/runtime-status` công bố mode và engine để giao diện
+hiển thị đúng trạng thái. Fallback keyword xác định dùng cùng input sẽ cho cùng
+kết quả và được benchmark trên dataset tổng hợp có version.
+
+Blind Review được áp dụng phía server trước khi tạo projection cho danh sách,
+detail, so sánh, evidence và CSV. Chính sách có version để chống ghi đè cũ;
+việc mở CV gốc cần thao tác reveal rõ ràng và tạo audit event. Client không phải
+là security boundary và không nhận PII đã bị che.
+
+Release pipeline đi theo chuỗi `safety -> compliance -> tests -> benchmark ->
+build -> E2E -> clean-room`. Script clean-room tạo archive/snapshot ở đường dẫn
+mới nhằm phát hiện dependency ẩn và đường dẫn hard-code.

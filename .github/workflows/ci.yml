@@ -19,6 +19,9 @@ jobs:
       - name: Verify open-source release files and SPDX headers
         shell: pwsh
         run: ./scripts/check_open_source_compliance.ps1
+      - name: Reject secrets, PII-risk artifacts, and unsafe evaluation data
+        shell: pwsh
+        run: ./scripts/check_release_safety.ps1
 
   backend:
     runs-on: ubuntu-latest
@@ -37,6 +40,11 @@ jobs:
         env:
           DISABLE_EMBEDDING_MODEL: "true"
         run: python -m pytest -q
+      - name: Run deterministic competition benchmark
+        env:
+          OFFLINE_MODE: "true"
+          DISABLE_EMBEDDING_MODEL: "true"
+        run: python scripts/run_ai_benchmark.py --release-version 1.1.0-competition --commit-sha ${{ github.sha }}
 
   frontend:
     runs-on: ubuntu-latest
@@ -62,3 +70,21 @@ jobs:
       - name: Run acceptance journeys
         working-directory: frontend
         run: npm run test:e2e
+
+  clean-room:
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    needs: [compliance, backend, frontend]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Verify source archive in a new offline workspace
+        shell: pwsh
+        run: ./scripts/verify_clean_room.ps1 -SourceMode Archive

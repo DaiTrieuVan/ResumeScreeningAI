@@ -3,6 +3,14 @@
 Checklist nội bộ đối chiếu thể lệ. Chỉ đánh dấu hoàn tất sau khi kiểm tra trên
 GitHub/default branch và máy sạch, không chỉ trong working tree cá nhân.
 
+## Evidence index
+
+- AI metrics và cách tái hiện: [`AI_EVALUATION.md`](AI_EVALUATION.md)
+- Build/release procedure: [`RELEASE_GUIDE.md`](RELEASE_GUIDE.md)
+- Machine-clean-room record: [`../release/verification-record.md`](../release/verification-record.md)
+- Regression commands và acceptance journeys: [`TESTING.md`](TESTING.md)
+- Responsible AI và Blind Review: [`PRIVACY_AND_RESPONSIBLE_AI.md`](PRIVACY_AND_RESPONSIBLE_AI.md)
+
 ## A. Điều kiện và lịch
 
 - [ ] Thành viên đều là sinh viên ICTU; nhóm tối đa 3 người.
@@ -38,8 +46,8 @@ GitHub/default branch và máy sạch, không chỉ trong working tree cá nhân
 - [x] Có hướng dẫn Windows và Linux/macOS.
 - [x] Không cần IDE/compiler nguồn đóng.
 - [x] Có `.env.example` và không sửa header/source để cấu hình.
-- [ ] Chạy clean-room build theo `docs/BUILD_AND_DEPLOYMENT.md`.
-- [ ] Xác nhận chạy sau khi đổi đường dẫn thư mục source.
+- [x] Chạy clean-room build từ committed Git archive theo `docs/BUILD_AND_DEPLOYMENT.md`.
+- [x] Xác nhận chạy sau khi đổi đường dẫn thư mục source (working-tree snapshot).
 - [ ] Xác nhận production reverse proxy `/api` hoạt động.
 
 ### 5. Dependencies/bundling - 10 điểm
@@ -83,8 +91,8 @@ GitHub/default branch và máy sạch, không chỉ trong working tree cá nhân
 
 - [x] Có semantic matching, optional Gemini và deterministic fallback.
 - [x] Có criteria/evidence/model metadata documentation.
-- [ ] Chạy evaluation dataset và điền số đo thực tế; không dùng target như result.
-- [ ] Ghi model, prompt, criteria và dataset version trong showcase.
+- [x] Chạy evaluation dataset và điền số đo thực tế; không dùng target như result.
+- [x] Ghi model, prompt, criteria và dataset version trong showcase.
 
 ### Presentation/community - 10 điểm
 
@@ -96,10 +104,10 @@ GitHub/default branch và máy sạch, không chỉ trong working tree cá nhân
 
 ## D. Release gate
 
-- [ ] Không có secret, PII, CV thật, DB hoặc output nhạy cảm được track.
-- [ ] Backend tests xanh.
-- [ ] Frontend unit tests, E2E và build xanh.
-- [ ] License/dependency scan đã review.
+- [x] Không có secret, PII, CV thật, DB hoặc output nhạy cảm trong snapshot đã scan.
+- [x] Backend tests xanh trên clean-room snapshot.
+- [x] Frontend unit tests, E2E và build xanh trên clean-room snapshot.
+- [x] License/dependency scan đã review; npm audit hiện có 0 vulnerability.
 - [ ] `CHANGELOG.md` chuyển `[Unreleased]` thành version/date.
 - [ ] Tag annotated trỏ đúng `main` commit.
 - [ ] GitHub Release công khai trước hạn nộp và source `.tar.gz` tải được.

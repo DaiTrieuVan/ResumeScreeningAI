@@ -24,6 +24,11 @@ backend/storage/resumes/*
 playwright-report/
 test-results/
 coverage/
+/output/
+/.tmp_video_analysis/
+/.tools/
+/video/
+/video_sources/
 
 *.db
 *.sqlite
@@ -31,11 +36,33 @@ coverage/
 *.zip
 *.tar.gz
 *.rar
+storage/**/*
+backend/storage/**/*
+!storage/resumes/.gitkeep
+!backend/storage/resumes/.gitkeep
+
+# Sensitive and generated competition artifacts
+*.pem
+*.key
+*.p12
+*.pfx
+*.bak
+*.dump
+artifacts/benchmark/*.json
+artifacts/benchmark/*.md
+!artifacts/benchmark/.gitkeep
+release/*.zip
+release/*.tar.gz
+release/*.sha256
+evaluation/private/
+evaluation/raw/
 
 
 # Environment variables
 .env
 .env.local
+.env.*
+!.env.example
 
 # Spec Kit local state
 .specify/feature.json

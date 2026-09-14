@@ -77,6 +77,7 @@ export function createUploadBatch(jobId, files, criteriaSetId = null) {
   if (criteriaSetId) formData.append('criteria_set_id', criteriaSetId);
   return recruiterRequest(`/jobs/${jobId}/upload-batches`, {
     method: 'POST',
+    headers: { 'Idempotency-Key': createIdempotencyKey('create-batch') },
     body: formData,
   });
 }
@@ -99,6 +100,24 @@ export function retryUploadBatch(batchId, itemIds = []) {
   });
 }
 
+export function recoverUploadBatch(batchId) {
+  return recruiterRequest(`/upload-batches/${batchId}/recover`, {
+    method: 'POST',
+    headers: { 'Idempotency-Key': createIdempotencyKey('recover-batch') },
+  });
+}
+
+export function submitManualRecovery(itemId, verifiedText, reason) {
+  return recruiterRequest(`/upload-items/${itemId}/manual-recovery`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Idempotency-Key': createIdempotencyKey('manual-recovery'),
+    },
+    body: JSON.stringify({ mode: 'VERIFIED_TEXT', verified_text: verifiedText, reason }),
+  });
+}
+
 export function resolveUploadDuplicate(itemId, resolution) {
   return recruiterRequest(`/upload-items/${itemId}/duplicate-resolution`, {
     method: 'POST',
@@ -111,8 +130,37 @@ export function fetchCandidateDetail(applicationId) {
   return recruiterRequest(`/applications/${applicationId}`);
 }
 
-export function getOriginalResumeUrl(applicationId) {
-  return `${RECRUITER_API_BASE}/applications/${applicationId}/resume`;
+export function getOriginalResumeUrl(applicationId, reveal = false) {
+  return `${RECRUITER_API_BASE}/applications/${applicationId}/resume${reveal ? '?reveal=true' : ''}`;
+}
+
+export function fetchReviewPrivacyPolicy(jobId) {
+  return recruiterRequest(`/jobs/${jobId}/review-privacy`);
+}
+
+export function updateReviewPrivacyPolicy(jobId, version, payload) {
+  return recruiterRequest(`/jobs/${jobId}/review-privacy`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'If-Match': String(version),
+      'X-Actor-Id': 'demo-privacy-admin',
+      'X-Actor-Role': 'admin',
+    },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function correctCandidateData(applicationId, version, payload) {
+  return recruiterRequest(`/applications/${applicationId}/corrections`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'If-Match': String(version),
+      'Idempotency-Key': createIdempotencyKey('correction'),
+    },
+    body: JSON.stringify(payload),
+  });
 }
 
 export function queryJobCandidates(jobId, params = {}) {

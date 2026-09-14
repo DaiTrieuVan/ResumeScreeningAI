@@ -13,6 +13,16 @@ class Settings(BaseSettings):
     DEFAULT_EMBEDDING_MODEL: str = "paraphrase-multilingual-MiniLM-L12-v2"
     DEFAULT_LLM_MODEL: str = "gemini-1.5-flash"
     RECRUITER_WORKSPACE_V2_ENABLED: bool = True
+    OFFLINE_MODE: bool = False
+    OFFLINE_ENGINE: str = "deterministic-keyword-v1"
+    MAX_BATCH_FILES: int = 200
+    MAX_UPLOAD_FILE_BYTES: int = 15 * 1024 * 1024
+    UPLOAD_MAX_ATTEMPTS: int = 3
+    PROCESSING_LEASE_SECONDS: int = 120
+    IDEMPOTENCY_TTL_HOURS: int = 24
+    DEFAULT_REVIEW_PRIVACY_MODE: str = "IDENTIFIED"
+    EVALUATION_DATASET_DIR: str = os.path.abspath("./evaluation/datasets")
+    BENCHMARK_ARTIFACT_DIR: str = os.path.abspath("./artifacts/benchmark")
     
     model_config = SettingsConfigDict(
         env_file=".env",

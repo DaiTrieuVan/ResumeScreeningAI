@@ -27,6 +27,7 @@ class UploadItemResponse(BaseModel):
     user_message: str | None = None
     attempt_count: int
     candidate_resume_id: str | None = None
+    extraction_method: str | None = None
     version: int
     duplicate_matches: list[DuplicateMatchResponse] = Field(default_factory=list)
     model_config = ConfigDict(from_attributes=True)

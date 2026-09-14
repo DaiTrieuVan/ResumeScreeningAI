@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.core.database import get_db
+from app.core.config import settings
 from app.core.storage import save_uploaded_pdf, delete_stored_file
 from app.services.pdf_parser import extract_text_from_pdf
 from app.services.job_aggregator import seed_real_jobs_if_empty
@@ -110,6 +111,16 @@ async def crawl_real_jobs(
     target_urls: Optional[List[str]] = None,
     db: AsyncSession = Depends(get_db)
 ):
+    if settings.OFFLINE_MODE:
+        total_active = await seed_real_jobs_if_empty(db)
+        return {
+            "status": "success",
+            "mode": "offline",
+            "message": "Chế độ offline đang bật; sử dụng bộ việc làm demo cục bộ.",
+            "new_jobs_added": 0,
+            "existing_jobs_updated": 0,
+            "total_active_jobs": total_active,
+        }
     new_added, updated, total_active = await crawl_and_sync_jobs(db, limit=limit, target_urls=target_urls)
     return {
         "status": "success",

@@ -13,9 +13,10 @@ from sqlalchemy import select
 from app.core.database import get_db
 from app.core.config import settings
 from app.core.storage import save_uploaded_pdf
-from app.services.pdf_parser import extract_text_from_pdf, extract_resume_metadata, extract_pdfs_from_zip
+from app.services.pdf_parser import extract_text_with_pages, extract_resume_metadata, extract_pdfs_from_zip
 from app.services.embedding_service import get_text_embedding, serialize_embedding
 from app.models.candidate_resume import CandidateResume
+from app.models.final_release import ResumePage
 from app.schemas.candidate_resume import CandidateResumeResponse
 
 router = APIRouter(prefix="/resumes", tags=["Candidate Resumes"])
@@ -42,9 +43,10 @@ async def process_single_pdf(
     raw_text = ""
     meta = {"candidate_name": filename, "email": "", "phone": ""}
     emb_json = None
+    page_records = []
 
     try:
-        raw_text = extract_text_from_pdf(dest_path)
+        raw_text, page_records = extract_text_with_pages(dest_path)
         meta = extract_resume_metadata(raw_text)
         if raw_text:
             vec = get_text_embedding(raw_text)
@@ -67,6 +69,9 @@ async def process_single_pdf(
         embedding_json=emb_json
     )
     db.add(resume)
+    await db.flush()
+    for page in page_records:
+        db.add(ResumePage(resume_id=resume.id, **page))
     return resume
 
 @router.post("/upload", response_model=List[CandidateResumeResponse], status_code=status.HTTP_200_OK)
