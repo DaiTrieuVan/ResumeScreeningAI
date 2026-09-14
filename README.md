@@ -77,6 +77,9 @@ Copy-Item .env.example .env
 uvicorn app.main:app --reload --port 8000
 ```
 
+Để bật sentence-transformer và live crawler trong môi trường online, cài thêm
+`pip install -r requirements-optional.txt`. Bản demo offline không cần các gói nặng này.
+
 Trên Linux/macOS, thay lệnh activate bằng `source venv/bin/activate` và sao
 chép cấu hình bằng `cp .env.example .env`.
 

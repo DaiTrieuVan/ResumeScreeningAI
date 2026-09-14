@@ -126,18 +126,18 @@
 
 ### Tests for User Story 4
 
-- [ ] T045 [P] [US4] Add privacy-policy and reveal authorization contract tests in `backend/tests/contract/test_review_privacy_api.py`
-- [ ] T046 [P] [US4] Add server-side list/detail/compare/export/evidence masking tests in `backend/tests/integration/test_blind_review_projections.py`
-- [ ] T047 [P] [US4] Add blind-review toggle and masked presentation tests in `frontend/src/components/recruiter/CandidateGrid.test.jsx` and `frontend/src/components/recruiter/CandidateReviewDrawer.test.jsx`
+- [X] T045 [P] [US4] Add privacy-policy and reveal authorization contract tests in `backend/tests/contract/test_review_privacy_api.py`
+- [X] T046 [P] [US4] Add server-side list/detail/compare/export/evidence masking tests in `backend/tests/integration/test_blind_review_projections.py`
+- [X] T047 [P] [US4] Add blind-review toggle and masked presentation tests in `frontend/src/components/recruiter/CandidateGrid.test.jsx` and `frontend/src/components/recruiter/CandidateReviewDrawer.test.jsx`
 
 ### Implementation for User Story 4
 
-- [ ] T048 [US4] Implement versioned job privacy policy and authorized reveal auditing in `backend/app/services/candidate_privacy_service.py`
-- [ ] T049 [US4] Apply blind projections to candidate list, detail, compare, evidence, filename, and export in `backend/app/repositories/candidate_query_repository.py`, `backend/app/services/comparison_service.py`, and `backend/app/api/exports.py`
-- [ ] T050 [US4] Add privacy policy and reveal endpoints in `backend/app/api/recruiter.py`
-- [ ] T051 [US4] Add review privacy API clients in `frontend/src/services/recruiterApi.js`
-- [ ] T052 [US4] Add blind-review controls, explanatory copy, and masked render paths in `frontend/src/pages/RecruiterDashboard.jsx`, `frontend/src/components/recruiter/CandidateGrid.jsx`, and `frontend/src/components/recruiter/CandidateReviewDrawer.jsx`
-- [ ] T053 [US4] Add blind-review journey coverage in `frontend/tests/e2e/recruiter-workspace.spec.js`
+- [X] T048 [US4] Implement versioned job privacy policy and authorized reveal auditing in `backend/app/services/candidate_privacy_service.py`
+- [X] T049 [US4] Apply blind projections to candidate list, detail, compare, evidence, filename, and export in `backend/app/repositories/candidate_query_repository.py`, `backend/app/services/comparison_service.py`, and `backend/app/api/exports.py`
+- [X] T050 [US4] Add privacy policy and reveal endpoints in `backend/app/api/recruiter.py`
+- [X] T051 [US4] Add review privacy API clients in `frontend/src/services/recruiterApi.js`
+- [X] T052 [US4] Add blind-review controls, explanatory copy, and masked render paths in `frontend/src/pages/RecruiterDashboard.jsx`, `frontend/src/components/recruiter/CandidateGrid.jsx`, and `frontend/src/components/recruiter/CandidateReviewDrawer.jsx`
+- [X] T053 [US4] Add blind-review journey coverage in `frontend/tests/e2e/recruiter-workspace.spec.js`
 
 **Checkpoint**: Initial review can be completed without exposing direct identifiers, while authorized reveal remains accountable.
 
@@ -151,18 +151,18 @@
 
 ### Tests for User Story 5
 
-- [ ] T054 [P] [US5] Add secret, PII, tracked-artifact, and synthetic-dataset safety scan tests in `scripts/check_release_safety.ps1`
-- [ ] T055 [P] [US5] Add full recruiter, real-jobs, and career-gap offline journey coverage in `frontend/tests/e2e/competition-showcase.spec.js`
+- [X] T054 [P] [US5] Add secret, PII, tracked-artifact, and synthetic-dataset safety scan tests in `scripts/check_release_safety.ps1`
+- [X] T055 [P] [US5] Add full recruiter, real-jobs, and career-gap offline journey coverage in `frontend/tests/e2e/competition-showcase.spec.js`
 
 ### Implementation for User Story 5
 
-- [ ] T056 [US5] Add deterministic offline mode and visible model/fallback status across backend and frontend in `backend/app/core/config.py`, `backend/app/services/embedding_service.py`, and `frontend/src/components/Navbar.jsx`
-- [ ] T057 [US5] Add a clean-room build/test/demo validator in `scripts/verify_clean_room.ps1`
-- [ ] T058 [US5] Integrate backend, frontend, E2E, compliance, benchmark, and release-safety gates in `.github/workflows/ci.yml`
-- [ ] T059 [P] [US5] Document benchmark reproduction and interpretation in `docs/AI_EVALUATION.md`
-- [ ] T060 [P] [US5] Document release manifest, checksum, SBOM/license inventory, offline fallback, and known limitations in `docs/RELEASE_GUIDE.md`
-- [ ] T061 [P] [US5] Align showcase timing, judge objections, and fallback cues with implemented behavior in `docs/SHOWCASE_SCRIPT.md`
-- [ ] T062 [US5] Execute the clean-room and offline showcase gates and record results in `release/verification-record.md`
+- [X] T056 [US5] Add deterministic offline mode and visible model/fallback status across backend and frontend in `backend/app/core/config.py`, `backend/app/services/embedding_service.py`, and `frontend/src/components/Navbar.jsx`
+- [X] T057 [US5] Add a clean-room build/test/demo validator in `scripts/verify_clean_room.ps1`
+- [X] T058 [US5] Integrate backend, frontend, E2E, compliance, benchmark, and release-safety gates in `.github/workflows/ci.yml`
+- [X] T059 [P] [US5] Document benchmark reproduction and interpretation in `docs/AI_EVALUATION.md`
+- [X] T060 [P] [US5] Document release manifest, checksum, SBOM/license inventory, offline fallback, and known limitations in `docs/RELEASE_GUIDE.md`
+- [X] T061 [P] [US5] Align showcase timing, judge objections, and fallback cues with implemented behavior in `docs/SHOWCASE_SCRIPT.md`
+- [X] T062 [US5] Execute the clean-room and offline showcase gates and record results in `release/verification-record.md`
 
 **Checkpoint**: The intended release is reproducible, inspectable, and demonstrable without external services.
 
@@ -172,11 +172,11 @@
 
 **Purpose**: Close documentation, accessibility, performance, and release-gate gaps without expanding product scope.
 
-- [ ] T063 [P] Add regression references and final evidence links to `docs/COMPETITION_CHECKLIST.md`
-- [ ] T064 [P] Update architecture, privacy, testing, and deployment documentation in `docs/ARCHITECTURE.md`, `docs/PRIVACY_AND_RESPONSIBLE_AI.md`, `docs/TESTING.md`, and `docs/BUILD_AND_DEPLOYMENT.md`
-- [ ] T065 Add accessibility labels, keyboard focus, reduced-motion handling, and responsive validation to final-release UI changes in `frontend/src/styles/index.css`
-- [ ] T066 Run all gates defined in `.github/workflows/ci.yml` and fix regressions in affected files under `backend/`, `frontend/`, and `scripts/`
-- [ ] T067 Record final measured outcomes, limitations, and unresolved production boundaries in `CHANGELOG.md` and `release/verification-record.md`
+- [X] T063 [P] Add regression references and final evidence links to `docs/COMPETITION_CHECKLIST.md`
+- [X] T064 [P] Update architecture, privacy, testing, and deployment documentation in `docs/ARCHITECTURE.md`, `docs/PRIVACY_AND_RESPONSIBLE_AI.md`, `docs/TESTING.md`, and `docs/BUILD_AND_DEPLOYMENT.md`
+- [X] T065 Add accessibility labels, keyboard focus, reduced-motion handling, and responsive validation to final-release UI changes in `frontend/src/styles/index.css`
+- [X] T066 Run all gates defined in `.github/workflows/ci.yml` and fix regressions in affected files under `backend/`, `frontend/`, and `scripts/`
+- [X] T067 Record final measured outcomes, limitations, and unresolved production boundaries in `CHANGELOG.md` and `release/verification-record.md`
 - [ ] T068 Verify every task and requirement is evidenced and mark completion in `specs/004-final-competition-release/tasks.md`
 
 ---

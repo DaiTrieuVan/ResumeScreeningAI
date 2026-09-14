@@ -1,5 +1,11 @@
 # Kịch bản thuyết trình toàn bộ dự án Resume Screening AI
 
+> **Cue release 1.1:** Trước khi bắt đầu, xác nhận badge hiển thị đúng `Offline · deterministic-keyword-v1` cho phương án dự phòng hoặc tên model online thực tế. Không gọi fallback là Gemini. Chỉ đọc metric từ báo cáo gắn với commit release cuối.
+
+> **Cue Blind Review:** Bật “Đánh giá ẩn danh”, chỉ ra pseudonym và evidence đã che. Khi mở CV gốc, nói rõ đây là thao tác reveal chủ động có audit.
+
+> **Nếu mạng/crawler/model lỗi:** Giữ `OFFLINE_MODE=true`, dùng job feed cục bộ và tiếp tục kịch bản. Video là phương án cuối sau live offline.
+
 ## 1. Cách kể đúng về sản phẩm
 
 Resume Screening AI không chỉ là một màn hình sàng lọc CV. Đây là một nền tảng AI hai chiều cho thị trường tuyển dụng:

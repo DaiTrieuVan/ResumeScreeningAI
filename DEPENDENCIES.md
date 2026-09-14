@@ -1,8 +1,9 @@
 # Direct Dependencies and Licenses
 
 Tài liệu này ghi nhận các dependency trực tiếp của Resume Screening AI. Phiên
-bản thực tế được giải quyết bởi `backend/requirements.txt` và
-`frontend/package-lock.json`. Dependency được cài qua `pip`/`npm`; repository
+bản thực tế được giải quyết bởi `backend/requirements.txt`, bộ mở rộng
+`backend/requirements-optional.txt` và `frontend/package-lock.json`. Dependency
+được cài qua `pip`/`npm`; repository
 không sao chép hoặc chỉnh sửa mã nguồn của các gói này.
 
 ## Backend runtime
@@ -18,11 +19,13 @@ không sao chép hoặc chỉnh sửa mã nguồn của các gói này.
 | aiofiles | `>=23.2.0` | Apache-2.0 | Async CV file storage |
 | pdfplumber | `>=0.11.0` | MIT | PDF text extraction |
 | google-genai | `>=0.1.1` | Apache-2.0 | Optional Gemini API SDK |
-| sentence-transformers | `>=3.0.0` | Apache-2.0 | Optional local embeddings |
 | NumPy | `>=1.26.0` | BSD-3-Clause | Vector calculations |
 | python-multipart | `>=0.0.9` | Apache-2.0 | Multipart uploads |
 | HTTPX | `>=0.27.0` | BSD-3-Clause | Async HTTP client and API tests |
-| Crawl4AI | `>=0.5.0.post8` | Apache-2.0 | Optional job crawling |
+
+`sentence-transformers>=3.0.0` (Apache-2.0) và
+`crawl4ai>=0.5.0.post8` (Apache-2.0) nằm trong
+`requirements-optional.txt`; bản cài tối thiểu không tải model/browser runtime.
 
 ## Backend test dependencies
 
@@ -43,9 +46,9 @@ không sao chép hoặc chỉnh sửa mã nguồn của các gói này.
 
 | Package | Constraint | License | Purpose |
 |---|---:|---|---|
-| Vite | `^5.4.0` | MIT | Development server and build |
-| @vitejs/plugin-react | `^4.3.1` | MIT | JSX/Fast Refresh integration |
-| Vitest | `^2.1.9` | MIT | Component test runner |
+| Vite | `^8.3.0` | MIT | Development server and build |
+| @vitejs/plugin-react | `^6.1.1` | MIT | JSX/Fast Refresh integration |
+| Vitest | `^5.0.0` | MIT | Component test runner |
 | jsdom | `^25.0.1` | MIT | Browser-like test environment |
 | @testing-library/react | `^16.1.0` | MIT | Component interaction tests |
 | @testing-library/jest-dom | `^6.6.3` | MIT | DOM assertions |

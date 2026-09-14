@@ -18,11 +18,18 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/lang/vi/).
 - Access audit và anonymization xóa CV gốc, PII cùng nội dung dẫn xuất nhạy cảm.
 - Playwright acceptance journeys cho keyboard, responsive, scrolling và comparison.
 - Bộ tài liệu mã nguồn mở, AI, quyền riêng tư, build/deploy và showcase cuộc thi.
+- Blind Review phía server cho list, detail, comparison, evidence và CSV; reveal
+  CV gốc là thao tác có chủ đích và được audit.
+- Chế độ offline xác định, runtime status badge, benchmark 30 CV tổng hợp / 3 JD
+  và clean-room verification có machine-readable record.
 
 ### Changed
 - Refactor giao diện theo phong cách sáng, chuyên nghiệp và responsive.
 - Trang khám phá việc làm sử dụng hero banner toàn chiều rộng.
 - Sentence Transformer được lazy-load để ứng dụng và test khởi động ổn định.
+- Tách sentence-transformer/Crawl4AI sang bộ dependency tùy chọn; bản cài tối
+  thiểu vẫn chạy đầy đủ fallback offline.
+- Nâng Vite/Vitest/plugin React để full npm audit đạt 0 vulnerability.
 
 ### Fixed
 - Candidate detail drawer có vùng cuộn độc lập, không còn bị kẹt ở viewport thấp.
@@ -32,6 +39,20 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/lang/vi/).
 - Kiểm tra vai trò khi xem/tải/xuất dữ liệu ứng viên.
 - Audit các lần xem chi tiết, mở CV gốc, xuất CSV và ẩn danh.
 - Loại bỏ dữ liệu evidence và ghi chú có thể chứa PII khi ẩn danh.
+
+### Measured release-candidate evidence
+- Backend: 54 tests; frontend: 15 component tests; Playwright: 7 journeys.
+- AI benchmark: mandatory recall, evidence precision, UNKNOWN accuracy, ranking
+  agreement và batch completion đều đạt `1.0000` trên dataset tổng hợp versioned.
+- Clean-room working-tree snapshot hoàn tất trong 1.44 phút; final tagged archive
+  vẫn phải chạy lại sau khi merge.
+
+### Known limitations
+- Benchmark tổng hợp không đại diện độ chính xác tuyển dụng ngoài thực tế.
+- SQLite/local storage và role headers chỉ phù hợp demo; production cần identity
+  provider, PostgreSQL/object storage, encryption và retention policy.
+- OCR cho scanned PDF và độ ổn định dịch vụ/crawler ngoài vẫn là giới hạn; bản
+  dự thi dùng fallback offline và luôn giữ quyết định cuối cho con người.
 
 ## [1.0.0] - 2026-08-15
 
