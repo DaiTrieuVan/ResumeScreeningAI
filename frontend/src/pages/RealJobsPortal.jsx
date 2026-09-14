@@ -28,8 +28,10 @@ export default function RealJobsPortal() {
   const fetchInitialJobs = async () => {
     try {
       const res = await fetch('/api/real-jobs');
+      if (!res.ok) throw new Error('Không thể tải danh sách việc làm');
       const data = await res.json();
-      setMatchResults(data.map((j) => ({
+      const jobs = Array.isArray(data) ? data : [];
+      setMatchResults(jobs.map((j) => ({
         real_job: j,
         match_score: null,
         skills_sub_score: null,
@@ -38,8 +40,8 @@ export default function RealJobsPortal() {
         gaps_summary: [],
         match_reasoning: "Tải lên CV PDF để kích hoạt chấm điểm AI riêng cho bạn."
       })));
-    } catch (err) {
-      console.error(err);
+    } catch {
+      setMatchResults([]);
     }
   };
 

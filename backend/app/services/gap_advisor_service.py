@@ -45,7 +45,7 @@ async def analyze_career_gap(
         cv_text=cv_text[:3000]
     )
 
-    if settings.GEMINI_API_KEY:
+    if settings.GEMINI_API_KEY and not settings.OFFLINE_MODE:
         try:
             client = genai.Client(api_key=settings.GEMINI_API_KEY)
             response = client.models.generate_content(

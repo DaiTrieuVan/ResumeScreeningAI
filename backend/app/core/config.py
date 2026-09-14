@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     DEFAULT_LLM_MODEL: str = "gemini-1.5-flash"
     RECRUITER_WORKSPACE_V2_ENABLED: bool = True
     OFFLINE_MODE: bool = False
+    OFFLINE_ENGINE: str = "deterministic-keyword-v1"
     MAX_BATCH_FILES: int = 200
     MAX_UPLOAD_FILE_BYTES: int = 15 * 1024 * 1024
     UPLOAD_MAX_ATTEMPTS: int = 3

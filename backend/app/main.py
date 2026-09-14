@@ -55,3 +55,15 @@ app.include_router(evaluations.router, prefix=settings.API_V1_STR)
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "project": settings.PROJECT_NAME}
+
+
+@app.get(f"{settings.API_V1_STR}/runtime-status")
+async def runtime_status():
+    offline = settings.OFFLINE_MODE
+    embedding_disabled = offline or not bool(settings.DEFAULT_EMBEDDING_MODEL)
+    return {
+        "mode": "offline" if offline else "online-capable",
+        "fallback": offline or embedding_disabled or not bool(settings.GEMINI_API_KEY),
+        "engine": settings.OFFLINE_ENGINE if offline else (settings.DEFAULT_LLM_MODEL if settings.GEMINI_API_KEY else settings.OFFLINE_ENGINE),
+        "external_services": not offline,
+    }

@@ -89,7 +89,7 @@ async def match_cv_against_real_jobs(
         sim_score = vector_rankings.get(job["id"], 50.0)
 
         # Stage 2: Gemini LLM Rerank
-        if settings.GEMINI_API_KEY:
+        if settings.GEMINI_API_KEY and not settings.OFFLINE_MODE:
             try:
                 client = genai.Client(api_key=settings.GEMINI_API_KEY)
                 prompt = CV_JOB_MATCH_PROMPT.format(
