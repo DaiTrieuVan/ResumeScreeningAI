@@ -17,20 +17,26 @@ $requiredFiles = @(
 
 Push-Location $repositoryRoot
 try {
+    git rev-parse --is-inside-work-tree 2>$null | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        $allFiles = @(git ls-files --cached --others --exclude-standard)
+    } else {
+        $allFiles = @(Get-ChildItem -Recurse -File | ForEach-Object { [System.IO.Path]::GetRelativePath($repositoryRoot, $_.FullName).Replace('\', '/') })
+    }
     foreach ($relativePath in $requiredFiles) {
         if (-not (Test-Path -LiteralPath $relativePath -PathType Leaf)) {
             $failures.Add("Missing required file: $relativePath")
         }
     }
 
-    $codeFiles = git ls-files "*.py" "*.js" "*.jsx" "*.css" "*.ps1"
+    $codeFiles = @($allFiles | Where-Object { $_ -match '\.(py|js|jsx|css|ps1)$' })
     foreach ($relativePath in $codeFiles) {
         if (-not (Select-String -LiteralPath $relativePath -SimpleMatch "SPDX-License-Identifier: MIT" -Quiet)) {
             $failures.Add("Missing SPDX header: $relativePath")
         }
     }
 
-    $forbiddenTracked = git ls-files | Where-Object {
+    $forbiddenTracked = $allFiles | Where-Object {
         $_ -match '(^|/)(node_modules|venv|dist)(/|$)' -or
         $_ -match '\.(db|sqlite|sqlite3|rar|zip)$' -or
         $_ -match '(^|/)\.env$'

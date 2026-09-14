@@ -24,6 +24,11 @@ backend/storage/resumes/*
 playwright-report/
 test-results/
 coverage/
+/output/
+/.tmp_video_analysis/
+/.tools/
+/video/
+/video_sources/
 
 *.db
 *.sqlite
