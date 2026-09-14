@@ -88,17 +88,25 @@ function CorrectionPanel({ detail, onCorrected }) {
 function CandidateReviewContent({ detail, onDecisionUpdated }) {
   const evaluation = detail.evaluation;
   const [page, setPage] = useState(null);
-  const baseResumeUrl = getOriginalResumeUrl(detail.application_id);
+  const [revealed, setRevealed] = useState(detail.privacy_mode !== 'BLIND');
+  const baseResumeUrl = getOriginalResumeUrl(detail.application_id, detail.privacy_mode === 'BLIND' && revealed);
   const resumeUrl = `${baseResumeUrl}${page ? `#page=${page}` : ''}`;
 
   return (
     <div className="candidate-review__body">
       <section className="candidate-review__resume" aria-label="CV gốc">
-        <div className="candidate-review__section-heading">
-          <div><FileText size={17} /><strong>CV gốc</strong></div>
-          <a href={resumeUrl} target="_blank" rel="noreferrer">Mở tab mới <ExternalLink size={13} /></a>
-        </div>
-        <iframe key={page || 'initial'} title={`CV của ${detail.candidate_name}`} src={resumeUrl} />
+        {detail.privacy_mode === 'BLIND' && !revealed ? <div className="blind-review-lock">
+          <ShieldCheck size={28} />
+          <strong>Danh tính và CV gốc đang được khóa</strong>
+          <p>Hãy đánh giá điểm số và bằng chứng đã che trước. Thao tác mở CV sẽ được ghi vào nhật ký audit.</p>
+          <button type="button" onClick={() => setRevealed(true)}>Mở danh tính và CV gốc</button>
+        </div> : <>
+          <div className="candidate-review__section-heading">
+            <div><FileText size={17} /><strong>{detail.privacy_mode === 'BLIND' ? 'CV đã mở có audit' : 'CV gốc'}</strong></div>
+            <a href={resumeUrl} target="_blank" rel="noreferrer">Mở tab mới <ExternalLink size={13} /></a>
+          </div>
+          <iframe key={page || 'initial'} title={`CV của ${detail.candidate_name}`} src={resumeUrl} />
+        </>}
       </section>
 
       <section className="candidate-review__analysis" aria-label="Đánh giá theo tiêu chí">

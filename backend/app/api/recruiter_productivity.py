@@ -12,6 +12,7 @@ from app.models.candidate_evaluation import CandidateApplication
 from app.models.recruiter_enums import PipelineStage
 from app.models.recruiter_productivity import BulkActionItem, BulkActionRequest, CandidateTag, CandidateTagAssignment, SavedView
 from app.repositories.candidate_query_repository import query_candidates
+from app.services.candidate_privacy_service import get_review_privacy_policy, mask_candidate_projection
 
 router = APIRouter()
 
@@ -42,7 +43,11 @@ def bulk_result(request):
 @router.get("/jobs/{job_id}/candidates")
 async def candidates(job_id: str, q: str | None = Query(None, max_length=200), stage: list[str] = Query(default=[]), mandatory_gate: str | None = None, min_score: float | None = Query(None, ge=0, le=100), skills: list[str] = Query(default=[]), sort: str = "score_desc", page: int = Query(1, ge=1), page_size: int = Query(25, ge=10, le=100), db: AsyncSession = Depends(get_db)):
     rows, total = await query_candidates(db, job_id, q=q, stages=stage, mandatory_gate=mandatory_gate, min_score=min_score, skills=skills, sort=sort, page=page, page_size=page_size)
-    return {"items": [candidate_item(*row) for row in rows], "total": total, "page": page, "page_size": page_size, "facets": {"filtered": total}}
+    policy = await get_review_privacy_policy(db, job_id)
+    items = [candidate_item(*row) for row in rows]
+    if policy.mode == "BLIND":
+        items = [mask_candidate_projection(item[0].id, candidate_item(*item)) for item in rows]
+    return {"items": items, "total": total, "page": page, "page_size": page_size, "facets": {"filtered": total}, "privacy_mode": policy.mode}
 
 
 @router.get("/jobs/{job_id}/saved-views")

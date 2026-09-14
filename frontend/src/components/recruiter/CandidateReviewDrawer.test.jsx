@@ -70,4 +70,18 @@ describe('CandidateReviewDrawer', () => {
     unmount();
     expect(document.body.style.overflow).toBe('');
   });
+
+  it('keeps the original CV locked in blind mode until an explicit reveal', async () => {
+    api.fetchCandidateDetail.mockResolvedValue({
+      application_id: 'app-blind', application_version: 1, candidate_name: 'Ứng viên A1B2C3D4',
+      privacy_mode: 'BLIND', resume_available: false, extracted_skills: [], evaluation: null,
+    });
+    api.getOriginalResumeUrl.mockImplementation((id, reveal) => `/applications/${id}/resume${reveal ? '?reveal=true' : ''}`);
+
+    render(<CandidateReviewDrawer candidate={{ application_id: 'app-blind' }} onClose={vi.fn()} />);
+    expect(await screen.findByText(/danh tính và cv gốc đang được khóa/i)).toBeInTheDocument();
+    expect(screen.queryByTitle(/CV của/i)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /mở danh tính và cv gốc/i }));
+    expect(screen.getByTitle(/CV của/i)).toHaveAttribute('src', '/applications/app-blind/resume?reveal=true');
+  });
 });

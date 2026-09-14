@@ -130,8 +130,25 @@ export function fetchCandidateDetail(applicationId) {
   return recruiterRequest(`/applications/${applicationId}`);
 }
 
-export function getOriginalResumeUrl(applicationId) {
-  return `${RECRUITER_API_BASE}/applications/${applicationId}/resume`;
+export function getOriginalResumeUrl(applicationId, reveal = false) {
+  return `${RECRUITER_API_BASE}/applications/${applicationId}/resume${reveal ? '?reveal=true' : ''}`;
+}
+
+export function fetchReviewPrivacyPolicy(jobId) {
+  return recruiterRequest(`/jobs/${jobId}/review-privacy`);
+}
+
+export function updateReviewPrivacyPolicy(jobId, version, payload) {
+  return recruiterRequest(`/jobs/${jobId}/review-privacy`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'If-Match': String(version),
+      'X-Actor-Id': 'demo-privacy-admin',
+      'X-Actor-Role': 'admin',
+    },
+    body: JSON.stringify(payload),
+  });
 }
 
 export function correctCandidateData(applicationId, version, payload) {
