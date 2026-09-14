@@ -3,13 +3,15 @@
 ## Candidate snapshot
 
 - Release candidate: `1.1.0-competition`
-- Source snapshot: working tree based on `804b5fb7bdeb30a0993b534b3e6e76010532d50b`
-- Verified at: 2026-09-14T12:13:49Z
+- Source snapshot: Git archive from `1c1ae7b8348baccac54e8a4a69d783057f7fb840`
+- Verified at: 2026-09-14T16:14:24Z
 - Environment: Windows, clean temporary path, Python 3.13, Node.js 24
 - Runtime mode: offline; `deterministic-keyword-v1`; Gemini key empty; embedding model disabled
 - Status: **internal gates passed**
 
-This is development evidence for the current working tree. It is not the final public-release attestation. After review/commit/merge, rerun `verify_clean_room.ps1 -SourceMode Archive` and replace the commit, tag, CI URL and artifact fields below.
+This is development evidence for the committed feature-branch archive. It is not
+the final public-release attestation. After merge to `main`, rerun the same
+archive gate and replace the tag, CI URL and artifact fields below.
 
 ## Automated evidence
 
@@ -22,7 +24,7 @@ This is development evidence for the current working tree. It is not the final p
 | Production build | PASS | Vite production bundle generated |
 | E2E/showcase | PASS | 7 Playwright journeys, including Blind Review and three-module offline showcase |
 | AI benchmark | PASS | 5/5 metrics meet threshold on 30 synthetic CV / 3 JD dataset |
-| Clean-room | PASS | 1.44 minutes from a new path, including dependency install and all gates |
+| Clean-room | PASS | 1.72 minutes from committed Git archive in a new path, including dependency install and all gates |
 | Production npm audit | PASS | 0 production vulnerabilities |
 | Full npm audit | PASS | 0 vulnerabilities after Vite/Vitest upgrade |
 
@@ -31,10 +33,10 @@ Machine-readable clean-room step timings are stored in `release/clean-room-resul
 ## Benchmark lineage
 
 - Dataset: `competition-synthetic` / `competition-v1`
-- Release/commit recorded by report: `1.1.0-competition` / `804b5fb`
+- Release/commit recorded by report: `1.1.0-competition` / `1c1ae7b`
 - Mode/model: offline fallback / `deterministic-offline-v1`
-- JSON SHA-256: `F0FD08178A66C0C366CD413847585F74441377FC873A8116C92F01EB7CC93E27`
-- Markdown SHA-256: `48CC5DBFE76C91D4085E37E2B7B42C5D3D9AC21648D7022510FE1A4D376EB3B0`
+- JSON SHA-256: `DFCA4A606AB3D932C953887328FE33C19C14373D883B6E45937796257E48EA5F`
+- Markdown SHA-256: `B273E447E6A8F7DC4194A6998B4886C191C0B46C73B993A842309E8205EC5B46`
 
 | Metric | Result | Threshold |
 |---|---:|---:|

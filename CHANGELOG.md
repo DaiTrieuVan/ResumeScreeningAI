@@ -44,7 +44,7 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/lang/vi/).
 - Backend: 54 tests; frontend: 15 component tests; Playwright: 7 journeys.
 - AI benchmark: mandatory recall, evidence precision, UNKNOWN accuracy, ranking
   agreement và batch completion đều đạt `1.0000` trên dataset tổng hợp versioned.
-- Clean-room working-tree snapshot hoàn tất trong 1.44 phút; final tagged archive
+- Clean-room committed source archive hoàn tất trong 1.72 phút; final `main` archive
   vẫn phải chạy lại sau khi merge.
 
 ### Known limitations

@@ -1,17 +1,17 @@
 {
   "status": "PASSED",
-  "source_mode": "WorkingTree",
-  "source_commit": "804b5fb7bdeb30a0993b534b3e6e76010532d50b",
-  "started_at": "2026-09-14T12:12:23.5755612Z",
-  "completed_at": "2026-09-14T12:13:49.8617233Z",
-  "duration_minutes": 1.44,
+  "source_mode": "Archive",
+  "source_commit": "1c1ae7b8348baccac54e8a4a69d783057f7fb840",
+  "started_at": "2026-09-14T16:12:40.9995286Z",
+  "completed_at": "2026-09-14T16:14:24.3592243Z",
+  "duration_minutes": 1.72,
   "offline_mode": true,
-  "workspace": "C:\\Users\\aloal\\AppData\\Local\\Temp\\ResumeScreeningAI-CleanRoom-5c77bcd1e89446f0ac4f9d120d0054e9",
+  "workspace": "C:\\Users\\aloal\\AppData\\Local\\Temp\\ResumeScreeningAI-CleanRoom-20c85c4737774684a163a0fefa770bf1",
   "steps": [
     {
       "name": "release-safety",
       "status": "PASSED",
-      "seconds": 0.61
+      "seconds": 0.87
     },
     {
       "name": "open-source-compliance",
@@ -21,42 +21,42 @@
     {
       "name": "python-venv",
       "status": "PASSED",
-      "seconds": 4.97
+      "seconds": 6.72
     },
     {
       "name": "backend-dependencies",
       "status": "PASSED",
-      "seconds": 28.44
+      "seconds": 36.47
     },
     {
       "name": "frontend-dependencies",
       "status": "PASSED",
-      "seconds": 10.32
+      "seconds": 11.73
     },
     {
       "name": "backend-tests",
       "status": "PASSED",
-      "seconds": 10.79
+      "seconds": 18.61
     },
     {
       "name": "ai-benchmark",
       "status": "PASSED",
-      "seconds": 0.77
+      "seconds": 0.75
     },
     {
       "name": "frontend-tests",
       "status": "PASSED",
-      "seconds": 7.8
+      "seconds": 9.03
     },
     {
       "name": "frontend-build",
       "status": "PASSED",
-      "seconds": 1.62
+      "seconds": 1.69
     },
     {
       "name": "showcase-e2e",
       "status": "PASSED",
-      "seconds": 19.49
+      "seconds": 16.62
     }
   ]
 }

@@ -46,7 +46,7 @@ GitHub/default branch và máy sạch, không chỉ trong working tree cá nhân
 - [x] Có hướng dẫn Windows và Linux/macOS.
 - [x] Không cần IDE/compiler nguồn đóng.
 - [x] Có `.env.example` và không sửa header/source để cấu hình.
-- [ ] Chạy clean-room build theo `docs/BUILD_AND_DEPLOYMENT.md`.
+- [x] Chạy clean-room build từ committed Git archive theo `docs/BUILD_AND_DEPLOYMENT.md`.
 - [x] Xác nhận chạy sau khi đổi đường dẫn thư mục source (working-tree snapshot).
 - [ ] Xác nhận production reverse proxy `/api` hoạt động.
 
