@@ -38,6 +38,9 @@ class EvaluationResponse(BaseModel):
     evaluation_kind: str
     component_scores: dict[str, float]
     overall_score: float
+    maximum_possible_score: float = 100.0
+    evidence_coverage: float = 0.0
+    scoring_version: str = "legacy"
     mandatory_gate: str
     evidence_status: str
     evaluated_at: datetime

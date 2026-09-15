@@ -311,7 +311,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .candidate-review__section-heading > div, .candidate-review__section-heading a { display: inline-flex; align-items: center; gap: 7px; }
 .candidate-review__section-heading a { color: var(--accent-primary-dark); font-size: 0.72rem; font-weight: 600; text-decoration: none; }
 .candidate-review__section-heading > span { color: var(--text-muted); font-size: 0.7rem; }
-.candidate-review__summary { margin-bottom: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.candidate-review__summary { margin-bottom: 16px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
 .candidate-review__summary div { min-width: 0; padding: 11px 12px; background: var(--bg-subtle); border-radius: var(--radius-sm); }
 .candidate-review__summary span, .candidate-review__summary strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .candidate-review__summary span { color: var(--text-muted); font-size: 0.64rem; text-transform: uppercase; }
@@ -327,6 +327,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .criterion-importance.is-must_have { color: #a63d49; background: #fff0f1; }
 .evidence-result { flex: 0 0 auto; padding: 4px 8px; display: inline-flex; align-items: center; gap: 5px; border-radius: var(--radius-full); font-size: 0.67rem; font-weight: 700; }
 .evidence-result.is-met { color: #087455; background: #e5f6ef; }
+.evidence-result.is-partial { color: #87620e; background: #fff3d6; }
 .evidence-result.is-not-met { color: #b84250; background: #fff0f1; }
 .evidence-result.is-unknown { color: #8a620e; background: #fff6e6; }
 .evidence-result.is-na { color: #66736e; background: #edf2f0; }

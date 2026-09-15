@@ -59,11 +59,18 @@ def _migration_004_final_release_columns(connection: Connection) -> None:
     _add_column(connection, "upload_items", "last_failure_at", "DATETIME")
 
 
+def _migration_005_verified_scoring(connection: Connection) -> None:
+    _add_column(connection, "screening_evaluations", "maximum_possible_score", "FLOAT NOT NULL DEFAULT 100.0")
+    _add_column(connection, "screening_evaluations", "evidence_coverage", "FLOAT NOT NULL DEFAULT 0.0")
+    _add_column(connection, "screening_evaluations", "scoring_version", "VARCHAR(50) NOT NULL DEFAULT 'legacy'")
+
+
 MIGRATIONS: list[Migration] = [
     ("001_legacy_columns", _migration_001_legacy_columns),
     ("002_recruiter_versioning", _migration_002_recruiter_versioning),
     ("003_recruiter_query_indexes", _migration_003_recruiter_query_indexes),
     ("004_final_release_columns", _migration_004_final_release_columns),
+    ("005_verified_scoring", _migration_005_verified_scoring),
 ]
 
 

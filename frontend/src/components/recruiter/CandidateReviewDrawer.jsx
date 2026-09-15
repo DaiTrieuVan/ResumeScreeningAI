@@ -13,6 +13,7 @@ import DecisionPanel from './DecisionPanel';
 
 const RESULT_META = {
   MET: { label: 'Đạt', icon: CheckCircle2, className: 'is-met' },
+  PARTIAL: { label: 'Đạt một phần', icon: AlertCircle, className: 'is-partial' },
   NOT_MET: { label: 'Chưa đạt', icon: XCircle, className: 'is-not-met' },
   UNKNOWN: { label: 'Chưa đủ dữ liệu', icon: HelpCircle, className: 'is-unknown' },
   NOT_APPLICABLE: { label: 'Không áp dụng', icon: AlertCircle, className: 'is-na' },
@@ -111,9 +112,10 @@ function CandidateReviewContent({ detail, onDecisionUpdated }) {
 
       <section className="candidate-review__analysis" aria-label="Đánh giá theo tiêu chí">
         <div className="candidate-review__summary">
-          <div><span>Điểm chính thức</span><strong>{evaluation ? `${evaluation.overall_score}%` : '—'}</strong></div>
+          <div><span>Điểm đã xác minh</span><strong>{evaluation ? `${evaluation.overall_score}%` : '—'}</strong></div>
+          <div><span>Khoảng có thể</span><strong>{evaluation ? `${evaluation.overall_score}–${evaluation.maximum_possible_score ?? evaluation.overall_score}%` : '—'}</strong></div>
+          <div><span>Độ phủ bằng chứng</span><strong>{evaluation ? `${evaluation.evidence_coverage ?? 0}%` : '—'}</strong></div>
           <div><span>Cổng bắt buộc</span><strong>{evaluation?.mandatory_gate || 'Chưa đánh giá'}</strong></div>
-          <div><span>Trạng thái bằng chứng</span><strong>{evaluation?.evidence_status || 'Chưa có'}</strong></div>
         </div>
 
         <DecisionPanel applicationId={detail.application_id} version={detail.application_version} currentStage={detail.pipeline_stage} onUpdated={onDecisionUpdated} />
