@@ -18,6 +18,7 @@ class GapAnalysisResponse(BaseModel):
     category_scores: Dict[str, float] = Field(default_factory=dict, description="Category scores out of 10")
     strengths: List[str] = Field(default_factory=list, description="List of CV strengths")
     weaknesses: List[str] = Field(default_factory=list, description="List of CV weaknesses")
+    spelling_and_format_errors: List[str] = Field(default_factory=list, description="Detected spelling or formatting issues in CV")
     matched_skills: List[str]
     missing_skills: List[str]
     suggested_action_items: List[str]

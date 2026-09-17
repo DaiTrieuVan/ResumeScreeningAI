@@ -18,6 +18,7 @@ class GapAnalysis(Base):
     category_scores: Mapped[dict] = mapped_column(JSON, nullable=True, default=dict)
     strengths: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
     weaknesses: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
+    spelling_and_format_errors: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
     matched_skills: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
     missing_skills: Mapped[list] = mapped_column(JSON, nullable=True, default=list)
     suggested_action_items: Mapped[list] = mapped_column(JSON, nullable=True, default=list)

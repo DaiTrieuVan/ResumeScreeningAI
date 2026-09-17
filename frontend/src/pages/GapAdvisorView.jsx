@@ -250,6 +250,34 @@ export default function GapAdvisorView() {
 
             </div>
 
+            {/* 3.5 SPELLING & FORMAT ERRORS CARD */}
+            {result.spelling_and_format_errors && result.spelling_and_format_errors.length > 0 && (
+              <div style={{ background: '#fef2f2', padding: '20px', borderRadius: '14px', border: '1px solid #fecaca' }}>
+                <h4 style={{ fontSize: '0.95rem', color: '#991b1b', fontWeight: 700, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <AlertTriangle size={18} color="#dc2626" />
+                  Lỗi chính tả & Thuật ngữ cần chuẩn hóa
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {result.spelling_and_format_errors.map((errItem, idx) => (
+                    <div key={idx} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      background: '#ffffff',
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      border: '1px solid #fee2e2',
+                      fontSize: '0.84rem',
+                      color: '#7f1d1d'
+                    }}>
+                      <span style={{ fontWeight: 700, color: '#dc2626' }}>•</span>
+                      <span>{errItem}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* 4. ACTIONABLE RECOMMENDATIONS */}
             <div className="glass-panel" style={{ padding: '24px' }}>
               <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>

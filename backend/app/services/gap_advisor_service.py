@@ -4,12 +4,6 @@
 import json
 import logging
 from typing import Dict, Any
-# SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai
-# SPDX-License-Identifier: MIT
-
-import json
-import logging
-from typing import Dict, Any
 from google import genai
 from google.genai import types
 from app.core.config import settings
@@ -17,8 +11,25 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 GAP_PROMPT_TEMPLATE = """
-You are a Principal Technical Recruiter and Career Mentor evaluating a candidate's CV against a target Job Description.
-Provide a thorough, highly professional CV evaluation with numerical scoring, category breakdowns, detailed strengths & weaknesses, and actionable improvement steps.
+You are a Vice President of Engineering and Principal Technical Recruiter conducting an in-depth CV evaluation against a target Job Description.
+Evaluate the candidate's CV strictly, constructively, and professionally based on realistic engineering recruitment standards.
+
+### CRITICAL EVALUATION RULES:
+1. **Spell & Tech Term Standardizer ("spelling_and_format_errors"):**
+   - Detect spelling mistakes in Vietnamese or English (e.g. "hệ thông" ➔ "hệ thống", "Developement" ➔ "Development").
+   - Detect incorrect tech term capitalization/formatting (e.g. "springboot" ➔ "Spring Boot", "postgres" ➔ "PostgreSQL", "pyton" ➔ "Python", "javascript" ➔ "JavaScript").
+   - List each detected error as a string: "Lỗi chính tả/từ khóa: 'springboot' ➔ Nên sửa thành 'Spring Boot'".
+
+2. **Targeted Value Proposition ("Sell what they need, not everything you have"):**
+   - Flag irrelevant "noise" skills that dilute the candidate's focus (e.g., listing Java/PHP when applying for an AI/ML position).
+   - Guide the candidate to emphasize exact requirements from the Job Description.
+
+3. **Skill Organization & Proficiency Level:**
+   - Check whether Skills are positioned prominently and described using clear contextual proficiency levels (e.g. "Proficient", "Working Knowledge") rather than meaningless percentage bars.
+
+4. **Project Impact & Lessons Learned:**
+   - Penalize generic feature lists (e.g. "Built login & shopping cart").
+   - Require individual contribution details and technical lessons learned / challenges solved (e.g. "Handled concurrency race conditions", "Optimized DB query latency by 40%").
 
 ### Target Job Title: {job_title}
 ### Target Job Description:
@@ -41,23 +52,26 @@ Return a strict JSON object (in Vietnamese) matching this schema:
   }},
   "strengths": [
     "Nền tảng kỹ thuật tốt về Java backend, đặc biệt là Spring Boot, cơ sở dữ liệu và RESTful API.",
-    "Kết quả học tập rất tốt với GPA ấn tượng, cho thấy khả năng tiếp thu và tư duy logic mạnh mẽ.",
+    "Kết quả học tập rất tốt với GPA ấn tượng, thể hiện khả năng tiếp thu và tư duy logic mạnh mẽ.",
     "Kinh nghiệm làm dự án có số liệu cụ thể về quy mô và hiệu năng hệ thống."
   ],
   "weaknesses": [
-    "Mốc thời gian kinh nghiệm chưa đồng nhất hoặc thiếu chi tiết bối cảnh dự án.",
-    "Trình bày còn một số đoạn bị dính dòng/khoảng cách chưa tối ưu cho công cụ quét CV (ATS).",
-    "Thành tích nêu ra nhưng chưa thể hiện rõ đóng góp cá nhân trực tiếp."
+    "Mô tả dự án còn thiên về liệt kê tính năng chung chung, chưa làm nổi bật vai trò cá nhân và thách thức kỹ thuật đã giải quyết.",
+    "Một số kỹ năng chưa tập trung vào yêu cầu cốt lõi của JD, gây nhiễu thông tin khi duyệt nhanh.",
+    "Khoảng cách dấu câu và định dạng một số dòng chưa tối ưu cho công cụ quét CV (ATS)."
+  ],
+  "spelling_and_format_errors": [
+    "Lỗi từ khóa: 'springboot' ➔ Nên ghi chuẩn là 'Spring Boot'",
+    "Lỗi từ khóa: 'postgres' ➔ Nên ghi chuẩn là 'PostgreSQL'"
   ],
   "matched_skills": ["Java", "Spring Boot", "RESTful API", "MySQL"],
   "missing_skills": ["Docker", "Redis", "PostgreSQL", "Kafka"],
   "suggested_action_items": [
-    "Sửa lại toàn bộ mốc thời gian để nhất quán và hợp lý trong CV.",
-    "Bổ sung 1-2 dòng mô tả vai trò cá nhân và số liệu đo lường cụ thể cho từng dự án.",
-    "Căn chỉnh định dạng bullet points, tăng độ thoáng và chuẩn hóa font chữ.",
-    "Bổ sung dự án cá nhân hoặc thực tập gần đây có áp dụng Docker và PostgreSQL."
+    "Tái cấu trúc mô tả dự án: Nêu rõ vai trò cá nhân, thách thức kỹ thuật và bài học rút ra thay vì chỉ liệt kê tính năng.",
+    "Tập trung phần kỹ năng vào các công nghệ trọng tâm của JD, ẩn bớt thông tin không liên quan.",
+    "Chuẩn hóa lại các từ khóa công nghệ (Spring Boot, PostgreSQL) và căn chỉnh khoảng trắng dấu câu."
   ],
-  "summary_explanation": "Ứng viên có nền tảng tư duy và kỹ thuật cốt lõi khá vững chắc. Cần tập trung chuẩn hóa lại định dạng trình bày và làm nổi bật các con số thành tích cá nhân để tối ưu cơ hội trúng tuyển."
+  "summary_explanation": "Hồ sơ có tư duy kỹ thuật khá vững. Tối ưu lại mô tả dự án theo bài học kinh nghiệm và chuẩn hóa từ khóa sẽ giúp CV có sức thuyết phục cao hơn hẳn."
 }}
 """
 
@@ -117,6 +131,7 @@ def sanitize_gap_output(data: Dict[str, Any]) -> Dict[str, Any]:
         "category_scores": category_scores,
         "strengths": list(data.get("strengths") or []),
         "weaknesses": list(data.get("weaknesses") or []),
+        "spelling_and_format_errors": list(data.get("spelling_and_format_errors") or []),
         "matched_skills": list(data.get("matched_skills") or []),
         "missing_skills": list(data.get("missing_skills") or []),
         "suggested_action_items": list(data.get("suggested_action_items") or []),
@@ -136,6 +151,18 @@ def fallback_gap_analysis(job_description: str, cv_text: str) -> Dict[str, Any]:
     if not missing:
         missing = ["PostgreSQL", "Docker", "CI/CD"]
 
+    # Simple offline spelling/tech term check simulation
+    detected_typos = []
+    text_lower = cv_text.lower()
+    if "springboot" in text_lower:
+        detected_typos.append("Lỗi từ khóa: 'springboot' ➔ Nên ghi chuẩn là 'Spring Boot'")
+    if "postgres" in text_lower and "postgresql" not in text_lower:
+        detected_typos.append("Lỗi từ khóa: 'postgres' ➔ Nên ghi chuẩn là 'PostgreSQL'")
+    if "pyton" in text_lower:
+        detected_typos.append("Lỗi chính tả: 'pyton' ➔ Nên sửa thành 'Python'")
+    if not detected_typos:
+        detected_typos = ["Lỗi trình bày: Cần kiểm tra lại khoảng trắng trước dấu câu (ví dụ: 'API , MySQL .')"]
+
     match_ratio = len(matched) / (len(matched) + len(missing)) if (matched or missing) else 0.6
     overall_score = round(min(9.5, max(5.0, 5.5 + match_ratio * 4.0)), 1)
     
@@ -145,22 +172,21 @@ def fallback_gap_analysis(job_description: str, cv_text: str) -> Dict[str, Any]:
     else: label = "Cần cải thiện"
 
     strengths = [
-        f"Nền tảng kỹ thuật tốt với các kỹ năng đã xác minh: {', '.join(matched[:4])}.",
-        "Cấu trúc CV có bố cục phân chia các phần rõ ràng, dễ theo dõi thông tin cơ bản.",
-        "Thể hiện tinh thần chủ động nâng cao năng lực qua các dự án cá nhân/môn học."
+        f"Nền tảng kỹ thuật phù hợp với các kỹ năng cốt lõi: {', '.join(matched[:4])}.",
+        "Cấu trúc phân chia các mục cơ bản rõ ràng, dễ theo dõi.",
+        "Có tinh thần chủ động thực hiện dự án thực tế."
     ]
 
     weaknesses = [
-        f"CV còn thiếu một số từ khóa kỹ thuật yêu cầu trong JD: {', '.join(missing[:3])}.",
-        "Chưa có nhiều số liệu đo lường cụ thể (như % tối ưu, quy mô người dùng hay lượng API request/ngày).",
-        "Mô tả dự án còn thiên về liệt kê công nghệ hơn là thể hiện tác động nghiệp vụ thực tế."
+        f"CV còn thiếu các từ khóa kỹ thuật yêu cầu trong JD: {', '.join(missing[:3])}.",
+        "Mô tả dự án còn thiên về liệt kê tính năng, chưa nêu bật vai trò cá nhân và bài học/thách thức kỹ thuật.",
+        "Phần kỹ năng chưa phân loại rõ ràng theo độ thành thạo chuyên môn."
     ]
 
     suggested_action_items = [
-        f"Sửa đổi CV để bổ sung các từ khóa kỹ thuật quan trọng còn thiếu: {', '.join(missing[:3])}.",
-        "Thêm 1-2 con số đo lường hiệu quả (ví dụ: 'Giảm 20% thời gian phản hồi API' hoặc 'Xử lý 10.000+ bản ghi').",
-        "Tối ưu lại định dạng trình bày cho thoáng và nhất quán các mốc thời gian kinh nghiệm.",
-        "Đưa các dự án tiêu biểu lên đầu phần kinh nghiệm để gây ấn tượng nhanh với nhà tuyển dụng."
+        f"Tập trung bổ sung các từ khóa kỹ thuật yêu cầu còn thiếu: {', '.join(missing[:3])}.",
+        "Viết lại phần dự án: Mô tả rõ vai trò cá nhân, bài học kinh nghiệm và kết quả đo lường được.",
+        "Chuẩn hóa lại chính tả từ khóa công nghệ và tăng khoảng thoáng định dạng cho ATS."
     ]
 
     return {
@@ -169,14 +195,15 @@ def fallback_gap_analysis(job_description: str, cv_text: str) -> Dict[str, Any]:
         "category_scores": {
             "kinh_nghiem": round(min(10.0, overall_score - 0.5), 1),
             "ky_nang": round(min(10.0, overall_score + 0.8), 1),
-            "dinh_dang": 6.5,
+            "dinh_dang": 6.0,
             "thanh_tich": round(min(10.0, overall_score - 0.2), 1),
             "muc_tieu": 7.0
         },
         "strengths": strengths,
         "weaknesses": weaknesses,
+        "spelling_and_format_errors": detected_typos,
         "matched_skills": matched,
         "missing_skills": missing,
         "suggested_action_items": suggested_action_items,
-        "summary_explanation": f"Hồ sơ ứng viên đạt mức {label} ({overall_score}/10). Nền tảng kỹ thuật cơ bản khá tốt, bổ sung thêm các số liệu dự án cụ thể sẽ giúp CV nổi bật hơn rõ rệt."
+        "summary_explanation": f"Hồ sơ đạt mức {label} ({overall_score}/10). Tối ưu lại phần mô tả dự án theo bài học thực tế và chuẩn hóa chính tả sẽ giúp CV ấn tượng hơn hẳn."
     }
