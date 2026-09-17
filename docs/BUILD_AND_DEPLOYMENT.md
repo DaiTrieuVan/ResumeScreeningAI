@@ -34,6 +34,9 @@ Copy-Item .env.example .env
 uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
+`requirements.txt` là bộ cài tối thiểu, hỗ trợ fallback offline. Chỉ cài
+`requirements-optional.txt` khi cần sentence-transformer và live crawler.
+
 ## 4. Backend trên Linux/macOS
 
 ```bash
@@ -90,6 +93,8 @@ Không commit `dist`; release được build lại từ source và lockfile.
 | `DEFAULT_LLM_MODEL` | No | configured model name | Gemini model |
 | `DEFAULT_EMBEDDING_MODEL` | No | multilingual MiniLM | Embedding model |
 | `DISABLE_EMBEDDING_MODEL` | No | `false` | Force keyword fallback |
+| `OFFLINE_MODE` | No | `false` | Chặn dịch vụ ngoài và dùng dữ liệu/fallback cục bộ |
+| `OFFLINE_ENGINE` | No | `deterministic-keyword-v1` | Nhãn engine khi chạy offline |
 | `RECRUITER_WORKSPACE_V2_ENABLED` | No | `true` | Rollout signal |
 
 Không đưa `.env` vào source control. Sau khi thay key, restart backend.
@@ -122,12 +127,13 @@ liệu để tránh mất lịch sử. Không sử dụng backup chứa CV thậ
 
 Trên một thư mục/máy mới:
 
-1. Clone đúng release tag.
-2. Làm theo mục backend và frontend, không sao chép `venv`/`node_modules`.
-3. Chạy backend tests, frontend tests và build.
-4. Tạo JD mẫu, upload CV tổng hợp, chạy screening và mở evidence.
-5. Dừng network/Gemini và xác nhận fallback vẫn hoàn tất demo.
-6. Di chuyển source sang đường dẫn khác và chạy lại để phát hiện hard-code.
+1. Clone đúng release tag hoặc tải source archive chính thức.
+2. Chạy `scripts\verify_clean_room.ps1 -SourceMode Archive` từ repository gốc.
+3. Script tạo đường dẫn tạm mới, cài lại dependency và chạy safety, compliance,
+   backend, benchmark, frontend, build cùng E2E.
+4. Đối chiếu JSON kết quả với `release/verification-record.md` và checksum asset.
+5. Tạo JD mẫu, upload CV tổng hợp, chạy screening và mở evidence trên máy demo.
+6. Ngắt network và xác nhận badge `Offline` cùng fallback vẫn hoàn tất hành trình.
 
 ## 11. Troubleshooting
 

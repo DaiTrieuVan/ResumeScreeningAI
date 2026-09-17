@@ -39,6 +39,7 @@ class CriterionOperator(StrEnum):
 
 class CriterionOutcome(StrEnum):
     MET = "MET"
+    PARTIAL = "PARTIAL"
     NOT_MET = "NOT_MET"
     UNKNOWN = "UNKNOWN"
     NOT_APPLICABLE = "NOT_APPLICABLE"

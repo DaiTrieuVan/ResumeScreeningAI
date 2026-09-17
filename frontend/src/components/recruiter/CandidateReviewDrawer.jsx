@@ -4,15 +4,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
-  AlertCircle, CheckCircle2, ExternalLink, FileText, HelpCircle,
-  LoaderCircle, ShieldCheck, X, XCircle,
+  AlertCircle, CheckCircle2, ExternalLink, FilePenLine, FileText, HelpCircle,
+  LoaderCircle, LocateFixed, ShieldCheck, X, XCircle,
 } from 'lucide-react';
 
-import { fetchCandidateDetail, getOriginalResumeUrl } from '../../services/recruiterApi';
+import { correctCandidateData, fetchCandidateDetail, getOriginalResumeUrl } from '../../services/recruiterApi';
 import DecisionPanel from './DecisionPanel';
 
 const RESULT_META = {
   MET: { label: 'Đạt', icon: CheckCircle2, className: 'is-met' },
+  PARTIAL: { label: 'Đạt một phần', icon: AlertCircle, className: 'is-partial' },
   NOT_MET: { label: 'Chưa đạt', icon: XCircle, className: 'is-not-met' },
   UNKNOWN: { label: 'Chưa đủ dữ liệu', icon: HelpCircle, className: 'is-unknown' },
   NOT_APPLICABLE: { label: 'Không áp dụng', icon: AlertCircle, className: 'is-na' },
@@ -25,28 +26,102 @@ function ResultBadge({ result }) {
   return <span className={`evidence-result ${meta.className}`}><Icon size={14} />{meta.label}</span>;
 }
 
+const CORRECTION_FIELDS = [
+  ['extracted_skills', 'Kỹ năng', true],
+  ['work_history', 'Kinh nghiệm', true],
+  ['education', 'Học vấn', true],
+  ['parsed_name', 'Họ tên', false],
+  ['parsed_email', 'Email', false],
+  ['parsed_phone', 'Số điện thoại', false],
+];
+
+function CorrectionPanel({ detail, onCorrected }) {
+  const [field, setField] = useState('extracted_skills');
+  const [value, setValue] = useState(JSON.stringify(detail.extracted_skills || [], null, 2));
+  const [reason, setReason] = useState('');
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const changeField = (nextField) => {
+    setField(nextField);
+    const [, , listField] = CORRECTION_FIELDS.find(([key]) => key === nextField);
+    const current = detail[nextField] ?? (listField ? [] : '');
+    setValue(listField ? JSON.stringify(current, null, 2) : String(current));
+  };
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setError('');
+    const [, , listField] = CORRECTION_FIELDS.find(([key]) => key === field);
+    let newValue = value;
+    if (listField) {
+      try { newValue = JSON.parse(value); } catch { setError('Dữ liệu danh sách phải là JSON hợp lệ.'); return; }
+      if (!Array.isArray(newValue)) { setError('Dữ liệu danh sách phải là một mảng.'); return; }
+    }
+    setSaving(true);
+    try {
+      await correctCandidateData(detail.application_id, detail.application_version, {
+        field_path: field, new_value: newValue, reason,
+      });
+      setReason('');
+      await onCorrected();
+    } catch (failure) {
+      setError(failure.message || 'Không thể lưu hiệu chỉnh.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <details className="correction-panel">
+      <summary><FilePenLine size={15} /> Hiệu chỉnh dữ liệu AI</summary>
+      <form onSubmit={submit}>
+        <label>Trường dữ liệu<select value={field} onChange={(event) => changeField(event.target.value)}>{CORRECTION_FIELDS.map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label>
+        <label>Giá trị đã xác minh<textarea value={value} onChange={(event) => setValue(event.target.value)} /></label>
+        <label>Lý do hiệu chỉnh<input value={reason} minLength={3} required onChange={(event) => setReason(event.target.value)} placeholder="Ví dụ: Đã đối chiếu trực tiếp trên CV" /></label>
+        {error && <p className="correction-panel__error">{error}</p>}
+        <button type="submit" disabled={saving}>{saving ? 'Đang lưu…' : 'Lưu và đánh dấu cần chạy lại'}</button>
+      </form>
+    </details>
+  );
+}
+
 function CandidateReviewContent({ detail, onDecisionUpdated }) {
   const evaluation = detail.evaluation;
-  const resumeUrl = getOriginalResumeUrl(detail.application_id);
+  const [page, setPage] = useState(null);
+  const [revealed, setRevealed] = useState(detail.privacy_mode !== 'BLIND');
+  const baseResumeUrl = getOriginalResumeUrl(detail.application_id, detail.privacy_mode === 'BLIND' && revealed);
+  const resumeUrl = `${baseResumeUrl}${page ? `#page=${page}` : ''}`;
 
   return (
     <div className="candidate-review__body">
       <section className="candidate-review__resume" aria-label="CV gốc">
-        <div className="candidate-review__section-heading">
-          <div><FileText size={17} /><strong>CV gốc</strong></div>
-          <a href={resumeUrl} target="_blank" rel="noreferrer">Mở tab mới <ExternalLink size={13} /></a>
-        </div>
-        <iframe title={`CV của ${detail.candidate_name}`} src={resumeUrl} />
+        {detail.privacy_mode === 'BLIND' && !revealed ? <div className="blind-review-lock">
+          <ShieldCheck size={28} />
+          <strong>Danh tính và CV gốc đang được khóa</strong>
+          <p>Hãy đánh giá điểm số và bằng chứng đã che trước. Thao tác mở CV sẽ được ghi vào nhật ký audit.</p>
+          <button type="button" onClick={() => setRevealed(true)}>Mở danh tính và CV gốc</button>
+        </div> : <>
+          <div className="candidate-review__section-heading">
+            <div><FileText size={17} /><strong>{detail.privacy_mode === 'BLIND' ? 'CV đã mở có audit' : 'CV gốc'}</strong></div>
+            <a href={resumeUrl} target="_blank" rel="noreferrer">Mở tab mới <ExternalLink size={13} /></a>
+          </div>
+          <iframe key={page || 'initial'} title={`CV của ${detail.candidate_name}`} src={resumeUrl} />
+        </>}
       </section>
 
       <section className="candidate-review__analysis" aria-label="Đánh giá theo tiêu chí">
         <div className="candidate-review__summary">
-          <div><span>Điểm chính thức</span><strong>{evaluation ? `${evaluation.overall_score}%` : '—'}</strong></div>
+          <div><span>Điểm đã xác minh</span><strong>{evaluation ? `${evaluation.overall_score}%` : '—'}</strong></div>
+          <div><span>Khoảng có thể</span><strong>{evaluation ? `${evaluation.overall_score}–${evaluation.maximum_possible_score ?? evaluation.overall_score}%` : '—'}</strong></div>
+          <div><span>Độ phủ bằng chứng</span><strong>{evaluation ? `${evaluation.evidence_coverage ?? 0}%` : '—'}</strong></div>
           <div><span>Cổng bắt buộc</span><strong>{evaluation?.mandatory_gate || 'Chưa đánh giá'}</strong></div>
-          <div><span>Trạng thái bằng chứng</span><strong>{evaluation?.evidence_status || 'Chưa có'}</strong></div>
         </div>
 
         <DecisionPanel applicationId={detail.application_id} version={detail.application_version} currentStage={detail.pipeline_stage} onUpdated={onDecisionUpdated} />
+
+        {detail.evaluation_stale && <div className="candidate-review__stale"><AlertCircle size={16} /><span><strong>Kết quả cần chạy lại.</strong> {detail.stale_reason}</span></div>}
+        <CorrectionPanel detail={detail} onCorrected={onDecisionUpdated} />
 
         {!evaluation ? (
           <div className="workspace-state workspace-state--stacked">
@@ -71,13 +146,20 @@ function CandidateReviewContent({ detail, onDecisionUpdated }) {
                 </div>
                 <p>{criterion.explanation}</p>
                 {criterion.evidence.length ? criterion.evidence.map((evidence) => (
-                  <blockquote key={evidence.id}>
-                    “{evidence.excerpt}”
+                  <button
+                    className="criterion-evidence__source"
+                    key={evidence.id}
+                    type="button"
+                    onClick={() => evidence.page_number && setPage(evidence.page_number)}
+                    disabled={!evidence.page_number}
+                    title={evidence.page_number ? `Mở trang ${evidence.page_number} trong CV` : 'Không xác định được trang nguồn'}
+                  >
+                    <span>“{evidence.excerpt}”</span>
                     <footer>
-                      {evidence.page_number ? `Trang ${evidence.page_number} · ` : ''}
+                      {evidence.page_number ? <><LocateFixed size={12} /> Trang {evidence.page_number} · bấm để kiểm chứng · </> : 'Chưa xác định trang · dùng tìm kiếm trong CV · '}
                       Độ tin cậy {Math.round(evidence.confidence * 100)}%
                     </footer>
-                  </blockquote>
+                  </button>
                 )) : (
                   <div className="criterion-evidence__missing">
                     <HelpCircle size={15} /> Không tìm thấy bằng chứng trực tiếp trong CV — cần người tuyển dụng xác minh.

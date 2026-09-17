@@ -14,6 +14,7 @@ class EvidenceResponse(BaseModel):
     excerpt: str
     polarity: str
     confidence: float
+    source_method: str = "LEGACY_UNKNOWN"
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -37,6 +38,9 @@ class EvaluationResponse(BaseModel):
     evaluation_kind: str
     component_scores: dict[str, float]
     overall_score: float
+    maximum_possible_score: float = 100.0
+    evidence_coverage: float = 0.0
+    scoring_version: str = "legacy"
     mandatory_gate: str
     evidence_status: str
     evaluated_at: datetime
@@ -47,6 +51,10 @@ class EvaluationResponse(BaseModel):
 class CandidateDetailResponse(BaseModel):
     application_id: str
     application_version: int
+    evaluation_stale: bool = False
+    stale_reason: str | None = None
+    privacy_mode: str = "IDENTIFIED"
+    resume_available: bool = True
     job_id: str
     resume_id: str
     pipeline_stage: str

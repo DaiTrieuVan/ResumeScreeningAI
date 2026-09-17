@@ -11,11 +11,12 @@ from sqlalchemy import select
 from app.core.database import get_db
 from app.models.screening_result import ScreeningResult
 from app.models.candidate_resume import CandidateResume
+from app.models.candidate_evaluation import CandidateApplication
 from app.models.job_posting import JobPosting
 from app.services.reranker_service import detect_competition_honors
 from app.core.exceptions import ResourceNotFoundException
 from app.models.audit_event import AuditEvent
-from app.services.candidate_privacy_service import require_candidate_access
+from app.services.candidate_privacy_service import anonymous_candidate_name, candidate_identifiers, get_review_privacy_policy, redact_identifiers, require_candidate_access
 
 router = APIRouter(prefix="/exports", tags=["Export Data"])
 
@@ -47,6 +48,11 @@ async def export_shortlist_csv(
     )
     res = await db.execute(stmt)
     all_rows = res.all()
+    policy = await get_review_privacy_policy(db, job_id)
+    application_by_resume = {
+        application.resume_id: application
+        for application in (await db.scalars(select(CandidateApplication).where(CandidateApplication.job_id == job_id))).all()
+    }
 
     sf = (status_filter or "SHORTLISTED").upper()
 
@@ -95,19 +101,25 @@ async def export_shortlist_csv(
 
     for s_res, c_res in rows:
         badges = detect_competition_honors(c_res.raw_text or "")
+        identifiers = candidate_identifiers(c_res)
+        application = application_by_resume.get(c_res.id)
+        blind = policy.mode == "BLIND"
+        candidate_name = anonymous_candidate_name(application.id if application else c_res.id) if blind else (c_res.parsed_name or c_res.file_name)
+        candidate_email = "N/A" if blind else (c_res.parsed_email or "N/A")
+        clean = lambda value: redact_identifiers(value or "", identifiers) if blind else (value or "")
         writer.writerow([
-            c_res.parsed_name or c_res.file_name,
-            c_res.parsed_email or "N/A",
+            candidate_name,
+            candidate_email,
             f"{s_res.overall_score:.1f}%",
             f"{s_res.skills_sub_score:.1f}%",
             f"{s_res.experience_sub_score:.1f}%",
             f"{s_res.education_sub_score:.1f}%",
             "; ".join(badges) if badges else "Không",
             s_res.recruiter_status,
-            "; ".join(s_res.strengths_summary or []),
-            "; ".join(s_res.gaps_summary or []),
-            s_res.ai_reasoning or "",
-            s_res.recruiter_feedback_notes or ""
+            clean("; ".join(s_res.strengths_summary or [])),
+            clean("; ".join(s_res.gaps_summary or [])),
+            clean(s_res.ai_reasoning),
+            clean(s_res.recruiter_feedback_notes)
         ])
 
     # Prepend UTF-8 BOM (\ufeff) so Microsoft Excel opens Vietnamese text perfectly without font errors

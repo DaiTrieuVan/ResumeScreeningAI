@@ -50,3 +50,17 @@ trên pull request. Có thể chạy riêng kiểm tra hồ sơ mã nguồn mở
 ```powershell
 .\scripts\check_open_source_compliance.ps1
 ```
+
+Gate bản dự thi còn chạy kiểm tra release-safety và benchmark xác định trong chế
+độ offline. Job Windows cuối cùng dựng source archive ở đường dẫn mới, cài lại
+dependency rồi chạy toàn bộ backend, frontend, build và E2E:
+
+```powershell
+.\scripts\check_release_safety.ps1
+.\scripts\run_ai_benchmark.ps1
+.\scripts\verify_clean_room.ps1 -SourceMode Archive -RecordPath release\clean-room-result.json
+```
+
+Hành trình `competition-showcase.spec.js` mock biên mạng nhưng đi xuyên qua ba
+module Jobs, Recruiter và Gap Advisor. Kết quả đo, checksum và giới hạn diễn giải
+được lưu tại `docs/AI_EVALUATION.md` và `release/verification-record.md`.

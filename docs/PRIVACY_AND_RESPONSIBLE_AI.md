@@ -47,6 +47,19 @@ Luồng anonymization:
 
 Backup cũng phải tuân theo retention; xóa record chính không tự động xóa bản backup cũ.
 
+## Blind Review
+
+Khi chính sách job ở mode `BLIND`, server che tên, email, điện thoại, địa chỉ,
+nơi làm việc, trường học và tên file trước khi trả danh sách, detail, comparison,
+evidence hoặc CSV. Pseudonym ổn định giúp recruiter theo dõi cùng ứng viên mà
+không cần nhận dạng thật. Mọi update chính sách gửi version dự kiến để tránh
+lost update.
+
+CV gốc mặc định bị khóa trong drawer. Recruiter có quyền chỉ xem được sau một
+thao tác reveal chủ động; API kiểm tra role và ghi audit. Đây là biện pháp giảm
+thiên kiến trong review, không thay thế authentication, consent hay đánh giá
+công bằng theo quy định của tổ chức triển khai.
+
 ## Quy tắc tuyển dụng có trách nhiệm
 
 - Không dùng thuộc tính được bảo vệ hoặc proxy của chúng để chấm điểm.
@@ -61,6 +74,11 @@ Backup cũng phải tuân theo retention; xóa record chính không tự động
 Chỉ dùng CV tổng hợp hoặc đã ẩn danh. Không commit `.env`, DB, storage, export,
 screenshot có PII hoặc log từ production. Fixture nên dùng tên/email giả thuộc
 domain `example.com`.
+
+`scripts/check_release_safety.ps1` chặn artifact nhạy cảm phổ biến, private key,
+credential pattern và xác nhận manifest benchmark chỉ chứa hồ sơ tổng hợp. Scan
+tự động là release gate hỗ trợ review, không phải bằng chứng rằng không thể có
+mọi dạng dữ liệu nhạy cảm; maintainer vẫn phải kiểm tra release archive.
 
 ## Checklist production
 

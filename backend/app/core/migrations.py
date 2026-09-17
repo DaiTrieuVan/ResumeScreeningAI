@@ -17,7 +17,10 @@ def _columns(connection: Connection, table: str) -> set[str]:
 
 
 def _add_column(connection: Connection, table: str, name: str, ddl: str) -> None:
-    if name not in _columns(connection, table):
+    columns = _columns(connection, table)
+    if not columns:
+        return
+    if name not in columns:
         connection.execute(text(f'ALTER TABLE "{table}" ADD COLUMN "{name}" {ddl}'))
 
 
@@ -43,10 +46,31 @@ def _migration_003_recruiter_query_indexes(connection: Connection) -> None:
         connection.execute(text("CREATE INDEX IF NOT EXISTS ix_resume_job_uploaded ON candidate_resumes(job_id, uploaded_at)"))
 
 
+def _migration_004_final_release_columns(connection: Connection) -> None:
+    _add_column(connection, "candidate_applications", "evaluation_stale", "BOOLEAN NOT NULL DEFAULT 0")
+    _add_column(connection, "candidate_applications", "stale_reason", "TEXT")
+    _add_column(connection, "evidence_snippets", "resume_page_id", "VARCHAR(36)")
+    _add_column(connection, "evidence_snippets", "bbox_json", "JSON")
+    _add_column(connection, "evidence_snippets", "source_method", "VARCHAR(20) NOT NULL DEFAULT 'LEGACY_UNKNOWN'")
+    _add_column(connection, "evidence_snippets", "verified_by", "VARCHAR(255)")
+    _add_column(connection, "evidence_snippets", "verified_at", "DATETIME")
+    _add_column(connection, "upload_items", "extraction_method", "VARCHAR(20)")
+    _add_column(connection, "upload_items", "manual_text", "TEXT")
+    _add_column(connection, "upload_items", "last_failure_at", "DATETIME")
+
+
+def _migration_005_verified_scoring(connection: Connection) -> None:
+    _add_column(connection, "screening_evaluations", "maximum_possible_score", "FLOAT NOT NULL DEFAULT 100.0")
+    _add_column(connection, "screening_evaluations", "evidence_coverage", "FLOAT NOT NULL DEFAULT 0.0")
+    _add_column(connection, "screening_evaluations", "scoring_version", "VARCHAR(50) NOT NULL DEFAULT 'legacy'")
+
+
 MIGRATIONS: list[Migration] = [
     ("001_legacy_columns", _migration_001_legacy_columns),
     ("002_recruiter_versioning", _migration_002_recruiter_versioning),
     ("003_recruiter_query_indexes", _migration_003_recruiter_query_indexes),
+    ("004_final_release_columns", _migration_004_final_release_columns),
+    ("005_verified_scoring", _migration_005_verified_scoring),
 ]
 
 

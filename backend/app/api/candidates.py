@@ -10,8 +10,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.database import get_db
 from app.schemas.candidate_detail import CandidateDetailResponse, EvaluationResponse
+from app.schemas.final_release import CorrectionRequest
 from app.services.evidence_service import load_candidate_detail
-from app.services.candidate_privacy_service import anonymize_candidate, record_candidate_access, require_candidate_access
+from app.services.candidate_privacy_service import anonymize_candidate, candidate_identifiers, get_review_privacy_policy, mask_candidate_projection, record_candidate_access, require_candidate_access
+from app.services.correction_service import correct_candidate
+from app.services.idempotency_service import IdempotencyConflict
 
 
 router = APIRouter()
@@ -28,9 +31,12 @@ async def get_candidate_detail(application_id: str, x_actor_id: str = Header("sy
     except LookupError as error:
         raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": str(error)}) from error
     record_candidate_access(db, application, x_actor_id, "VIEW_CANDIDATE_DETAIL")
-    return CandidateDetailResponse(
+    policy = await get_review_privacy_policy(db, application.job_id)
+    response = CandidateDetailResponse(
         application_id=application.id,
         application_version=application.version,
+        evaluation_stale=application.evaluation_stale,
+        stale_reason=application.stale_reason,
         job_id=application.job_id,
         resume_id=resume.id,
         pipeline_stage=application.pipeline_stage,
@@ -48,10 +54,51 @@ async def get_candidate_detail(application_id: str, x_actor_id: str = Header("sy
         },
         evaluation=EvaluationResponse.model_validate(evaluation) if evaluation else None,
     )
+    if policy.mode == "BLIND":
+        data = response.model_dump()
+        data = mask_candidate_projection(application.id, data, candidate_identifiers(resume))
+        data["privacy_mode"] = "BLIND"
+        data["resume_available"] = False
+        return CandidateDetailResponse.model_validate(data)
+    return response
+
+
+@router.post("/applications/{application_id}/corrections")
+async def create_candidate_correction(
+    application_id: str,
+    payload: CorrectionRequest,
+    if_match: str = Header(..., alias="If-Match"),
+    idempotency_key: str = Header(..., alias="Idempotency-Key"),
+    x_actor_id: str = Header("system"),
+    x_actor_role: str = Header("system"),
+    db: AsyncSession = Depends(get_db),
+):
+    try:
+        require_candidate_access(x_actor_role)
+        expected_version = int(if_match.strip('"'))
+        return await correct_candidate(
+            db,
+            application_id=application_id,
+            expected_version=expected_version,
+            field_path=payload.field_path,
+            new_value=payload.new_value,
+            reason=payload.reason,
+            actor_id=x_actor_id,
+            idempotency_key=idempotency_key,
+            evidence_id=payload.evidence_id,
+        )
+    except PermissionError as error:
+        raise HTTPException(403, detail={"code": "FORBIDDEN", "message": str(error)}) from error
+    except LookupError as error:
+        raise HTTPException(404, detail={"code": "NOT_FOUND", "message": str(error)}) from error
+    except (RuntimeError, IdempotencyConflict) as error:
+        raise HTTPException(409, detail={"code": "CONFLICT", "message": str(error)}) from error
+    except ValueError as error:
+        raise HTTPException(422, detail={"code": "INVALID_CORRECTION", "message": str(error)}) from error
 
 
 @router.get("/applications/{application_id}/resume")
-async def view_original_resume(application_id: str, x_actor_id: str = Header("system"), x_actor_role: str = Header("system"), db: AsyncSession = Depends(get_db)):
+async def view_original_resume(application_id: str, reveal: bool = False, x_actor_id: str = Header("system"), x_actor_role: str = Header("system"), db: AsyncSession = Depends(get_db)):
     try:
         require_candidate_access(x_actor_role)
     except PermissionError as error:
@@ -60,13 +107,16 @@ async def view_original_resume(application_id: str, x_actor_id: str = Header("sy
         application, resume, _ = await load_candidate_detail(db, application_id)
     except LookupError as error:
         raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": str(error)}) from error
+    policy = await get_review_privacy_policy(db, application.job_id)
+    if policy.mode == "BLIND" and not reveal:
+        raise HTTPException(status_code=403, detail={"code": "BLIND_REVIEW_ACTIVE", "message": "CV gốc đang được khóa trong chế độ đánh giá ẩn danh."})
 
     storage_root = Path(settings.STORAGE_DIR).resolve()
     file_path = Path(resume.file_path).resolve()
     if not file_path.is_relative_to(storage_root) or not file_path.is_file():
         raise HTTPException(status_code=404, detail={"code": "RESUME_NOT_FOUND", "message": "Không tìm thấy CV gốc."})
 
-    record_candidate_access(db, application, x_actor_id, "VIEW_ORIGINAL_RESUME")
+    record_candidate_access(db, application, x_actor_id, "REVEAL_ORIGINAL_RESUME" if policy.mode == "BLIND" else "VIEW_ORIGINAL_RESUME")
     return FileResponse(file_path, media_type="application/pdf", filename=resume.file_name, content_disposition_type="inline")
 
 

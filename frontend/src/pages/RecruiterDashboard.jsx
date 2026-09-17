@@ -2,7 +2,7 @@
 /* SPDX-License-Identifier: MIT */
 
 import React, { useState, useEffect } from 'react';
-import { Briefcase, Plus, Play, RefreshCw, Edit3, Trash2, FileText, CheckCircle2, XCircle, Target } from 'lucide-react';
+import { Briefcase, Plus, Play, RefreshCw, Edit3, Trash2, FileText, CheckCircle2, XCircle, Target, ShieldCheck } from 'lucide-react';
 import { fetchJobs, triggerScreeningStream, fetchJobScreenings, deleteJob } from '../services/api';
 import JobPostingForm from '../components/JobPostingForm';
 import CandidateGrid from '../components/recruiter/CandidateGrid';
@@ -12,6 +12,7 @@ import ScreeningProgressModal from '../components/ScreeningProgressModal';
 import CriteriaEditor from '../components/recruiter/CriteriaEditor';
 import BatchUploader from '../components/recruiter/BatchUploader';
 import RecruiterAnalytics from '../components/recruiter/RecruiterAnalytics';
+import { fetchReviewPrivacyPolicy, updateReviewPrivacyPolicy } from '../services/recruiterApi';
 
 export default function RecruiterDashboard() {
   const [jobs, setJobs] = useState([]);
@@ -23,6 +24,9 @@ export default function RecruiterDashboard() {
   const [editingJob, setEditingJob] = useState(null);
   const [loading, setLoading] = useState(false);
   const [screeningLoading, setScreeningLoading] = useState(false);
+  const [privacyPolicy, setPrivacyPolicy] = useState(null);
+  const [privacySaving, setPrivacySaving] = useState(false);
+  const [privacyError, setPrivacyError] = useState('');
 
   // Live Progress Modal State
   const [progressModalOpen, setProgressModalOpen] = useState(false);
@@ -63,6 +67,22 @@ export default function RecruiterDashboard() {
         wEdu: job.weight_education ?? 0.15,
       });
       loadScreenings(job.id);
+      setPrivacyError('');
+      fetchReviewPrivacyPolicy(job.id).then(setPrivacyPolicy).catch((error) => setPrivacyError(error.message));
+    }
+  };
+
+  const toggleBlindReview = async () => {
+    if (!selectedJob || !privacyPolicy || privacySaving) return;
+    setPrivacySaving(true);
+    setPrivacyError('');
+    try {
+      const mode = privacyPolicy.mode === 'BLIND' ? 'IDENTIFIED' : 'BLIND';
+      setPrivacyPolicy(await updateReviewPrivacyPolicy(selectedJob.id, privacyPolicy.version, { mode, reveal_stage: mode === 'BLIND' ? 'HR_INTERVIEW' : null }));
+    } catch (error) {
+      setPrivacyError(error.message || 'Không thể cập nhật chế độ riêng tư.');
+    } finally {
+      setPrivacySaving(false);
     }
   };
 
@@ -266,6 +286,9 @@ export default function RecruiterDashboard() {
 
           {/* Job Action Buttons */}
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            {privacyPolicy && <button type="button" className={`btn ${privacyPolicy.mode === 'BLIND' ? 'btn-emerald' : 'btn-secondary'}`} onClick={toggleBlindReview} disabled={privacySaving} aria-pressed={privacyPolicy.mode === 'BLIND'}>
+              <ShieldCheck size={16} /> {privacySaving ? 'Đang lưu…' : privacyPolicy.mode === 'BLIND' ? 'Ẩn danh: đang bật' : 'Bật đánh giá ẩn danh'}
+            </button>}
             <button
               onClick={() => {
                 setEditingJob(null);
@@ -299,6 +322,7 @@ export default function RecruiterDashboard() {
             )}
           </div>
         </div>
+        {privacyError && <div className="workspace-state workspace-state--error">{privacyError}</div>}
 
         {/* Step Body: Sliders + Embedded Upload Zone */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', alignItems: 'center' }}>
@@ -358,7 +382,7 @@ export default function RecruiterDashboard() {
       <div>
         {selectedJob && <ExportFeedbackPanel selectedJobId={selectedJob.id} candidateCount={candidates.length} />}
 
-        {selectedJob && <CandidateGrid jobId={selectedJob.id} criteriaSetId={selectedJob.active_criteria_set_id} refreshToken={candidates} onSelectCandidate={setSelectedCandidate} />}
+        {selectedJob && <CandidateGrid jobId={selectedJob.id} criteriaSetId={selectedJob.active_criteria_set_id} refreshToken={`${candidates.length}:${privacyPolicy?.version || 0}`} onSelectCandidate={setSelectedCandidate} />}
       </div>
 
       {/* Modals */}

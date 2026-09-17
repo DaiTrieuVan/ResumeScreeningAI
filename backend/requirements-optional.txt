@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: 2026 226789SBTC - Trieu Van Dai
+# SPDX-License-Identifier: MIT
+
+-r requirements.txt
+
+# Optional online/live enhancements. The competition offline release does not
+# need these packages to build, test, or complete its deterministic showcase.
+sentence-transformers>=3.0.0
+crawl4ai>=0.5.0.post8

@@ -1,0 +1,62 @@
+{
+  "status": "PASSED",
+  "source_mode": "Archive",
+  "source_commit": "1c1ae7b8348baccac54e8a4a69d783057f7fb840",
+  "started_at": "2026-09-14T16:12:40.9995286Z",
+  "completed_at": "2026-09-14T16:14:24.3592243Z",
+  "duration_minutes": 1.72,
+  "offline_mode": true,
+  "workspace": "C:\\Users\\aloal\\AppData\\Local\\Temp\\ResumeScreeningAI-CleanRoom-20c85c4737774684a163a0fefa770bf1",
+  "steps": [
+    {
+      "name": "release-safety",
+      "status": "PASSED",
+      "seconds": 0.87
+    },
+    {
+      "name": "open-source-compliance",
+      "status": "PASSED",
+      "seconds": 0.2
+    },
+    {
+      "name": "python-venv",
+      "status": "PASSED",
+      "seconds": 6.72
+    },
+    {
+      "name": "backend-dependencies",
+      "status": "PASSED",
+      "seconds": 36.47
+    },
+    {
+      "name": "frontend-dependencies",
+      "status": "PASSED",
+      "seconds": 11.73
+    },
+    {
+      "name": "backend-tests",
+      "status": "PASSED",
+      "seconds": 18.61
+    },
+    {
+      "name": "ai-benchmark",
+      "status": "PASSED",
+      "seconds": 0.75
+    },
+    {
+      "name": "frontend-tests",
+      "status": "PASSED",
+      "seconds": 9.03
+    },
+    {
+      "name": "frontend-build",
+      "status": "PASSED",
+      "seconds": 1.69
+    },
+    {
+      "name": "showcase-e2e",
+      "status": "PASSED",
+      "seconds": 16.62
+    }
+  ]
+}

@@ -53,6 +53,7 @@ async def test_batch_is_persisted_and_can_be_reloaded(batch_client):
     client, job_id, process_mock = batch_client
     response = await client.post(
         f"/api/recruiter/jobs/{job_id}/upload-batches",
+        headers={"Idempotency-Key": "create-batch-one"},
         files=[("files", ("candidate.pdf", b"%PDF-1.4\nplaceholder", "application/pdf"))],
     )
     assert response.status_code == 202
@@ -71,6 +72,7 @@ async def test_invalid_pdf_does_not_block_batch_and_is_retryable(batch_client):
     client, job_id, process_mock = batch_client
     response = await client.post(
         f"/api/recruiter/jobs/{job_id}/upload-batches",
+        headers={"Idempotency-Key": "create-batch-mixed"},
         files=[
             ("files", ("valid.pdf", b"%PDF-1.4\nplaceholder", "application/pdf")),
             ("files", ("broken.pdf", b"not-a-pdf", "application/pdf")),
@@ -99,6 +101,7 @@ async def test_exact_duplicate_is_flagged_without_being_deleted(batch_client):
     content = b"%PDF-1.4\nsame-candidate"
     response = await client.post(
         f"/api/recruiter/jobs/{job_id}/upload-batches",
+        headers={"Idempotency-Key": "create-batch-duplicate"},
         files=[
             ("files", ("candidate-a.pdf", content, "application/pdf")),
             ("files", ("candidate-copy.pdf", content, "application/pdf")),
@@ -108,3 +111,25 @@ async def test_exact_duplicate_is_flagged_without_being_deleted(batch_client):
     duplicate = next(item for item in batch["items"] if item["status"] == "DEDUPE_REVIEW")
     assert batch["duplicate_count"] == 1
     assert duplicate["duplicate_matches"][0]["match_type"] == "EXACT_FILE"
+
+
+@pytest.mark.asyncio
+async def test_scan_can_recover_with_verified_text_and_request_is_idempotent(batch_client):
+    client, job_id, process_mock = batch_client
+    created = await client.post(
+        f"/api/recruiter/jobs/{job_id}/upload-batches",
+        headers={"Idempotency-Key": "create-manual-recovery"},
+        files=[("files", ("scan.pdf", b"not-a-pdf", "application/pdf"))],
+    )
+    item = created.json()["items"][0]
+    headers = {"Idempotency-Key": "manual-recovery-one", "X-Actor-Id": "recruiter-1"}
+    payload = {"mode": "VERIFIED_TEXT", "verified_text": "Verified Python and FastAPI experience.", "reason": "Checked against scan"}
+    recovered = await client.post(f"/api/recruiter/upload-items/{item['id']}/manual-recovery", headers=headers, json=payload)
+    replayed = await client.post(f"/api/recruiter/upload-items/{item['id']}/manual-recovery", headers=headers, json=payload)
+    assert recovered.status_code == 202
+    assert replayed.status_code == 202
+    recovered_item = recovered.json()["items"][0]
+    assert recovered_item["status"] == "QUEUED"
+    assert recovered_item["extraction_method"] == "MANUAL"
+    assert replayed.json() == recovered.json()
+    assert process_mock.await_count == 2

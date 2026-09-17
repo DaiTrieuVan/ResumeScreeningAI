@@ -3,10 +3,10 @@
 
 import React, { useState } from 'react';
 import {
-  AlertTriangle, CheckCircle2, FileText, Link2, LoaderCircle, RefreshCw, SkipForward, Users,
+  AlertTriangle, CheckCircle2, FileText, Link2, LoaderCircle, RefreshCw, RotateCcw, SkipForward, Users,
 } from 'lucide-react';
 
-import { resolveUploadDuplicate, retryUploadBatch } from '../../services/recruiterApi';
+import { recoverUploadBatch, resolveUploadDuplicate, retryUploadBatch, submitManualRecovery } from '../../services/recruiterApi';
 
 
 const statusLabels = {
@@ -18,6 +18,8 @@ const statusLabels = {
 export default function BatchReviewPanel({ batch, onUpdated }) {
   const [busyItem, setBusyItem] = useState(null);
   const [retrying, setRetrying] = useState(false);
+  const [recovering, setRecovering] = useState(false);
+  const [manualValues, setManualValues] = useState({});
   if (!batch) return null;
 
   const completed = batch.success_count + batch.failed_count + batch.duplicate_count + batch.cancelled_count;
@@ -32,6 +34,19 @@ export default function BatchReviewPanel({ batch, onUpdated }) {
   const resolve = async (itemId, resolution) => {
     setBusyItem(itemId);
     try { onUpdated?.(await resolveUploadDuplicate(itemId, resolution)); } finally { setBusyItem(null); }
+  };
+
+  const recoverInterrupted = async () => {
+    setRecovering(true);
+    try { onUpdated?.(await recoverUploadBatch(batch.id)); } finally { setRecovering(false); }
+  };
+
+  const recoverManual = async (itemId) => {
+    const current = manualValues[itemId] || {};
+    setBusyItem(itemId);
+    try {
+      onUpdated?.(await submitManualRecovery(itemId, current.text || '', current.reason || 'Đã đối chiếu bản scan'));
+    } finally { setBusyItem(null); }
   };
 
   return (
@@ -69,6 +84,19 @@ export default function BatchReviewPanel({ batch, onUpdated }) {
                 <button type="button" onClick={() => resolve(item.id, 'SKIP')} disabled={busyItem === item.id}><SkipForward size={13} /> Bỏ qua</button>
               </div>
             )}
+            {item.status === 'NEEDS_OCR' && (
+              <details className="batch-item__manual">
+                <summary>Nhập nội dung đã xác minh</summary>
+                <label>Văn bản từ CV
+                  <textarea aria-label={`Văn bản xác minh cho ${item.original_file_name}`} minLength={20} value={manualValues[item.id]?.text || ''} onChange={(event) => setManualValues((values) => ({ ...values, [item.id]: { ...values[item.id], text: event.target.value } }))} />
+                </label>
+                <label>Lý do
+                  <input aria-label={`Lý do xác minh cho ${item.original_file_name}`} value={manualValues[item.id]?.reason || ''} onChange={(event) => setManualValues((values) => ({ ...values, [item.id]: { ...values[item.id], reason: event.target.value } }))} placeholder="Đã đối chiếu bản scan" />
+                </label>
+                <button type="button" disabled={(manualValues[item.id]?.text || '').length < 20 || busyItem === item.id} onClick={() => recoverManual(item.id)}>Xác nhận và xử lý lại</button>
+              </details>
+            )}
+            {item.error_code === 'RETRY_LIMIT_REACHED' && <span className="batch-item__limit">Đã dừng tự động — cần thay tệp hoặc xác minh thủ công.</span>}
           </article>
         ))}
       </div>
@@ -76,6 +104,11 @@ export default function BatchReviewPanel({ batch, onUpdated }) {
       {failedItems.length > 0 && (
         <button type="button" className="btn btn-secondary batch-review__retry" onClick={retryFailed} disabled={retrying}>
           <RefreshCw size={15} className={retrying ? 'spin' : ''} /> Thử lại {failedItems.length} mục lỗi
+        </button>
+      )}
+      {batch.status === 'PROCESSING' && (
+        <button type="button" className="btn btn-secondary batch-review__retry" onClick={recoverInterrupted} disabled={recovering}>
+          <RotateCcw size={15} className={recovering ? 'spin' : ''} /> Phục hồi tiến trình gián đoạn
         </button>
       )}
     </div>

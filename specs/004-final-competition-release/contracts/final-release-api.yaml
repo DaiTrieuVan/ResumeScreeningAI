@@ -1,0 +1,261 @@
+openapi: 3.1.0
+info:
+  title: Resume Screening AI - Final Competition Hardening API
+  version: 1.1.0-draft
+paths:
+  /api/recruiter/evaluation-runs:
+    post:
+      summary: Start a reproducible evaluation run
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvaluationRunRequest'
+      responses:
+        '202':
+          description: Evaluation persisted and queued
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EvaluationRun' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/recruiter/evaluation-runs/{run_id}:
+    get:
+      summary: Read evaluation status and measured metrics
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Evaluation result
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EvaluationRun' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/recruiter/applications/{application_id}/corrections:
+    post:
+      summary: Correct extracted data and invalidate affected evaluation
+      parameters:
+        - name: application_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - name: If-Match
+          in: header
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CorrectionRequest' }
+      responses:
+        '200':
+          description: Corrected candidate detail with stale evaluation marker
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CandidateCorrectionResult' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/recruiter/upload-items/{item_id}/manual-recovery:
+    post:
+      summary: Supply verified text or a replacement PDF for an unreadable item
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mode, reason]
+              properties:
+                mode: { type: string, enum: [VERIFIED_TEXT] }
+                verified_text: { type: string, minLength: 20 }
+                reason: { type: string, minLength: 3, maxLength: 500 }
+      responses:
+        '202':
+          description: Item returned to processing with verified source
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UploadItemRecovery' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/recruiter/upload-batches/{batch_id}/recover:
+    post:
+      summary: Reconcile expired processing leases and safely resume a batch
+      parameters:
+        - name: batch_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '202':
+          description: Recovery accepted or prior idempotent result returned
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BatchRecoveryResult' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/recruiter/jobs/{job_id}/review-privacy:
+    get:
+      summary: Read review privacy policy
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Current policy
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReviewPrivacyPolicy' }
+    put:
+      summary: Update blind review policy
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: If-Match
+          in: header
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReviewPrivacyPolicyUpdate' }
+      responses:
+        '200':
+          description: Updated policy and version
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReviewPrivacyPolicy' }
+        '409': { $ref: '#/components/responses/Conflict' }
+components:
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, minLength: 8, maxLength: 128 }
+  responses:
+    Conflict:
+      description: Stale version, active lease, or idempotency key reused with different payload
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    ValidationError:
+      description: Invalid correction or recovery input
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Problem' }
+  schemas:
+    EvaluationRunRequest:
+      type: object
+      required: [dataset_version, release_version, commit_sha, fallback_mode]
+      properties:
+        dataset_version: { type: string }
+        release_version: { type: string }
+        commit_sha: { type: string, pattern: '^[0-9a-f]{7,40}$' }
+        fallback_mode: { type: boolean }
+        model_metadata: { type: object, additionalProperties: true }
+    EvaluationRun:
+      type: object
+      required: [id, status, dataset_version, commit_sha, metrics]
+      properties:
+        id: { type: string, format: uuid }
+        status: { type: string, enum: [QUEUED, RUNNING, PASSED, FAILED, ERROR] }
+        dataset_version: { type: string }
+        commit_sha: { type: string }
+        metrics:
+          type: array
+          items: { $ref: '#/components/schemas/MetricResult' }
+        report_urls:
+          type: object
+          properties:
+            json: { type: string }
+            markdown: { type: string }
+    MetricResult:
+      type: object
+      required: [name, value, threshold, status]
+      properties:
+        name: { type: string }
+        numerator: { type: number }
+        denominator: { type: number }
+        value: { type: number }
+        threshold: { type: number }
+        status: { type: string, enum: [PASSED, FAILED, NOT_COMPUTABLE] }
+    CorrectionRequest:
+      type: object
+      required: [field_path, new_value, reason]
+      properties:
+        field_path:
+          type: string
+          enum: [parsed_name, parsed_email, parsed_phone, extracted_skills, work_history, education]
+        new_value: {}
+        reason: { type: string, minLength: 3, maxLength: 500 }
+        evidence_id: { type: [string, 'null'], format: uuid }
+    CandidateCorrectionResult:
+      type: object
+      required: [application_id, application_version, evaluation_stale, audit_event_id]
+      properties:
+        application_id: { type: string, format: uuid }
+        application_version: { type: integer }
+        evaluation_stale: { type: boolean }
+        audit_event_id: { type: string, format: uuid }
+    UploadItemRecovery:
+      type: object
+      required: [item_id, status, extraction_method]
+      properties:
+        item_id: { type: string, format: uuid }
+        status: { type: string, enum: [QUEUED, PROCESSING, COMPLETED, FAILED] }
+        extraction_method: { type: string, enum: [MANUAL, OCR] }
+    BatchRecoveryResult:
+      type: object
+      required: [batch_id, recovered_count, skipped_count, status]
+      properties:
+        batch_id: { type: string, format: uuid }
+        recovered_count: { type: integer, minimum: 0 }
+        skipped_count: { type: integer, minimum: 0 }
+        status: { type: string }
+    ReviewPrivacyPolicyUpdate:
+      type: object
+      required: [mode]
+      properties:
+        mode: { type: string, enum: [IDENTIFIED, BLIND] }
+        reveal_stage: { type: [string, 'null'] }
+    ReviewPrivacyPolicy:
+      allOf:
+        - $ref: '#/components/schemas/ReviewPrivacyPolicyUpdate'
+        - type: object
+          required: [job_id, version, masked_fields]
+          properties:
+            job_id: { type: string, format: uuid }
+            version: { type: integer }
+            masked_fields:
+              type: array
+              items: { type: string }
+    Problem:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details: { type: object, additionalProperties: true }

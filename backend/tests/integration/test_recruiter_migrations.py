@@ -16,6 +16,7 @@ def test_migration_runner_is_idempotent(tmp_path):
         CREATE TABLE job_postings (id VARCHAR(36) PRIMARY KEY);
         CREATE TABLE candidate_resumes (id VARCHAR(36) PRIMARY KEY);
         CREATE TABLE screening_results (id VARCHAR(36) PRIMARY KEY);
+        CREATE TABLE screening_evaluations (id VARCHAR(36) PRIMARY KEY);
         """
     )
     raw.close()
@@ -28,9 +29,11 @@ def test_migration_runner_is_idempotent(tmp_path):
     inspector = inspect(engine)
     job_columns = {column["name"] for column in inspector.get_columns("job_postings")}
     result_columns = {column["name"] for column in inspector.get_columns("screening_results")}
+    evaluation_columns = {column["name"] for column in inspector.get_columns("screening_evaluations")}
 
     assert {"active_criteria_set_id", "version"} <= job_columns
     assert {"criteria_set_id", "evaluation_kind"} <= result_columns
+    assert {"maximum_possible_score", "evidence_coverage", "scoring_version"} <= evaluation_columns
 
     with engine.connect() as connection:
         applied = connection.exec_driver_sql(

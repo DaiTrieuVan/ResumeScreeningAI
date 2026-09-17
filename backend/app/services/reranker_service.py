@@ -88,7 +88,7 @@ async def rerank_candidate_resume(
         resume_text=resume_text[:4000]  # Cap text length to prevent overflow
     )
 
-    if settings.GEMINI_API_KEY:
+    if settings.GEMINI_API_KEY and not settings.OFFLINE_MODE:
         try:
             def _sync_gemini_call():
                 """Synchronous Gemini API call, executed in thread pool."""

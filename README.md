@@ -77,6 +77,9 @@ Copy-Item .env.example .env
 uvicorn app.main:app --reload --port 8000
 ```
 
+Để bật sentence-transformer và live crawler trong môi trường online, cài thêm
+`pip install -r requirements-optional.txt`. Bản demo offline không cần các gói nặng này.
+
 Trên Linux/macOS, thay lệnh activate bằng `source venv/bin/activate` và sao
 chép cấu hình bằng `cp .env.example .env`.
 
@@ -133,6 +136,7 @@ docs/               Architecture, AI, build, testing, privacy và demo guide
 - [Kiểm thử](docs/TESTING.md)
 - [Quyền riêng tư và Responsible AI](docs/PRIVACY_AND_RESPONSIBLE_AI.md)
 - [Kịch bản demo](docs/DEMO_GUIDE.md)
+- [Kịch bản thuyết trình 6 phút 30 giây](docs/SHOWCASE_SCRIPT.md)
 - [Checklist cuộc thi](docs/COMPETITION_CHECKLIST.md)
 - [Thư viện và giấy phép](DEPENDENCIES.md)
 - [Hướng dẫn đóng góp](CONTRIBUTING.md)

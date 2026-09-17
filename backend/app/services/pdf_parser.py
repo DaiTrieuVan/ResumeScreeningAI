@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 import re
+import hashlib
 import pdfplumber
 from app.core.exceptions import ParsingException
 
@@ -19,7 +20,28 @@ def sanitize_extracted_text(text: str) -> str:
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
 
-def extract_text_from_pdf(file_path: str) -> str:
+def build_page_records(page_texts: list[str], extraction_method: str = "NATIVE") -> tuple[str, list[dict]]:
+    pages: list[dict] = []
+    normalized_pages = [sanitize_extracted_text(text) for text in page_texts]
+    full_text = "\n".join(normalized_pages)
+    offset = 0
+    for page_number, text in enumerate(normalized_pages, start=1):
+        start = offset
+        end = start + len(text)
+        pages.append({
+            "page_number": page_number,
+            "text": text,
+            "normalized_start_offset": start,
+            "normalized_end_offset": end,
+            "extraction_method": extraction_method,
+            "confidence": None,
+            "checksum": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        })
+        offset = end + 1
+    return full_text, pages
+
+
+def extract_text_with_pages(file_path: str) -> tuple[str, list[dict]]:
     """
     Extracts text from a digital PDF with the MIT-licensed pdfplumber package.
     """
@@ -27,21 +49,24 @@ def extract_text_from_pdf(file_path: str) -> str:
     try:
         with pdfplumber.open(file_path) as pdf:
             for page in pdf.pages:
-                page_text = page.extract_text(layout=False) or ""
-                if page_text:
-                    full_text.append(page_text)
-        
-        extracted = " ".join(full_text)
-        sanitized = sanitize_extracted_text(extracted)
+                full_text.append(page.extract_text(layout=False) or "")
+
+        sanitized, pages = build_page_records(full_text)
         
         if not sanitized:
             raise ParsingException(file_path, "PDF appears to be empty or contains no readable digital text.")
             
-        return sanitized
+        return sanitized, pages
     except ParsingException:
         raise
     except Exception as e:
         raise ParsingException(file_path, f"Failed to extract text from PDF: {str(e)}")
+
+
+def extract_text_from_pdf(file_path: str) -> str:
+    """Backward-compatible text-only facade."""
+    text, _ = extract_text_with_pages(file_path)
+    return text
 
 import zipfile
 import io
