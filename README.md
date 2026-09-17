@@ -70,7 +70,7 @@ Chi tiết tại [Kiến trúc hệ thống](docs/ARCHITECTURE.md) và
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/fe414999-af86-47fb-8c69-e17f59621273" />
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/285ac9cf-43ae-45c9-8e2d-27dd37c9773e" />
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/58f67341-82a9-4fea-8c3b-31ee742013e0" />
-### Module 3 - — Không gian tuyển dụng
+### Module 3 — Không gian tuyển dụng
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/5139404f-60fd-41f0-b7cb-517ebee25334" />
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3ae66cb6-e10e-4e89-88be-ddda39b20ab6" />
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/43bbdfa4-0a64-442a-89c9-d10b6939d337" />
