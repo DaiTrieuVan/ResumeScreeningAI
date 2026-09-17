@@ -3,12 +3,93 @@
 
 import json
 import logging
+import re
 from typing import Dict, Any
 from google import genai
 from google.genai import types
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
+
+
+_SKILL_ALIASES = (
+    ("Spring Boot", ("spring boot", "springboot")),
+    ("RESTful API", ("restful api", "rest api")),
+    ("PostgreSQL", ("postgresql", "postgres")),
+    ("JavaScript", ("javascript",)),
+    ("TypeScript", ("typescript",)),
+    ("FastAPI", ("fastapi",)),
+    ("MySQL", ("mysql",)),
+    ("Kubernetes", ("kubernetes",)),
+    ("Docker", ("docker",)),
+    ("Python", ("python",)),
+    ("Java", ("java",)),
+    ("React", ("react",)),
+    ("Redis", ("redis",)),
+    ("Kafka", ("kafka",)),
+    ("AWS", ("aws",)),
+    ("SQL", ("sql",)),
+    ("Git", ("git",)),
+)
+
+
+def _canonical_skill_name(value: Any) -> str:
+    """Return a stable display name without changing unknown technologies."""
+    cleaned = re.sub(r"\s+", " ", str(value or "")).strip(" ,;\t\r\n")
+    folded = cleaned.casefold()
+    for canonical, aliases in _SKILL_ALIASES:
+        if folded in aliases:
+            return canonical
+    return cleaned
+
+
+def _normalize_skill_list(values: Any) -> list[str]:
+    """Canonicalize, join known multi-word skills, and remove duplicates."""
+    if not isinstance(values, (list, tuple, set)):
+        values = [values] if values else []
+
+    cleaned = [_canonical_skill_name(value) for value in values]
+    cleaned = [value for value in cleaned if value]
+
+    merged: list[str] = []
+    index = 0
+    while index < len(cleaned):
+        pair = " ".join(cleaned[index:index + 2]).casefold()
+        if pair == "spring boot":
+            merged.append("Spring Boot")
+            index += 2
+        elif pair in {"rest api", "restful api"}:
+            merged.append("RESTful API")
+            index += 2
+        else:
+            merged.append(_canonical_skill_name(cleaned[index]))
+            index += 1
+
+    unique: list[str] = []
+    seen: set[str] = set()
+    for skill in merged:
+        key = skill.casefold()
+        if key not in seen:
+            seen.add(key)
+            unique.append(skill)
+    return unique
+
+
+def _normalize_technical_text(value: Any) -> str:
+    """Repair common LLM/fallback splits inside human-readable feedback."""
+    text = str(value or "")
+    replacements = (
+        (r"\bSpring\s*,\s*Boot\b", "Spring Boot"),
+        (r"\bREST(?:ful)?\s*,\s*API\b", "RESTful API"),
+        (r"\bPostgresql\b", "PostgreSQL"),
+        (r"\bMysql\b", "MySQL"),
+        (r"\bJavascript\b", "JavaScript"),
+        (r"\bTypescript\b", "TypeScript"),
+        (r"\bFastapi\b", "FastAPI"),
+    )
+    for pattern, replacement in replacements:
+        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+    return text
 
 GAP_PROMPT_TEMPLATE = """
 You are a Vice President of Engineering and Principal Technical Recruiter conducting an in-depth CV evaluation against a target Job Description.
@@ -39,6 +120,9 @@ Evaluate the candidate's CV strictly, constructively, and professionally based o
 {cv_text}
 
 ### Instructions:
+Treat multi-word technology names as one indivisible skill. In particular, return
+"Spring Boot" and "RESTful API" as single array items; never split them into
+"Spring"/"Boot" or "REST"/"API".
 Return a strict JSON object (in Vietnamese) matching this schema:
 {{
   "overall_score": 7.5,
@@ -49,6 +133,13 @@ Return a strict JSON object (in Vietnamese) matching this schema:
     "dinh_dang": 5.5,
     "thanh_tich": 7.0,
     "muc_tieu": 6.5
+  }},
+  "category_details": {{
+    "kinh_nghiem": "Kinh nghiệm thực hành tốt nhưng cần mô tả rõ hơn quy mô dữ liệu và bài học giải quyết lỗi thực tế.",
+    "ky_nang": "Nắm chắc các công nghệ trọng tâm; cần bổ sung các công nghệ nâng cao được yêu cầu trong JD.",
+    "dinh_dang": "Bố cục rõ ràng, dễ nhìn; cần rà soát khoảng trắng dấu câu và chuẩn hóa viết hoa đúng tên công nghệ.",
+    "thanh_tich": "Có số liệu bước đầu về hiệu năng, nên lượng hóa cụ thể hơn với các chỉ số đo lường như % tối ưu, latency.",
+    "muc_tieu": "Mục tiêu rõ định hướng nghề nghiệp, nên gắn kết chặt chẽ hơn với định hướng của vị trí ứng tuyển."
   }},
   "strengths": [
     "Nền tảng kỹ thuật tốt về Java backend, đặc biệt là Spring Boot, cơ sở dữ liệu và RESTful API.",
@@ -89,23 +180,41 @@ async def analyze_career_gap(
     if settings.GEMINI_API_KEY and not settings.OFFLINE_MODE:
         try:
             client = genai.Client(api_key=settings.GEMINI_API_KEY)
-            response = client.models.generate_content(
-                model=settings.DEFAULT_LLM_MODEL,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    temperature=0.3
-                )
-            )
-            raw_text = response.text or "{}"
-            return sanitize_gap_output(json.loads(raw_text))
+            response = None
+            candidate_models = [settings.DEFAULT_LLM_MODEL, "gemini-3.6-flash", "gemini-3.7-flash", "gemini-3.8-flash", "gemini-flash-latest"]
+            for model_name in candidate_models:
+                try:
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config=types.GenerateContentConfig(
+                            response_mime_type="application/json",
+                            temperature=0.3
+                        )
+                    )
+                    if response and response.text:
+                        break
+                except Exception as me:
+                    err_msg = str(me).lower()
+                    if "404" in err_msg or "not found" in err_msg or "no longer available" in err_msg:
+                        logger.warning(f"Model {model_name} unavailable, trying next candidate model...")
+                        continue
+                    raise me
+
+            if not response or not response.text:
+                logger.warning("No valid response from Gemini models, falling back to rule-based gap analysis...")
+                return fallback_gap_analysis(job_description, cv_text)
+
+            raw_text = response.text.strip()
+            data = json.loads(raw_text)
+            return sanitize_gap_output(data, job_description, cv_text)
         except Exception as e:
             logger.error(f"Gemini API error during gap analysis: {e}")
             return fallback_gap_analysis(job_description, cv_text)
     else:
         return fallback_gap_analysis(job_description, cv_text)
 
-def sanitize_gap_output(data: Dict[str, Any]) -> Dict[str, Any]:
+def sanitize_gap_output(data: Dict[str, Any], job_description: str = "", cv_text: str = "") -> Dict[str, Any]:
     raw_score = float(data.get("overall_score") or 7.5)
     overall_score = round(max(1.0, min(10.0, raw_score)), 1)
     
@@ -125,26 +234,61 @@ def sanitize_gap_output(data: Dict[str, Any]) -> Dict[str, Any]:
         "muc_tieu": round(float(cat.get("muc_tieu") or 6.5), 1)
     }
 
+    cat_det = data.get("category_details") or {}
+    category_details = {
+        "kinh_nghiem": _normalize_technical_text(cat_det.get("kinh_nghiem") or "Kinh nghiệm thực hành tốt nhưng cần mô tả rõ hơn quy mô dữ liệu và bài học giải quyết lỗi thực tế."),
+        "ky_nang": _normalize_technical_text(cat_det.get("ky_nang") or "Nắm chắc các công nghệ trọng tâm; cần bổ sung các công nghệ nâng cao được yêu cầu trong JD."),
+        "dinh_dang": _normalize_technical_text(cat_det.get("dinh_dang") or "Bố cục rõ ràng, dễ nhìn; cần rà soát khoảng trắng dấu câu và chuẩn hóa viết hoa đúng tên công nghệ."),
+        "thanh_tich": _normalize_technical_text(cat_det.get("thanh_tich") or "Có số liệu bước đầu về hiệu năng, nên lượng hóa cụ thể hơn với các chỉ số đo lường như % tối ưu, latency."),
+        "muc_tieu": _normalize_technical_text(cat_det.get("muc_tieu") or "Mục tiêu rõ định hướng nghề nghiệp, nên gắn kết chặt chẽ hơn với định hướng của vị trí ứng tuyển.")
+    }
+
+    strengths = list(data.get("strengths") or [])
+    weaknesses = list(data.get("weaknesses") or [])
+    matched_skills = _normalize_skill_list(data.get("matched_skills") or [])
+    missing_skills = _normalize_skill_list(data.get("missing_skills") or [])
+    suggested_action_items = list(data.get("suggested_action_items") or [])
+
+    # Guarantee fallback if LLM returned empty arrays
+    if not strengths or not weaknesses or not suggested_action_items:
+        fb = fallback_gap_analysis(job_description or "Developer", cv_text or "Candidate Resume")
+        if not strengths:
+            strengths = fb["strengths"]
+        if not weaknesses:
+            weaknesses = fb["weaknesses"]
+        if not suggested_action_items:
+            suggested_action_items = fb["suggested_action_items"]
+        if not matched_skills:
+            matched_skills = fb["matched_skills"]
+        if not missing_skills:
+            missing_skills = fb["missing_skills"]
+
     return {
         "overall_score": overall_score,
         "score_label": label,
         "category_scores": category_scores,
-        "strengths": list(data.get("strengths") or []),
-        "weaknesses": list(data.get("weaknesses") or []),
+        "category_details": category_details,
+        "strengths": strengths,
+        "weaknesses": weaknesses,
         "spelling_and_format_errors": list(data.get("spelling_and_format_errors") or []),
-        "matched_skills": list(data.get("matched_skills") or []),
-        "missing_skills": list(data.get("missing_skills") or []),
-        "suggested_action_items": list(data.get("suggested_action_items") or []),
-        "summary_explanation": str(data.get("summary_explanation") or "Đã hoàn thành phân tích đánh giá CV và định hướng cải thiện.")
+        "matched_skills": matched_skills,
+        "missing_skills": missing_skills,
+        "suggested_action_items": suggested_action_items,
+        "summary_explanation": str(data.get("summary_explanation") or f"Hồ sơ đạt mức {label} ({overall_score}/10). Tối ưu lại phần mô tả dự án theo bài học thực tế và bổ sung từ khóa kỹ thuật sẽ giúp CV ấn tượng hơn hẳn.")
     }
 
 def fallback_gap_analysis(job_description: str, cv_text: str) -> Dict[str, Any]:
-    jd_words = set(job_description.lower().split())
-    cv_words = set(cv_text.lower().split())
-    
-    common_keywords = ["python", "java", "spring", "boot", "react", "fastapi", "docker", "sql", "postgresql", "mysql", "rest", "api", "git", "aws", "kubernetes", "typescript"]
-    matched = [k.capitalize() for k in common_keywords if k in jd_words and k in cv_words]
-    missing = [k.capitalize() for k in common_keywords if k in jd_words and k not in cv_words]
+    def contains_alias(text: str, aliases: tuple[str, ...]) -> bool:
+        normalized = re.sub(r"[^a-z0-9+#.]+", " ", text.casefold()).strip()
+        padded = f" {normalized} "
+        return any(f" {alias} " in padded for alias in aliases)
+
+    matched = []
+    missing = []
+    for canonical, aliases in _SKILL_ALIASES:
+        if contains_alias(job_description, aliases):
+            target = matched if contains_alias(cv_text, aliases) else missing
+            target.append(canonical)
 
     if not matched:
         matched = ["REST API", "Java Core", "Git"]
@@ -189,6 +333,14 @@ def fallback_gap_analysis(job_description: str, cv_text: str) -> Dict[str, Any]:
         "Chuẩn hóa lại chính tả từ khóa công nghệ và tăng khoảng thoáng định dạng cho ATS."
     ]
 
+    category_details = {
+        "kinh_nghiem": f"Kinh nghiệm thực hành tốt nhưng cần tăng cường thêm bối cảnh nhóm và bài học kỹ thuật khi đối mặt với lỗi/bug lớn.",
+        "ky_nang": f"Đã thể hiện tốt các kỹ năng: {', '.join(matched[:3])}. Cần bổ sung thêm: {', '.join(missing[:3])} để đáp ứng trọn vẹn JD.",
+        "dinh_dang": "Bố cục phân mục cơ bản tốt; chú ý căn lề, khoảng cách dòng và rà soát lỗi viết dính từ hoặc khoảng trắng trước dấu phẩy.",
+        "thanh_tich": "Dự án đã có thông tin triển khai; nên lượng hóa thêm các chỉ số kết quả (như thời gian phản hồi, số người dùng, % tối ưu).",
+        "muc_tieu": "Mục tiêu đã định hình rõ vị trí; nên diễn đạt hướng tới giải quyết bài toán kinh doanh/sản phẩm của doanh nghiệp."
+    }
+
     return {
         "overall_score": overall_score,
         "score_label": label,
@@ -199,6 +351,7 @@ def fallback_gap_analysis(job_description: str, cv_text: str) -> Dict[str, Any]:
             "thanh_tich": round(min(10.0, overall_score - 0.2), 1),
             "muc_tieu": 7.0
         },
+        "category_details": category_details,
         "strengths": strengths,
         "weaknesses": weaknesses,
         "spelling_and_format_errors": detected_typos,

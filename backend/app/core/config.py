@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     STORAGE_DIR: str = os.path.abspath("./storage/resumes")
     GEMINI_API_KEY: str = ""
     DEFAULT_EMBEDDING_MODEL: str = "paraphrase-multilingual-MiniLM-L12-v2"
-    DEFAULT_LLM_MODEL: str = "gemini-1.5-flash"
+    DEFAULT_LLM_MODEL: str = "gemini-3.6-flash"
     RECRUITER_WORKSPACE_V2_ENABLED: bool = True
     OFFLINE_MODE: bool = False
     OFFLINE_ENGINE: str = "deterministic-keyword-v1"

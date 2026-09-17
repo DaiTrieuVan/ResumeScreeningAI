@@ -65,12 +65,22 @@ def _migration_005_verified_scoring(connection: Connection) -> None:
     _add_column(connection, "screening_evaluations", "scoring_version", "VARCHAR(50) NOT NULL DEFAULT 'legacy'")
 
 
+def _migration_006_gap_analysis_scores(connection: Connection) -> None:
+    _add_column(connection, "gap_analyses", "overall_score", "FLOAT DEFAULT 7.5")
+    _add_column(connection, "gap_analyses", "score_label", "VARCHAR(50) DEFAULT 'Tốt'")
+    _add_column(connection, "gap_analyses", "category_scores", "JSON")
+    _add_column(connection, "gap_analyses", "strengths", "JSON")
+    _add_column(connection, "gap_analyses", "weaknesses", "JSON")
+    _add_column(connection, "gap_analyses", "spelling_and_format_errors", "JSON")
+
+
 MIGRATIONS: list[Migration] = [
     ("001_legacy_columns", _migration_001_legacy_columns),
     ("002_recruiter_versioning", _migration_002_recruiter_versioning),
     ("003_recruiter_query_indexes", _migration_003_recruiter_query_indexes),
     ("004_final_release_columns", _migration_004_final_release_columns),
     ("005_verified_scoring", _migration_005_verified_scoring),
+    ("006_gap_analysis_scores", _migration_006_gap_analysis_scores),
 ]
 
 

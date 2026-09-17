@@ -34,6 +34,11 @@ và dự án tuân theo [Semantic Versioning](https://semver.org/lang/vi/).
 ### Fixed
 - Candidate detail drawer có vùng cuộn độc lập, không còn bị kẹt ở viewport thấp.
 - Test discovery không còn tải model embedding nặng.
+- Career Gap Advisor giữ các thuật ngữ nhiều từ như `Spring Boot` và
+  `RESTful API` thành một kỹ năng, đồng thời chuẩn hóa cách viết PostgreSQL,
+  MySQL, JavaScript, TypeScript và FastAPI.
+- Báo cáo Career Gap Advisor sử dụng toàn bộ chiều rộng vùng nội dung trên màn
+  hình lớn thay vì bị giới hạn ở 1040px.
 
 ### Security
 - Kiểm tra vai trò khi xem/tải/xuất dữ liệu ứng viên.
