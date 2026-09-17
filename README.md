@@ -62,32 +62,21 @@ Chi tiết tại [Kiến trúc hệ thống](docs/ARCHITECTURE.md) và
 
 ## Hình ảnh và video demo
 
-Tài nguyên truyền thông của bản phát hành được đặt trong `docs/media/`. Trước
-khi phát hành, thay các ô chờ bên dưới bằng ảnh chụp từ đúng release tag để nội
-dung trên GitHub khớp với sản phẩm được trình diễn.
-
-| Hành trình | Ảnh cần bổ sung | Nội dung nên thể hiện |
-|---|---|---|
-| Lọc CV | `docs/media/recruiter-workspace.png` | Batch upload, tiến độ và bảng xếp hạng ứng viên |
-| Kiểm chứng AI | `docs/media/candidate-evidence.png` | Điểm thành phần, `UNKNOWN` và evidence cạnh CV |
-| Tìm việc | `docs/media/real-jobs-matching.png` | Việc làm được rerank theo CV và lý do phù hợp |
-| Đánh giá CV | `docs/media/career-gap-advisor.png` | Kỹ năng đã có, kỹ năng thiếu và hành động đề xuất |
-
-<!-- Khi đã có ảnh, bỏ comment bốn dòng Markdown sau.
-![Không gian tuyển dụng](docs/media/recruiter-workspace.png)
-![Bằng chứng đánh giá ứng viên](docs/media/candidate-evidence.png)
-![Gợi ý việc làm phù hợp](docs/media/real-jobs-matching.png)
-![Cố vấn cải thiện CV](docs/media/career-gap-advisor.png)
--->
+### Hình ảnh
+#### Module 1 — Khám phá việc làm
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/332e45c9-16c7-4515-ac0f-522004d4e538" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/fca25f30-e0d3-4c1d-89a7-11e1a20be560" />
+#### Module 2 — Cố vấn nghề nghiệp
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/fe414999-af86-47fb-8c69-e17f59621273" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/285ac9cf-43ae-45c9-8e2d-27dd37c9773e" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/58f67341-82a9-4fea-8c3b-31ee742013e0" />
+#### Module 3 - — Không gian tuyển dụng
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/5139404f-60fd-41f0-b7cb-517ebee25334" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3ae66cb6-e10e-4e89-88be-ddda39b20ab6" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/43bbdfa4-0a64-442a-89c9-d10b6939d337" />
 
 ### Video
-
-- Video trình bày 15 phút: _bổ sung URL trước khi phát hành_.
-- Video dự phòng offline: đính kèm vào GitHub Release hoặc liên kết tới tệp có
-  quyền xem công khai.
-
-<!-- VIDEO_DEMO_URL: dán liên kết YouTube/Drive công khai hoặc release asset tại đây. -->
-
+https://drive.google.com/file/d/1GuNU5dxJVjjBNFcUqT4X3pKGfUTnz13H/view?usp=drive_link)
 ## Phiên bản phát hành
 
 - [Danh sách GitHub Releases](https://github.com/DaiTrieuVan/ResumeScreeningAI/releases)
