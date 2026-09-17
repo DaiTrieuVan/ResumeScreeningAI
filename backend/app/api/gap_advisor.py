@@ -41,10 +41,16 @@ async def analyze_gap_endpoint(
     record = GapAnalysis(
         target_job_title=job_title,
         target_job_description=job_description,
-        matched_skills=analysis_data["matched_skills"],
-        missing_skills=analysis_data["missing_skills"],
-        suggested_action_items=analysis_data["suggested_action_items"],
-        summary_explanation=analysis_data["summary_explanation"]
+        overall_score=analysis_data.get("overall_score", 7.5),
+        score_label=analysis_data.get("score_label", "Tốt"),
+        category_scores=analysis_data.get("category_scores") or {},
+        strengths=analysis_data.get("strengths") or [],
+        weaknesses=analysis_data.get("weaknesses") or [],
+        spelling_and_format_errors=analysis_data.get("spelling_and_format_errors") or [],
+        matched_skills=analysis_data.get("matched_skills") or [],
+        missing_skills=analysis_data.get("missing_skills") or [],
+        suggested_action_items=analysis_data.get("suggested_action_items") or [],
+        summary_explanation=analysis_data.get("summary_explanation") or ""
     )
     db.add(record)
     await db.commit()
@@ -53,6 +59,12 @@ async def analyze_gap_endpoint(
     return GapAnalysisResponse(
         id=record.id,
         target_job_title=record.target_job_title,
+        overall_score=record.overall_score or 7.5,
+        score_label=record.score_label or "Tốt",
+        category_scores=record.category_scores or {},
+        strengths=record.strengths or [],
+        weaknesses=record.weaknesses or [],
+        spelling_and_format_errors=record.spelling_and_format_errors or [],
         matched_skills=record.matched_skills or [],
         missing_skills=record.missing_skills or [],
         suggested_action_items=record.suggested_action_items or [],
