@@ -50,6 +50,13 @@ Return a strict JSON object (in Vietnamese) matching this schema:
     "thanh_tich": 7.0,
     "muc_tieu": 6.5
   }},
+  "category_details": {{
+    "kinh_nghiem": "Kinh nghiệm thực hành tốt nhưng cần mô tả rõ hơn quy mô dữ liệu và bài học giải quyết lỗi thực tế.",
+    "ky_nang": "Nắm chắc các công nghệ trọng tâm; cần bổ sung các công nghệ nâng cao được yêu cầu trong JD.",
+    "dinh_dang": "Bố cục rõ ràng, dễ nhìn; cần rà soát khoảng trắng dấu câu và chuẩn hóa viết hoa đúng tên công nghệ.",
+    "thanh_tich": "Có số liệu bước đầu về hiệu năng, nên lượng hóa cụ thể hơn với các chỉ số đo lường như % tối ưu, latency.",
+    "muc_tieu": "Mục tiêu rõ định hướng nghề nghiệp, nên gắn kết chặt chẽ hơn với định hướng của vị trí ứng tuyển."
+  }},
   "strengths": [
     "Nền tảng kỹ thuật tốt về Java backend, đặc biệt là Spring Boot, cơ sở dữ liệu và RESTful API.",
     "Kết quả học tập rất tốt với GPA ấn tượng, thể hiện khả năng tiếp thu và tư duy logic mạnh mẽ.",
@@ -89,15 +96,28 @@ async def analyze_career_gap(
     if settings.GEMINI_API_KEY and not settings.OFFLINE_MODE:
         try:
             client = genai.Client(api_key=settings.GEMINI_API_KEY)
-            response = client.models.generate_content(
-                model=settings.DEFAULT_LLM_MODEL,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    temperature=0.3
-                )
-            )
-            raw_text = response.text or "{}"
+            response = None
+            candidate_models = [settings.DEFAULT_LLM_MODEL, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest"]
+            for model_name in candidate_models:
+                try:
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config=types.GenerateContentConfig(
+                            response_mime_type="application/json",
+                            temperature=0.3
+                        )
+                    )
+                    if response and response.text:
+                        break
+                except Exception as me:
+                    err_msg = str(me).lower()
+                    if "404" in err_msg or "not found" in err_msg:
+                        logger.warning(f"Model {model_name} returned 404, trying next candidate model...")
+                        continue
+                    raise me
+
+            raw_text = (response.text if response else "") or "{}"
             return sanitize_gap_output(json.loads(raw_text))
         except Exception as e:
             logger.error(f"Gemini API error during gap analysis: {e}")
@@ -125,10 +145,20 @@ def sanitize_gap_output(data: Dict[str, Any]) -> Dict[str, Any]:
         "muc_tieu": round(float(cat.get("muc_tieu") or 6.5), 1)
     }
 
+    cat_det = data.get("category_details") or {}
+    category_details = {
+        "kinh_nghiem": str(cat_det.get("kinh_nghiem") or "Kinh nghiệm thực hành tốt nhưng cần mô tả rõ hơn quy mô dữ liệu và bài học giải quyết lỗi thực tế."),
+        "ky_nang": str(cat_det.get("ky_nang") or "Nắm chắc các công nghệ trọng tâm; cần bổ sung các công nghệ nâng cao được yêu cầu trong JD."),
+        "dinh_dang": str(cat_det.get("dinh_dang") or "Bố cục rõ ràng, dễ nhìn; cần rà soát khoảng trắng dấu câu và chuẩn hóa viết hoa đúng tên công nghệ."),
+        "thanh_tich": str(cat_det.get("thanh_tich") or "Có số liệu bước đầu về hiệu năng, nên lượng hóa cụ thể hơn với các chỉ số đo lường như % tối ưu, latency."),
+        "muc_tieu": str(cat_det.get("muc_tieu") or "Mục tiêu rõ định hướng nghề nghiệp, nên gắn kết chặt chẽ hơn với định hướng của vị trí ứng tuyển.")
+    }
+
     return {
         "overall_score": overall_score,
         "score_label": label,
         "category_scores": category_scores,
+        "category_details": category_details,
         "strengths": list(data.get("strengths") or []),
         "weaknesses": list(data.get("weaknesses") or []),
         "spelling_and_format_errors": list(data.get("spelling_and_format_errors") or []),
@@ -189,6 +219,14 @@ def fallback_gap_analysis(job_description: str, cv_text: str) -> Dict[str, Any]:
         "Chuẩn hóa lại chính tả từ khóa công nghệ và tăng khoảng thoáng định dạng cho ATS."
     ]
 
+    category_details = {
+        "kinh_nghiem": f"Kinh nghiệm thực hành tốt nhưng cần tăng cường thêm bối cảnh nhóm và bài học kỹ thuật khi đối mặt với lỗi/bug lớn.",
+        "ky_nang": f"Đã thể hiện tốt các kỹ năng: {', '.join(matched[:3])}. Cần bổ sung thêm: {', '.join(missing[:3])} để đáp ứng trọn vẹn JD.",
+        "dinh_dang": "Bố cục phân mục cơ bản tốt; chú ý căn lề, khoảng cách dòng và rà soát lỗi viết dính từ hoặc khoảng trắng trước dấu phẩy.",
+        "thanh_tich": "Dự án đã có thông tin triển khai; nên lượng hóa thêm các chỉ số kết quả (như thời gian phản hồi, số người dùng, % tối ưu).",
+        "muc_tieu": "Mục tiêu đã định hình rõ vị trí; nên diễn đạt hướng tới giải quyết bài toán kinh doanh/sản phẩm của doanh nghiệp."
+    }
+
     return {
         "overall_score": overall_score,
         "score_label": label,
@@ -199,6 +237,7 @@ def fallback_gap_analysis(job_description: str, cv_text: str) -> Dict[str, Any]:
             "thanh_tich": round(min(10.0, overall_score - 0.2), 1),
             "muc_tieu": 7.0
         },
+        "category_details": category_details,
         "strengths": strengths,
         "weaknesses": weaknesses,
         "spelling_and_format_errors": detected_typos,

@@ -101,15 +101,27 @@ async def match_cv_against_real_jobs(
                     experience_required=job.get("experience_required") or "N/A",
                     description_text=(job.get("description_text") or "")[:2000]
                 )
-                response = client.models.generate_content(
-                    model=settings.DEFAULT_LLM_MODEL,
-                    contents=prompt,
-                    config=types.GenerateContentConfig(
-                        response_mime_type="application/json",
-                        temperature=0.2
-                    )
-                )
-                raw_json = json.loads(response.text or "{}")
+                response = None
+                for model_name in [settings.DEFAULT_LLM_MODEL, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest"]:
+                    try:
+                        response = client.models.generate_content(
+                            model=model_name,
+                            contents=prompt,
+                            config=types.GenerateContentConfig(
+                                response_mime_type="application/json",
+                                temperature=0.2
+                            )
+                        )
+                        if response and response.text:
+                            break
+                    except Exception as me:
+                        err_msg = str(me).lower()
+                        if "404" in err_msg or "not found" in err_msg:
+                            logger.warning(f"Model {model_name} returned 404 in job matching, trying next model...")
+                            continue
+                        raise me
+
+                raw_json = json.loads((response.text if response else "") or "{}")
                 eval_data = sanitize_job_match(raw_json, sim_score)
             except Exception as e:
                 logger.error(f"Gemini API error during job matching: {e}")

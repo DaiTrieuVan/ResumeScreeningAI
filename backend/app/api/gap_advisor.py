@@ -62,6 +62,7 @@ async def analyze_gap_endpoint(
         overall_score=record.overall_score or 7.5,
         score_label=record.score_label or "Tốt",
         category_scores=record.category_scores or {},
+        category_details=analysis_data.get("category_details") or {},
         strengths=record.strengths or [],
         weaknesses=record.weaknesses or [],
         spelling_and_format_errors=record.spelling_and_format_errors or [],
