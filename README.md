@@ -60,6 +60,44 @@ Local CV storage with access audit and anonymization
 Chi tiết tại [Kiến trúc hệ thống](docs/ARCHITECTURE.md) và
 [Thiết kế AI](docs/AI_SYSTEM.md).
 
+## Hình ảnh và video demo
+
+Tài nguyên truyền thông của bản phát hành được đặt trong `docs/media/`. Trước
+khi phát hành, thay các ô chờ bên dưới bằng ảnh chụp từ đúng release tag để nội
+dung trên GitHub khớp với sản phẩm được trình diễn.
+
+| Hành trình | Ảnh cần bổ sung | Nội dung nên thể hiện |
+|---|---|---|
+| Lọc CV | `docs/media/recruiter-workspace.png` | Batch upload, tiến độ và bảng xếp hạng ứng viên |
+| Kiểm chứng AI | `docs/media/candidate-evidence.png` | Điểm thành phần, `UNKNOWN` và evidence cạnh CV |
+| Tìm việc | `docs/media/real-jobs-matching.png` | Việc làm được rerank theo CV và lý do phù hợp |
+| Đánh giá CV | `docs/media/career-gap-advisor.png` | Kỹ năng đã có, kỹ năng thiếu và hành động đề xuất |
+
+<!-- Khi đã có ảnh, bỏ comment bốn dòng Markdown sau.
+![Không gian tuyển dụng](docs/media/recruiter-workspace.png)
+![Bằng chứng đánh giá ứng viên](docs/media/candidate-evidence.png)
+![Gợi ý việc làm phù hợp](docs/media/real-jobs-matching.png)
+![Cố vấn cải thiện CV](docs/media/career-gap-advisor.png)
+-->
+
+### Video
+
+- Video trình bày 15 phút: _bổ sung URL trước khi phát hành_.
+- Video dự phòng offline: đính kèm vào GitHub Release hoặc liên kết tới tệp có
+  quyền xem công khai.
+
+<!-- VIDEO_DEMO_URL: dán liên kết YouTube/Drive công khai hoặc release asset tại đây. -->
+
+## Phiên bản phát hành
+
+- [Danh sách GitHub Releases](https://github.com/DaiTrieuVan/ResumeScreeningAI/releases)
+- [Lịch sử thay đổi](CHANGELOG.md)
+- [Quy trình đóng gói và phát hành](docs/RELEASE_GUIDE.md)
+
+Mỗi release dự thi nên chứa source archive, checksum, release notes, báo cáo
+benchmark và video demo. Chỉ công bố số liệu được tạo từ đúng commit/tag của
+release đó.
+
 ## Khởi chạy nhanh từ mã nguồn
 
 Yêu cầu: Python 3.10+, Node.js 18+ và Git.

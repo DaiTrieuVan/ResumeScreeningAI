@@ -3,12 +3,93 @@
 
 import json
 import logging
+import re
 from typing import Dict, Any
 from google import genai
 from google.genai import types
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
+
+
+_SKILL_ALIASES = (
+    ("Spring Boot", ("spring boot", "springboot")),
+    ("RESTful API", ("restful api", "rest api")),
+    ("PostgreSQL", ("postgresql", "postgres")),
+    ("JavaScript", ("javascript",)),
+    ("TypeScript", ("typescript",)),
+    ("FastAPI", ("fastapi",)),
+    ("MySQL", ("mysql",)),
+    ("Kubernetes", ("kubernetes",)),
+    ("Docker", ("docker",)),
+    ("Python", ("python",)),
+    ("Java", ("java",)),
+    ("React", ("react",)),
+    ("Redis", ("redis",)),
+    ("Kafka", ("kafka",)),
+    ("AWS", ("aws",)),
+    ("SQL", ("sql",)),
+    ("Git", ("git",)),
+)
+
+
+def _canonical_skill_name(value: Any) -> str:
+    """Return a stable display name without changing unknown technologies."""
+    cleaned = re.sub(r"\s+", " ", str(value or "")).strip(" ,;\t\r\n")
+    folded = cleaned.casefold()
+    for canonical, aliases in _SKILL_ALIASES:
+        if folded in aliases:
+            return canonical
+    return cleaned
+
+
+def _normalize_skill_list(values: Any) -> list[str]:
+    """Canonicalize, join known multi-word skills, and remove duplicates."""
+    if not isinstance(values, (list, tuple, set)):
+        values = [values] if values else []
+
+    cleaned = [_canonical_skill_name(value) for value in values]
+    cleaned = [value for value in cleaned if value]
+
+    merged: list[str] = []
+    index = 0
+    while index < len(cleaned):
+        pair = " ".join(cleaned[index:index + 2]).casefold()
+        if pair == "spring boot":
+            merged.append("Spring Boot")
+            index += 2
+        elif pair in {"rest api", "restful api"}:
+            merged.append("RESTful API")
+            index += 2
+        else:
+            merged.append(_canonical_skill_name(cleaned[index]))
+            index += 1
+
+    unique: list[str] = []
+    seen: set[str] = set()
+    for skill in merged:
+        key = skill.casefold()
+        if key not in seen:
+            seen.add(key)
+            unique.append(skill)
+    return unique
+
+
+def _normalize_technical_text(value: Any) -> str:
+    """Repair common LLM/fallback splits inside human-readable feedback."""
+    text = str(value or "")
+    replacements = (
+        (r"\bSpring\s*,\s*Boot\b", "Spring Boot"),
+        (r"\bREST(?:ful)?\s*,\s*API\b", "RESTful API"),
+        (r"\bPostgresql\b", "PostgreSQL"),
+        (r"\bMysql\b", "MySQL"),
+        (r"\bJavascript\b", "JavaScript"),
+        (r"\bTypescript\b", "TypeScript"),
+        (r"\bFastapi\b", "FastAPI"),
+    )
+    for pattern, replacement in replacements:
+        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+    return text
 
 GAP_PROMPT_TEMPLATE = """
 You are a Vice President of Engineering and Principal Technical Recruiter conducting an in-depth CV evaluation against a target Job Description.
@@ -39,6 +120,9 @@ Evaluate the candidate's CV strictly, constructively, and professionally based o
 {cv_text}
 
 ### Instructions:
+Treat multi-word technology names as one indivisible skill. In particular, return
+"Spring Boot" and "RESTful API" as single array items; never split them into
+"Spring"/"Boot" or "REST"/"API".
 Return a strict JSON object (in Vietnamese) matching this schema:
 {{
   "overall_score": 7.5,
@@ -152,17 +236,17 @@ def sanitize_gap_output(data: Dict[str, Any], job_description: str = "", cv_text
 
     cat_det = data.get("category_details") or {}
     category_details = {
-        "kinh_nghiem": str(cat_det.get("kinh_nghiem") or "Kinh nghiệm thực hành tốt nhưng cần mô tả rõ hơn quy mô dữ liệu và bài học giải quyết lỗi thực tế."),
-        "ky_nang": str(cat_det.get("ky_nang") or "Nắm chắc các công nghệ trọng tâm; cần bổ sung các công nghệ nâng cao được yêu cầu trong JD."),
-        "dinh_dang": str(cat_det.get("dinh_dang") or "Bố cục rõ ràng, dễ nhìn; cần rà soát khoảng trắng dấu câu và chuẩn hóa viết hoa đúng tên công nghệ."),
-        "thanh_tich": str(cat_det.get("thanh_tich") or "Có số liệu bước đầu về hiệu năng, nên lượng hóa cụ thể hơn với các chỉ số đo lường như % tối ưu, latency."),
-        "muc_tieu": str(cat_det.get("muc_tieu") or "Mục tiêu rõ định hướng nghề nghiệp, nên gắn kết chặt chẽ hơn với định hướng của vị trí ứng tuyển.")
+        "kinh_nghiem": _normalize_technical_text(cat_det.get("kinh_nghiem") or "Kinh nghiệm thực hành tốt nhưng cần mô tả rõ hơn quy mô dữ liệu và bài học giải quyết lỗi thực tế."),
+        "ky_nang": _normalize_technical_text(cat_det.get("ky_nang") or "Nắm chắc các công nghệ trọng tâm; cần bổ sung các công nghệ nâng cao được yêu cầu trong JD."),
+        "dinh_dang": _normalize_technical_text(cat_det.get("dinh_dang") or "Bố cục rõ ràng, dễ nhìn; cần rà soát khoảng trắng dấu câu và chuẩn hóa viết hoa đúng tên công nghệ."),
+        "thanh_tich": _normalize_technical_text(cat_det.get("thanh_tich") or "Có số liệu bước đầu về hiệu năng, nên lượng hóa cụ thể hơn với các chỉ số đo lường như % tối ưu, latency."),
+        "muc_tieu": _normalize_technical_text(cat_det.get("muc_tieu") or "Mục tiêu rõ định hướng nghề nghiệp, nên gắn kết chặt chẽ hơn với định hướng của vị trí ứng tuyển.")
     }
 
     strengths = list(data.get("strengths") or [])
     weaknesses = list(data.get("weaknesses") or [])
-    matched_skills = list(data.get("matched_skills") or [])
-    missing_skills = list(data.get("missing_skills") or [])
+    matched_skills = _normalize_skill_list(data.get("matched_skills") or [])
+    missing_skills = _normalize_skill_list(data.get("missing_skills") or [])
     suggested_action_items = list(data.get("suggested_action_items") or [])
 
     # Guarantee fallback if LLM returned empty arrays
@@ -194,12 +278,17 @@ def sanitize_gap_output(data: Dict[str, Any], job_description: str = "", cv_text
     }
 
 def fallback_gap_analysis(job_description: str, cv_text: str) -> Dict[str, Any]:
-    jd_words = set(job_description.lower().split())
-    cv_words = set(cv_text.lower().split())
-    
-    common_keywords = ["python", "java", "spring", "boot", "react", "fastapi", "docker", "sql", "postgresql", "mysql", "rest", "api", "git", "aws", "kubernetes", "typescript"]
-    matched = [k.capitalize() for k in common_keywords if k in jd_words and k in cv_words]
-    missing = [k.capitalize() for k in common_keywords if k in jd_words and k not in cv_words]
+    def contains_alias(text: str, aliases: tuple[str, ...]) -> bool:
+        normalized = re.sub(r"[^a-z0-9+#.]+", " ", text.casefold()).strip()
+        padded = f" {normalized} "
+        return any(f" {alias} " in padded for alias in aliases)
+
+    matched = []
+    missing = []
+    for canonical, aliases in _SKILL_ALIASES:
+        if contains_alias(job_description, aliases):
+            target = matched if contains_alias(cv_text, aliases) else missing
+            target.append(canonical)
 
     if not matched:
         matched = ["REST API", "Java Core", "Git"]
