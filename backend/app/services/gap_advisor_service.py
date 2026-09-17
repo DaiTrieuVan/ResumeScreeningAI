@@ -97,7 +97,7 @@ async def analyze_career_gap(
         try:
             client = genai.Client(api_key=settings.GEMINI_API_KEY)
             response = None
-            candidate_models = [settings.DEFAULT_LLM_MODEL, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest"]
+            candidate_models = [settings.DEFAULT_LLM_MODEL, "gemini-3.6-flash", "gemini-3.7-flash", "gemini-3.8-flash", "gemini-flash-latest"]
             for model_name in candidate_models:
                 try:
                     response = client.models.generate_content(
@@ -112,20 +112,25 @@ async def analyze_career_gap(
                         break
                 except Exception as me:
                     err_msg = str(me).lower()
-                    if "404" in err_msg or "not found" in err_msg:
-                        logger.warning(f"Model {model_name} returned 404, trying next candidate model...")
+                    if "404" in err_msg or "not found" in err_msg or "no longer available" in err_msg:
+                        logger.warning(f"Model {model_name} unavailable, trying next candidate model...")
                         continue
                     raise me
 
-            raw_text = (response.text if response else "") or "{}"
-            return sanitize_gap_output(json.loads(raw_text))
+            if not response or not response.text:
+                logger.warning("No valid response from Gemini models, falling back to rule-based gap analysis...")
+                return fallback_gap_analysis(job_description, cv_text)
+
+            raw_text = response.text.strip()
+            data = json.loads(raw_text)
+            return sanitize_gap_output(data, job_description, cv_text)
         except Exception as e:
             logger.error(f"Gemini API error during gap analysis: {e}")
             return fallback_gap_analysis(job_description, cv_text)
     else:
         return fallback_gap_analysis(job_description, cv_text)
 
-def sanitize_gap_output(data: Dict[str, Any]) -> Dict[str, Any]:
+def sanitize_gap_output(data: Dict[str, Any], job_description: str = "", cv_text: str = "") -> Dict[str, Any]:
     raw_score = float(data.get("overall_score") or 7.5)
     overall_score = round(max(1.0, min(10.0, raw_score)), 1)
     
@@ -154,18 +159,38 @@ def sanitize_gap_output(data: Dict[str, Any]) -> Dict[str, Any]:
         "muc_tieu": str(cat_det.get("muc_tieu") or "Mục tiêu rõ định hướng nghề nghiệp, nên gắn kết chặt chẽ hơn với định hướng của vị trí ứng tuyển.")
     }
 
+    strengths = list(data.get("strengths") or [])
+    weaknesses = list(data.get("weaknesses") or [])
+    matched_skills = list(data.get("matched_skills") or [])
+    missing_skills = list(data.get("missing_skills") or [])
+    suggested_action_items = list(data.get("suggested_action_items") or [])
+
+    # Guarantee fallback if LLM returned empty arrays
+    if not strengths or not weaknesses or not suggested_action_items:
+        fb = fallback_gap_analysis(job_description or "Developer", cv_text or "Candidate Resume")
+        if not strengths:
+            strengths = fb["strengths"]
+        if not weaknesses:
+            weaknesses = fb["weaknesses"]
+        if not suggested_action_items:
+            suggested_action_items = fb["suggested_action_items"]
+        if not matched_skills:
+            matched_skills = fb["matched_skills"]
+        if not missing_skills:
+            missing_skills = fb["missing_skills"]
+
     return {
         "overall_score": overall_score,
         "score_label": label,
         "category_scores": category_scores,
         "category_details": category_details,
-        "strengths": list(data.get("strengths") or []),
-        "weaknesses": list(data.get("weaknesses") or []),
+        "strengths": strengths,
+        "weaknesses": weaknesses,
         "spelling_and_format_errors": list(data.get("spelling_and_format_errors") or []),
-        "matched_skills": list(data.get("matched_skills") or []),
-        "missing_skills": list(data.get("missing_skills") or []),
-        "suggested_action_items": list(data.get("suggested_action_items") or []),
-        "summary_explanation": str(data.get("summary_explanation") or "Đã hoàn thành phân tích đánh giá CV và định hướng cải thiện.")
+        "matched_skills": matched_skills,
+        "missing_skills": missing_skills,
+        "suggested_action_items": suggested_action_items,
+        "summary_explanation": str(data.get("summary_explanation") or f"Hồ sơ đạt mức {label} ({overall_score}/10). Tối ưu lại phần mô tả dự án theo bài học thực tế và bổ sung từ khóa kỹ thuật sẽ giúp CV ấn tượng hơn hẳn.")
     }
 
 def fallback_gap_analysis(job_description: str, cv_text: str) -> Dict[str, Any]:

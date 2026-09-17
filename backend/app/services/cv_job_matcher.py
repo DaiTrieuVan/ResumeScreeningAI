@@ -102,7 +102,7 @@ async def match_cv_against_real_jobs(
                     description_text=(job.get("description_text") or "")[:2000]
                 )
                 response = None
-                for model_name in [settings.DEFAULT_LLM_MODEL, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest"]:
+                for model_name in [settings.DEFAULT_LLM_MODEL, "gemini-3.6-flash", "gemini-3.7-flash", "gemini-3.8-flash", "gemini-flash-latest"]:
                     try:
                         response = client.models.generate_content(
                             model=model_name,
@@ -116,8 +116,8 @@ async def match_cv_against_real_jobs(
                             break
                     except Exception as me:
                         err_msg = str(me).lower()
-                        if "404" in err_msg or "not found" in err_msg:
-                            logger.warning(f"Model {model_name} returned 404 in job matching, trying next model...")
+                        if "404" in err_msg or "not found" in err_msg or "no longer available" in err_msg:
+                            logger.warning(f"Model {model_name} unavailable in job matching, trying next model...")
                             continue
                         raise me
 
