@@ -38,8 +38,8 @@ test('offline showcase covers recruiter, real-job matching and career-gap guidan
   await expect(page.locator('.select-field')).toHaveValue('job-offline');
 
   await page.getByRole('button', { name: 'Cố vấn nghề nghiệp' }).click();
-  await page.getByPlaceholder(/Kỹ sư hệ thống AI/i).fill('Backend Engineer');
-  await page.getByPlaceholder(/Dán nội dung mô tả công việc/i).fill('Python FastAPI Docker');
+  await page.getByLabel(/Vị trí mục tiêu/i).fill('Backend Engineer');
+  await page.getByLabel(/Mô tả công việc mục tiêu/i).fill('Python FastAPI Docker');
   await page.getByRole('button', { name: /Xây dựng lộ trình/i }).click();
   await expect(page.getByText('Docker', { exact: true })).toBeVisible();
   await expect(page.getByText(/Pipeline deterministic offline/i)).toBeVisible();

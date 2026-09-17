@@ -167,10 +167,11 @@ export default function GapAdvisorView() {
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.86rem', marginBottom: '8px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                <label htmlFor="advisor-job-title" style={{ display: 'block', fontSize: '0.86rem', marginBottom: '8px', color: 'var(--text-secondary)', fontWeight: 600 }}>
                   Vị trí mục tiêu <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(không bắt buộc)</span>
                 </label>
                 <input
+                  id="advisor-job-title"
                   className="input-field"
                   placeholder="Ví dụ: Java Web Backend Developer Intern"
                   value={jobTitle}
@@ -180,10 +181,11 @@ export default function GapAdvisorView() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.86rem', marginBottom: '8px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                <label htmlFor="advisor-job-description" style={{ display: 'block', fontSize: '0.86rem', marginBottom: '8px', color: 'var(--text-secondary)', fontWeight: 600 }}>
                   Mô tả công việc mục tiêu <span style={{ color: 'var(--accent-rose)' }}>*</span>
                 </label>
                 <textarea
+                  id="advisor-job-description"
                   className="textarea-field"
                   rows="9"
                   placeholder="Dán nội dung mô tả công việc (JD) và các yêu cầu của vị trí tuyển dụng vào đây..."
@@ -681,4 +683,3 @@ export default function GapAdvisorView() {
     </div>
   );
 }
-
