@@ -16,6 +16,7 @@ try {
     if ($LASTEXITCODE -eq 0) {
         $tracked = @(git ls-files --cached --others --exclude-standard)
     } else {
+        $global:LASTEXITCODE = 0
         $tracked = @(Get-ChildItem -Recurse -File | ForEach-Object { [System.IO.Path]::GetRelativePath($repoRoot, $_.FullName).Replace('\', '/') })
     }
 

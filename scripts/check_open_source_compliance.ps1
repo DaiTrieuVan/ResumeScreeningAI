@@ -21,6 +21,7 @@ try {
     if ($LASTEXITCODE -eq 0) {
         $allFiles = @(git ls-files --cached --others --exclude-standard)
     } else {
+        $global:LASTEXITCODE = 0
         $allFiles = @(Get-ChildItem -Recurse -File | ForEach-Object { [System.IO.Path]::GetRelativePath($repositoryRoot, $_.FullName).Replace('\', '/') })
     }
     foreach ($relativePath in $requiredFiles) {
